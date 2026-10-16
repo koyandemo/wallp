@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../data/assets/asset_cache.dart';
 import '../../look/look_controller.dart';
 import '../../look/resolved_look.dart';
@@ -49,10 +49,7 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
               child: Text(
                 '${plural(packs.length, 'pack')} · ${GlyphKeys.all.length} icons in each',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: context.palette.muted),
               ),
             ),
           ),
@@ -88,11 +85,11 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
                       borderRadius: BorderRadius.circular(18),
                       side: BorderSide(
                         color: p.id == inUse
-                            ? AppColors.brand
-                            : AppColors.outline,
+                            ? context.palette.brand
+                            : context.palette.outline,
                       ),
                     ),
-                    tileColor: AppColors.surface,
+                    tileColor: context.palette.surface,
                     leading: PackSample(pack: p, size: 44),
                     title: Text(
                       p.name.en,
@@ -102,8 +99,8 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
                       meta,
                       style: TextStyle(
                         color: p.id == inUse
-                            ? AppColors.brand
-                            : AppColors.textSecondary,
+                            ? context.palette.brand
+                            : context.palette.muted,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
@@ -184,18 +181,15 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
         children: [
           Text(
             '${GlyphKeys.all.length} icons · ${catalog.festival(pack.festivalId)?.name.en ?? ''} · ${pack.style.en}',
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: context.palette.muted),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Tile shape',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -222,10 +216,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
             keys.length == GlyphKeys.all.length
                 ? '${keys.length} icons'
                 : '${keys.length} of ${GlyphKeys.all.length}',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, color: context.palette.muted),
           ),
           const SizedBox(height: 8),
           if (inUse && LauncherService.isSupported) ...[
@@ -275,9 +266,9 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         key[0].toUpperCase() + key.substring(1),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textPrimary,
+                          color: context.palette.text,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

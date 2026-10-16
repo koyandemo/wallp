@@ -101,6 +101,7 @@ class NativeBridge(private val activity: Activity) {
                         result.success(true)
                     }
                     "isDefaultHome" -> result.success(isDefaultHome())
+                    "goHome" -> result.success(goHome())
                     "requestDefaultHome" -> requestDefaultHome(result)
                     else -> result.notImplemented()
                 }
@@ -394,6 +395,19 @@ class NativeBridge(private val activity: Activity) {
     private fun openAppInfo(pkg: String): Boolean = try {
         activity.startActivity(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", pkg, null)),
+        )
+        true
+    } catch (e: ActivityNotFoundException) {
+        false
+    }
+
+    /** Opens wallp Home (wallp's own home screen), wherever the user is. */
+    private fun goHome(): Boolean = try {
+        activity.startActivity(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME)
+                .setPackage(activity.packageName)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
         true
     } catch (e: ActivityNotFoundException) {

@@ -16,7 +16,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   MockCatalogSource source(NetworkConditions c, {Random? random}) =>
-      MockCatalogSource(conditions: () => c, random: random);
+      fixtureSource(conditions: () => c, random: random);
 
   /// The biggest file in the mock catalog (a font), so it takes many chunks.
   late String bigAsset;

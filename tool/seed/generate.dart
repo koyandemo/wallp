@@ -1,12 +1,19 @@
-// Writes the mock catalog under assets/mock/catalog/v1/, laid out exactly
-// like the CDN (docs/theme-api.md §3), so the app's mock data source only
-// swaps "where the bytes come from".
+// Writes the mock catalogs, each laid out exactly like the CDN
+// (docs/theme-api.md §3), so the app's mock data source only swaps "where
+// the bytes come from":
+//
+// * assets/mock/catalog/v1    — what the app shows: the demo catalog, three
+//   complete themes (Halloween, Christmas, Thingyan) and three wallpapers,
+//   for testing the app step by step.
+// * test/fixtures/catalog/v1  — the full catalog (30 themes, dashboard-made
+//   themes, downloaded icon packs) that the tests check every feature with.
+// * assets/builtin/catalog    — the first-launch catalog with no internet.
 //
 //   dart run tool/seed/generate.dart
 //
 // Fonts are fetched once from github.com/google/fonts into
 // tool/seed/source/fonts/ (committed, with their licences). Icon and scene
-// PNGs come from render_art_test.dart. Every run rebuilds the output folder
+// PNGs come from render_art_test.dart. Every run rebuilds the output folders
 // from scratch, so deleted seed items never linger.
 import 'dart:convert';
 import 'dart:io';
@@ -16,11 +23,15 @@ import 'package:wallp/catalog/catalog.dart';
 
 import 'seed_data.dart';
 
-const outDir = 'assets/mock/catalog/v1';
-
-/// What the app ships with for a first launch with no internet: only the
-/// themes its own painters draw, in the same format.
+const demoDir = 'assets/mock/catalog/v1';
+const fullDir = 'test/fixtures/catalog/v1';
 const builtInDir = 'assets/builtin/catalog';
+
+/// The demo catalog's themes and wallpapers: one complete theme and one
+/// wallpaper per festival.
+const demoThemes = {'halloween-night', 'christmas-eve', 'thingyan-water'};
+const demoWallpapers = {'harvest-moon', 'silent-night', 'water-splash'};
+
 const _fontsRepo = 'https://raw.githubusercontent.com/google/fonts/main';
 const _json = JsonEncoder.withIndent('  ');
 
@@ -32,12 +43,9 @@ Future<void> main() async {
   }
   await _fetchFonts();
 
-  final out = Directory(outDir);
-  if (out.existsSync()) out.deleteSync(recursive: true);
-  Directory('$outDir/assets').createSync(recursive: true);
-  Directory('$outDir/themes').createSync(recursive: true);
-
-  // Copies each source file once, named by its hash, like the CDN.
+  // Hashes each source file once; files are copied per catalog, so each
+  // folder holds only what its catalog uses.
+  final sources = <String, String>{}; // sha256 → source path
   final assets = <String, AssetRef>{};
   AssetRef asset(
     String sourcePath,
@@ -51,9 +59,13 @@ Future<void> main() async {
     }
     final bytes = file.readAsBytesSync();
     final sha = sha256.convert(bytes).toString();
-    final url = 'assets/$sha.${format.name}';
-    File('$outDir/$url').writeAsBytesSync(bytes);
-    return AssetRef(url: url, sha256: sha, bytes: bytes.length, format: format);
+    sources[sha] = sourcePath;
+    return AssetRef(
+      url: 'assets/$sha.${format.name}',
+      sha256: sha,
+      bytes: bytes.length,
+      format: format,
+    );
   });
 
   final fonts = buildFonts(asset);
@@ -78,7 +90,7 @@ Future<void> main() async {
       ),
   ];
 
-  final catalog = Catalog(
+  final full = Catalog(
     catalogVersion: catalogVersion,
     festivals: festivals,
     themes: [for (final t in themes) t.toSummary()],
@@ -89,45 +101,154 @@ Future<void> main() async {
     accentPresets: accentPresets,
     searchSuggestions: searchSuggestions,
   );
-  final problems = catalog.validate();
+  final problems = full.validate();
   if (problems.isNotEmpty) {
     stderr.writeln('Seed has broken references:\n  ${problems.join('\n  ')}');
     exitCode = 1;
     return;
   }
 
+  _writeCatalog(fullDir, full, themes, sources);
+  _writeCatalog(demoDir, _demo(full), themes, sources);
+  _writeBuiltIn(full, themes);
+}
+
+/// The full catalog cut down to [demoThemes] and [demoWallpapers], with
+/// only the festivals, icon packs, fonts and banners they need.
+Catalog _demo(Catalog full) {
+  final themes = [
+    for (final t in full.themes)
+      if (demoThemes.contains(t.id)) t,
+  ];
+  final festivalIds = {for (final t in themes) t.festivalId};
+  final festivals = [
+    for (final f in full.festivals)
+      if (festivalIds.contains(f.id)) f,
+  ];
+  final fontIds = <String>{
+    for (final t in themes) t.displayFont,
+    for (final f in festivals) f.look.displayFont,
+  };
+  // Body and label fonts come from the full theme files.
   for (final t in themes) {
-    _write('themes/${t.id}.${t.rev}.json', t.toJson());
+    fontIds.addAll(_detailFonts[t.id] ?? const {});
   }
-  final catalogFile = Manifest.fileNameFor(catalogVersion);
-  final catalogBytes = _write(catalogFile, catalog.toJson());
+  final candidate = Catalog(
+    catalogVersion: '$catalogVersion-demo',
+    festivals: festivals,
+    themes: themes,
+    wallpapers: [
+      for (final w in full.wallpapers)
+        if (demoWallpapers.contains(w.id)) w,
+    ],
+    fonts: [
+      for (final f in full.fonts)
+        if (fontIds.contains(f.id) || f.id == 'padauk') f,
+    ],
+    banners: full.banners,
+    iconPacks: [
+      for (final p in full.iconPacks)
+        if (themes.any((t) => t.iconPackId == p.id)) p,
+    ],
+    accentPresets: full.accentPresets,
+    searchSuggestions: const [
+      'Halloween',
+      'Christmas',
+      'Thingyan',
+      'moon',
+      'snow',
+      'live',
+    ],
+  );
+  // Drops banners whose targets were cut (e.g. Thadingyut's).
+  final demo = candidate.filtered();
+  // Banner fonts must be listed too; add them, then check nothing's broken.
+  final bannerFonts = {for (final b in demo.banners) b.look.font};
+  final withFonts = Catalog(
+    catalogVersion: demo.catalogVersion,
+    festivals: demo.festivals,
+    themes: demo.themes,
+    wallpapers: demo.wallpapers,
+    fonts: [
+      for (final f in full.fonts)
+        if (demo.fonts.any((d) => d.id == f.id) || bannerFonts.contains(f.id))
+          f,
+    ],
+    banners: demo.banners,
+    iconPacks: demo.iconPacks,
+    accentPresets: demo.accentPresets,
+    searchSuggestions: demo.searchSuggestions,
+  );
+  final broken = withFonts.validate(includeSoft: false);
+  if (broken.isNotEmpty) throw StateError('Demo catalog: $broken');
+  return withFonts;
+}
+
+/// Fonts each theme file uses (display, body, labels), filled in while
+/// writing the full catalog.
+final _detailFonts = <String, Set<String>>{};
+
+void _writeCatalog(
+  String dir,
+  Catalog catalog,
+  List<ThemeDetail> allThemes,
+  Map<String, String> sources,
+) {
+  final out = Directory(dir);
+  if (out.existsSync()) out.deleteSync(recursive: true);
+  Directory('$dir/assets').createSync(recursive: true);
+  Directory('$dir/themes').createSync(recursive: true);
+
+  final details = [
+    for (final t in allThemes)
+      if (catalog.theme(t.id) != null) t,
+  ];
+  for (final t in allThemes) {
+    _detailFonts[t.id] = t.fonts.ids;
+  }
+
+  // Every file this catalog points at, once.
+  final used = <AssetRef>{
+    for (final t in details) ...catalog.assetsFor(t),
+    for (final w in catalog.wallpapers) ...?w.scene?.assets,
+    for (final f in catalog.fonts) ...f.files.map((f) => f.asset),
+    for (final p in catalog.iconPacks) ...p.glyphs.values,
+  };
+  for (final ref in used) {
+    File(sources[ref.sha256]!).copySync('$dir/${ref.url}');
+  }
+
+  for (final t in details) {
+    _write(dir, 'themes/${t.id}.${t.rev}.json', t.toJson());
+  }
+  final catalogFile = Manifest.fileNameFor(catalog.catalogVersion);
+  final catalogBytes = _write(dir, catalogFile, catalog.toJson());
   _write(
+    dir,
     'manifest.json',
     Manifest(
       schemaVersion: Manifest.supportedSchemaVersion,
-      catalogVersion: catalogVersion,
+      catalogVersion: catalog.catalogVersion,
       catalog: catalogFile,
       catalogSha256: sha256.convert(catalogBytes).toString(),
       minAppVersion: '1.0.0',
       publishedAt: seedDate,
     ).toJson(),
   );
-  _write('engines.json', engines.toJson());
-  _verify(themes.length);
+  _write(dir, 'engines.json', engines.toJson());
+  _verify(dir, details.length);
 
-  _writeBuiltIn(catalog, themes);
-
-  final total = assets.values.fold(0, (sum, a) => sum + a.bytes);
+  final total = used.fold(0, (sum, a) => sum + a.bytes);
   stdout.writeln(
-    'Wrote $outDir: ${festivals.length} festivals, ${themes.length} themes '
-    '(${themes.where((t) => t.isBuiltIn).length} built-in), '
-    '${wallpapers.length} wallpapers, ${fonts.length} fonts, '
-    '${iconPacks.length} icon packs, ${banners.length} banners, '
-    '${assets.length} files (${(total / 1024 / 1024).toStringAsFixed(1)} MB).',
+    'Wrote $dir: ${catalog.festivals.length} festivals, '
+    '${catalog.themes.length} themes, ${catalog.wallpapers.length} wallpapers, '
+    '${catalog.fonts.length} fonts, ${catalog.iconPacks.length} icon packs, '
+    '${catalog.banners.length} banners, ${used.length} files '
+    '(${(total / 1024 / 1024).toStringAsFixed(1)} MB).',
   );
 }
 
-List<int> _write(String path, Object json, {String dir = outDir}) {
+List<int> _write(String dir, String path, Object json) {
   final bytes = utf8.encode('${_json.convert(json)}\n');
   File('$dir/$path').writeAsBytesSync(bytes);
   return bytes;
@@ -163,9 +284,9 @@ void _writeBuiltIn(Catalog full, List<ThemeDetail> themes) {
       'Built-in catalog: ${builtIn.validate(includeSoft: false)}',
     );
   }
-  _write('catalog.json', builtIn.toJson(), dir: builtInDir);
+  _write(builtInDir, 'catalog.json', builtIn.toJson());
   for (final t in themes.where((t) => t.isBuiltIn)) {
-    _write('themes/${t.id}.${t.rev}.json', t.toJson(), dir: builtInDir);
+    _write(builtInDir, 'themes/${t.id}.${t.rev}.json', t.toJson());
   }
   stdout.writeln(
     'Wrote $builtInDir: ${builtIn.themes.length} themes, '
@@ -174,10 +295,10 @@ void _writeBuiltIn(Catalog full, List<ThemeDetail> themes) {
 }
 
 /// Reads everything back through the app's parser: if this passes, the app
-/// can read the mock catalog.
-void _verify(int themeCount) {
+/// can read the catalog.
+void _verify(String dir, int themeCount) {
   Object? read(String path) =>
-      jsonDecode(File('$outDir/$path').readAsStringSync());
+      jsonDecode(File('$dir/$path').readAsStringSync());
 
   final manifest = Manifest.fromJson(
     JsonReader.of(read('manifest.json'), 'manifest'),
@@ -187,11 +308,11 @@ void _verify(int themeCount) {
   );
   if (catalog.issues.isNotEmpty) {
     throw StateError(
-      'Catalog read back with issues:\n${catalog.issues.join('\n')}',
+      '$dir read back with issues:\n${catalog.issues.join('\n')}',
     );
   }
   if (catalog.themes.length != themeCount) {
-    throw StateError('Lost themes on read-back');
+    throw StateError('$dir lost themes on read-back');
   }
   for (final t in catalog.themes) {
     ThemeDetail.fromJson(

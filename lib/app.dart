@@ -16,6 +16,7 @@ import 'core/clock.dart';
 import 'store/state/user_store.dart';
 import 'store/store_shell.dart';
 import 'store/widgets/download_overlay.dart';
+import 'store/widgets/store_look_scope.dart';
 
 class WallpApp extends StatelessWidget {
   const WallpApp({super.key});
@@ -63,7 +64,10 @@ class WallpApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark(),
         // The download progress card shows above every screen.
-        builder: (context, child) => DownloadOverlay(child: child!),
+        // The applied theme's colours everywhere ("Match app to my
+        // theme"); pages for one festival switch to its look.
+        builder: (context, child) =>
+            StoreLookScope(child: DownloadOverlay(child: child!)),
         home: const StoreShell(),
       ),
     );

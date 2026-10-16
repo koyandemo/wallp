@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../render/font_registry.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
@@ -73,13 +73,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 if (user.recentSearches.isNotEmpty) ...[
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Recent',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: context.palette.text,
                           ),
                         ),
                       ),
@@ -99,12 +99,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   const SizedBox(height: 24),
                 ],
-                const Text(
+                Text(
                   'Popular',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.palette.text,
                   ),
                 ),
                 const SizedBox(height: 8),

@@ -399,9 +399,12 @@ The publish step must be stricter: the dashboard refuses to publish while `Catal
 
 ### 4.11 The mock catalog
 
-Until the real API exists, the app reads a complete catalog bundled at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/), laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`.
+Until the real API exists, the app reads a mock catalog laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`. There are two:
 
-It contains 7 festivals (2 coming soon), 30 themes (3 built-in, 27 using the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), with 135 files totalling 4.7 MB.
+- **The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their icon packs, fonts and banners. Small on purpose, for testing the app step by step (2.3 MB).
+- **The full catalog** at [test/fixtures/catalog/v1/](../test/fixtures/catalog/v1/) is what the tests check every feature with: 7 festivals (2 coming soon), 30 themes (3 built-in, 27 on the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), 135 files. It isn't shipped in the app.
+
+To show more in the app, add IDs to `demoThemes` and `demoWallpapers` in [tool/seed/generate.dart](../tool/seed/generate.dart) and run it again.
 
 **To change it:** edit [tool/seed/seed_data.dart](../tool/seed/seed_data.dart), then run `dart run tool/seed/generate.dart`. The generator builds everything through the models above, fills in hashes, sizes and `downloadBytes`, and reads its own output back through the app's parser. If icon or scene art in [tool/seed/art.dart](../tool/seed/art.dart) changes, first run `flutter test tool/seed/render_art_test.dart`. Fonts are fetched once from Google Fonts (OFL / Apache) into `tool/seed/source/fonts/`, with their licences.
 

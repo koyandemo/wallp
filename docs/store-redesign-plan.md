@@ -108,7 +108,7 @@ From the canvas, so every screen has real-looking content:
 | 5 ✅ | **Download + cache.** `AssetCache` (sha256-named, checked on arrival, written atomically, pins `applied` / `pending` / `incoming`, LRU 50 MB); `DownloadManager` (progress, 3 at a time, retries brief failures, cancel, shared tasks); apply is all-or-nothing; launch-time repair; Me › Downloads list with Delete; download status in Developer settings | Apply → progress → applied, then works offline. Code: [lib/data/assets/](../lib/data/assets/). Not yet: resuming *inside* a file (HTTP Range; finished files are kept, a half file restarts), a free-space check before starting (a full disk shows as a failed download) |
 | 6 ✅ | **Layers engine + image icons + font loading.** `LayersPainter` (gradient, shape with glow and float / pulse / sway, image, 8 particle effects; palette tokens and gradient accents); downloaded pictures decoded once (`SceneAssets`); wallp Home and pinned shortcuts draw icon-pack pictures, clipped to the user's tile shape; `FontRegistry` loads downloaded fonts in all three engines, Padauk as Burmese fallback | Dashboard themes draw for real on lock, home and live wallpaper. Code: [lib/render/](../lib/render/). Still to do: bundle Sora + Padauk and drop `google_fonts` (it's the fallback for fonts not downloaded); on a cold start the clock can show the fallback font for a moment before the downloaded one loads |
 | 7 ✅ | **Screens.** 5-tab shell (Store, Themes, Wallpapers, Fonts, Me); Store home (banner carousel, festival rows, icon packs); Themes (5 filters, Soonest / A–Z, festival cards); festival page (style chips, Popular / New / A–Z, quick look with variants); theme detail (Lock / Home preview, variants, accents, includes, Apply sheet with 3 options and download size); accent picker (solid, gradient, custom, My accents, readability); wallpapers + preview; fonts + detail (size, colour, places); icon packs + detail (shapes, search, add to another home screen); search (recent, popular, result tabs); Me (current look, favourites with undo, history, downloads, settings). Download progress card above every screen | The demo flow works end to end. Code: [lib/store/](../lib/store/). Old Explore / My Themes / Settings screens removed |
-| 8 | **Match app to my theme.** App colours follow the festival or theme on screen | |
+| 8 ✅ | **Match app to my theme.** The store wears the applied theme's festival look (colours, display font for headings); festival, theme, accent picker, wallpaper and icon pack pages wear their own festival's; undated collections and the switch off in Me keep the plain look; colours fade over 300 ms | Every festival look passes contrast checks (text, muted, brand, button labels). Code: [store_palette.dart](../lib/core/store_palette.dart), [store_look_scope.dart](../lib/store/widgets/store_look_scope.dart) |
 | 9 | **Tests** (section 8) | Tests pass |
 
 Phases 3–6 hold most of the risk, so they come before the screens.
@@ -160,7 +160,11 @@ The switches show in Me and save their value. They don't do anything yet.
 
 ---
 
-## 9. Packages to add
+## 9. Mock data in the app
+
+The app shows a small **demo catalog**: three themes (Halloween, Christmas, Thingyan) and three wallpapers, for testing step by step. The full 30-theme catalog lives in `test/fixtures/` for the tests. See [theme-api.md §4.11](theme-api.md).
+
+## 10. Packages to add
 
 - `path_provider`: the cache folder
 - `crypto`: sha256

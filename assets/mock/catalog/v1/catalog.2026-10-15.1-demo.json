@@ -1,0 +1,835 @@
+{
+  "catalogVersion": "2026-10-15.1-demo",
+  "festivals": [
+    {
+      "id": "halloween",
+      "name": {
+        "en": "Halloween",
+        "my": "ဟယ်လိုဝင်း"
+      },
+      "kind": "festival",
+      "sort": 10,
+      "fallbackDate": {
+        "month": 10,
+        "day": 31
+      },
+      "unit": "night",
+      "look": {
+        "background": "#120A1C",
+        "surface": "#1E1430",
+        "surface2": "#2A1D40",
+        "outline": "#3D2C57",
+        "nav": "#170E24",
+        "muted": "#B9AECB",
+        "brand": "#FF7A1A",
+        "displayFont": "creepster"
+      },
+      "coverThemeId": "halloween-night"
+    },
+    {
+      "id": "christmas",
+      "name": {
+        "en": "Christmas",
+        "my": "ခရစ္စမတ်"
+      },
+      "kind": "festival",
+      "sort": 20,
+      "fallbackDate": {
+        "month": 12,
+        "day": 25
+      },
+      "unit": "day",
+      "look": {
+        "background": "#0A2A1F",
+        "surface": "#11392B",
+        "surface2": "#184735",
+        "outline": "#255A44",
+        "nav": "#0D3225",
+        "muted": "#B4CEC1",
+        "brand": "#F2B33D",
+        "displayFont": "playfair-display"
+      },
+      "coverThemeId": "christmas-eve"
+    },
+    {
+      "id": "thingyan",
+      "name": {
+        "en": "Thingyan",
+        "my": "သင်္ကြန်"
+      },
+      "kind": "festival",
+      "tags": [
+        "myanmar"
+      ],
+      "sort": 30,
+      "occurrences": [
+        "2027-04-13",
+        "2028-04-13",
+        "2029-04-13"
+      ],
+      "fallbackDate": {
+        "month": 4,
+        "day": 13
+      },
+      "durationDays": 4,
+      "unit": "day",
+      "look": {
+        "background": "#062848",
+        "surface": "#0C375F",
+        "surface2": "#124570",
+        "outline": "#1E5A8C",
+        "nav": "#083054",
+        "muted": "#B6D0E8",
+        "brand": "#FFC21A",
+        "displayFont": "baloo-2"
+      },
+      "coverThemeId": "thingyan-water"
+    }
+  ],
+  "themes": [
+    {
+      "id": "halloween-night",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Haunted Moon"
+      },
+      "style": "classic",
+      "tags": [
+        "spooky",
+        "moon",
+        "bats"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "halloween",
+        "params": {}
+      },
+      "palette": {
+        "background": "#160C24",
+        "deep": "#0D0717",
+        "surface": "#2A1840",
+        "text": "#F4E9C9",
+        "textMuted": "#CDBFA0"
+      },
+      "accent": {
+        "id": "pumpkin",
+        "name": {
+          "en": "Pumpkin"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF8A2A"
+        ]
+      },
+      "displayFont": "creepster",
+      "variantSwatches": [
+        "#160C24",
+        "#1A0A10"
+      ],
+      "iconPackId": "spooky-glow",
+      "downloadBytes": 199400
+    },
+    {
+      "id": "christmas-eve",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Snowy Pines"
+      },
+      "style": "classic",
+      "tags": [
+        "snow",
+        "tree",
+        "winter"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "christmas",
+        "params": {}
+      },
+      "palette": {
+        "background": "#0F3D2E",
+        "deep": "#0A2A20",
+        "surface": "#1A5C41",
+        "text": "#FFF6E5",
+        "textMuted": "#CFE0D7"
+      },
+      "accent": {
+        "id": "berry-red",
+        "name": {
+          "en": "Berry red"
+        },
+        "type": "solid",
+        "colors": [
+          "#C8102E"
+        ]
+      },
+      "displayFont": "playfair-display",
+      "variantSwatches": [
+        "#0F3D2E",
+        "#10223D",
+        "#4A1020"
+      ],
+      "iconPackId": "gold-ornament",
+      "downloadBytes": 540888
+    },
+    {
+      "id": "thingyan-water",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "subtitle": {
+        "en": "သင်္ကြန်"
+      },
+      "style": "classic",
+      "tags": [
+        "water",
+        "myanmar",
+        "new year"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "thingyan",
+        "params": {}
+      },
+      "palette": {
+        "background": "#0A3D6B",
+        "deep": "#1477C2",
+        "surface": "#0F4F86",
+        "text": "#FFF8E7",
+        "textMuted": "#CFE6F7"
+      },
+      "accent": {
+        "id": "sun",
+        "name": {
+          "en": "Sun"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFC20E"
+        ]
+      },
+      "displayFont": "baloo-2",
+      "iconPackId": "water-splash",
+      "downloadBytes": 1681364
+    }
+  ],
+  "wallpapers": [
+    {
+      "id": "harvest-moon",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Harvest Moon"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "halloween",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "moon",
+        "bats"
+      ],
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "silent-night",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Silent Night"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "christmas",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "snow",
+        "star",
+        "tree"
+      ],
+      "publishedAt": "2025-12-19T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "water-splash",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "thingyan",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "water",
+        "myanmar"
+      ],
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    }
+  ],
+  "fonts": [
+    {
+      "id": "creepster",
+      "family": "Creepster",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "halloween",
+        "spooky"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44.ttf",
+            "sha256": "402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44",
+            "bytes": 62724,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "playfair-display",
+      "family": "Playfair Display",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "christmas",
+        "serif",
+        "elegant"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 900,
+          "style": "normal",
+          "asset": {
+            "url": "assets/c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6.ttf",
+            "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6",
+            "bytes": 300724,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "baloo-2",
+      "family": "Baloo 2",
+      "category": "display",
+      "scripts": [
+        "latin",
+        "devanagari"
+      ],
+      "tags": [
+        "thingyan",
+        "rounded"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 800,
+          "style": "normal",
+          "asset": {
+            "url": "assets/d47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2.ttf",
+            "sha256": "d47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2",
+            "bytes": 683200,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "space-grotesk",
+      "family": "Space Grotesk",
+      "category": "clean",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "clean",
+        "modern"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 300,
+          "maxWeight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72.ttf",
+            "sha256": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+            "bytes": 136676,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "dm-sans",
+      "family": "DM Sans",
+      "category": "clean",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "clean",
+        "friendly"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 100,
+          "maxWeight": 1000,
+          "style": "normal",
+          "asset": {
+            "url": "assets/8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d.ttf",
+            "sha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+            "bytes": 240164,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "padauk",
+      "family": "Padauk",
+      "category": "myanmar",
+      "scripts": [
+        "myanmar",
+        "latin"
+      ],
+      "tags": [
+        "myanmar",
+        "burmese"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/c89cf56e572abda9652d9e54203bd729b0c59541c4b569046b9b61acd0b532f3.ttf",
+            "sha256": "c89cf56e572abda9652d9e54203bd729b0c59541c4b569046b9b61acd0b532f3",
+            "bytes": 498860,
+            "format": "ttf"
+          }
+        },
+        {
+          "weight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/9dbb46745ae4ed42d9030210e63f7aa53281861c7fa0be072980161f94927115.ttf",
+            "sha256": "9dbb46745ae4ed42d9030210e63f7aa53281861c7fa0be072980161f94927115",
+            "bytes": 499304,
+            "format": "ttf"
+          }
+        }
+      ],
+      "sampleText": {
+        "en": "သင်္ကြန် ၁၉:၄၇"
+      }
+    }
+  ],
+  "iconPacks": [
+    {
+      "id": "spooky-glow",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Spooky Glow"
+      },
+      "style": {
+        "en": "Neon outline"
+      },
+      "kind": "painted",
+      "painter": "halloween",
+      "shape": "squircle",
+      "tile": "#1E1430",
+      "glyph": "#FF7A1A",
+      "ring": "#FF7A1A",
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1
+    },
+    {
+      "id": "gold-ornament",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Gold Ornament"
+      },
+      "style": {
+        "en": "Gold rim"
+      },
+      "kind": "painted",
+      "painter": "christmas",
+      "shape": "circle",
+      "tile": "#5A1420",
+      "glyph": "#F2B33D",
+      "ring": "#F2B33D",
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 2
+    },
+    {
+      "id": "water-splash",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "style": {
+        "en": "Filled"
+      },
+      "kind": "painted",
+      "painter": "thingyan",
+      "shape": "leaf",
+      "tile": "#FFC21A",
+      "glyph": "#0A3D6B",
+      "ring": "#FFC21A",
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 3
+    }
+  ],
+  "banners": [
+    {
+      "id": "halloween-2026",
+      "title": {
+        "en": "Halloween Night"
+      },
+      "subtitle": {
+        "en": "Wallpaper, icons and a spooky clock font."
+      },
+      "tag": {
+        "en": "THEME"
+      },
+      "cta": {
+        "en": "Get theme"
+      },
+      "action": {
+        "type": "theme",
+        "id": "halloween-night"
+      },
+      "look": {
+        "background": "#160C24",
+        "accent": "#FF7A1A",
+        "titleColor": "#FF7A1A",
+        "font": "creepster",
+        "artThemeId": "halloween-night"
+      },
+      "startsAt": "2026-10-01T00:00:00.000Z",
+      "endsAt": "2026-11-01T00:00:00.000Z",
+      "sort": 10
+    },
+    {
+      "id": "christmas-2026",
+      "title": {
+        "en": "Snowy Christmas"
+      },
+      "subtitle": {
+        "en": "Snowy pines, gold ornaments and cozy cabins."
+      },
+      "tag": {
+        "en": "WALLPAPERS"
+      },
+      "cta": {
+        "en": "Browse"
+      },
+      "action": {
+        "type": "wallpapers",
+        "id": "christmas"
+      },
+      "look": {
+        "background": "#0F3D2E",
+        "accent": "#F2B33D",
+        "titleColor": "#F5F1EA",
+        "font": "playfair-display",
+        "artThemeId": "christmas-eve"
+      },
+      "startsAt": "2026-10-10T00:00:00.000Z",
+      "endsAt": "2026-12-27T00:00:00.000Z",
+      "sort": 20
+    },
+    {
+      "id": "clock-fonts",
+      "title": {
+        "en": "Clock fonts"
+      },
+      "subtitle": {
+        "en": "Pick a font for the wallp Home and lock screen clock."
+      },
+      "tag": {
+        "en": "NEW · FONTS"
+      },
+      "cta": {
+        "en": "Try fonts"
+      },
+      "action": {
+        "type": "fonts"
+      },
+      "look": {
+        "background": "#26222E",
+        "accent": "#FFB547",
+        "titleColor": "#F5F1EA",
+        "font": "space-grotesk"
+      },
+      "sort": 30
+    },
+    {
+      "id": "thingyan-2027",
+      "title": {
+        "en": "Thingyan",
+        "my": "သင်္ကြန်"
+      },
+      "subtitle": {
+        "en": "Water festival themes with Padauk flowers."
+      },
+      "tag": {
+        "en": "THEME"
+      },
+      "cta": {
+        "en": "Explore"
+      },
+      "action": {
+        "type": "festival",
+        "id": "thingyan"
+      },
+      "look": {
+        "background": "#0A3D6B",
+        "accent": "#FFC21A",
+        "titleColor": "#FFC21A",
+        "font": "baloo-2",
+        "artThemeId": "thingyan-water"
+      },
+      "sort": 40
+    }
+  ],
+  "accentPresets": {
+    "solids": [
+      {
+        "id": "pumpkin",
+        "name": {
+          "en": "Pumpkin"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF7A1A"
+        ]
+      },
+      {
+        "id": "ember",
+        "name": {
+          "en": "Ember"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF4D2E"
+        ]
+      },
+      {
+        "id": "candy",
+        "name": {
+          "en": "Candy"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF5FA2"
+        ]
+      },
+      {
+        "id": "witch-purple",
+        "name": {
+          "en": "Witch purple"
+        },
+        "type": "solid",
+        "colors": [
+          "#A970FF"
+        ]
+      },
+      {
+        "id": "ghost-blue",
+        "name": {
+          "en": "Ghost blue"
+        },
+        "type": "solid",
+        "colors": [
+          "#7CC6FF"
+        ]
+      },
+      {
+        "id": "slime",
+        "name": {
+          "en": "Slime"
+        },
+        "type": "solid",
+        "colors": [
+          "#7BD44A"
+        ]
+      },
+      {
+        "id": "moon-cream",
+        "name": {
+          "en": "Moon cream"
+        },
+        "type": "solid",
+        "colors": [
+          "#F3E6C4"
+        ]
+      },
+      {
+        "id": "gold",
+        "name": {
+          "en": "Gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#F2B33D"
+        ]
+      },
+      {
+        "id": "bone",
+        "name": {
+          "en": "Bone"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      {
+        "id": "blood",
+        "name": {
+          "en": "Blood"
+        },
+        "type": "solid",
+        "colors": [
+          "#D7263D"
+        ]
+      }
+    ],
+    "gradients": [
+      {
+        "id": "pumpkin-glow",
+        "name": {
+          "en": "Pumpkin glow"
+        },
+        "type": "gradient",
+        "colors": [
+          "#FFB547",
+          "#FF4D2E"
+        ],
+        "angle": 135
+      },
+      {
+        "id": "witching-hour",
+        "name": {
+          "en": "Witching hour"
+        },
+        "type": "gradient",
+        "colors": [
+          "#A970FF",
+          "#FF5FA2"
+        ],
+        "angle": 135
+      },
+      {
+        "id": "moonrise",
+        "name": {
+          "en": "Moonrise"
+        },
+        "type": "gradient",
+        "colors": [
+          "#F3E6C4",
+          "#FF7A1A"
+        ],
+        "angle": 180
+      },
+      {
+        "id": "potion",
+        "name": {
+          "en": "Potion"
+        },
+        "type": "gradient",
+        "colors": [
+          "#7BD44A",
+          "#2EC4B6"
+        ],
+        "angle": 90
+      },
+      {
+        "id": "frost",
+        "name": {
+          "en": "Frost"
+        },
+        "type": "gradient",
+        "colors": [
+          "#F5F1EA",
+          "#7CC6FF"
+        ],
+        "angle": 180
+      },
+      {
+        "id": "candle",
+        "name": {
+          "en": "Candle"
+        },
+        "type": "gradient",
+        "colors": [
+          "#FFE08A",
+          "#FF7A1A",
+          "#D7263D"
+        ],
+        "angle": 180
+      }
+    ]
+  },
+  "searchSuggestions": [
+    "Halloween",
+    "Christmas",
+    "Thingyan",
+    "moon",
+    "snow",
+    "live"
+  ]
+}

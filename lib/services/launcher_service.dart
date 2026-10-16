@@ -21,8 +21,12 @@ class LauncherService {
 
   Future<bool> isDefaultHome() => _call('isDefaultHome');
 
+  /// Opens wallp Home.
+  Future<bool> goHome() => _call('goHome');
+
   /// Shows Android's "default home app" dialog and completes when the user
-  /// is back: true if wallp is now the default home app.
+  /// is back: true if wallp is now the default home app. When wallp already
+  /// is, opens Android's Home app settings instead, to pick another.
   Future<bool> requestDefaultHome() => _call('requestDefaultHome');
 
   /// Listens for messages from the home screen's native side:

@@ -15,6 +15,7 @@ import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/scenes/scene_view.dart';
 import 'package:wallp/services/wallpaper_renderer.dart';
 
+import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
 
 const _size = Size(195, 422); // Half the design size: quick to render.
@@ -153,7 +154,7 @@ void main() {
     () async {
       final theme = themeOf('golden-pagoda');
       final ref = theme.layered!.images.single;
-      final bytes = File('assets/mock/catalog/v1/${ref.url}').readAsBytesSync();
+      final bytes = File('$mockDir/${ref.url}').readAsBytesSync();
       final codec = await ui.instantiateImageCodec(bytes);
       final pagoda = (await codec.getNextFrame()).image;
 
@@ -205,10 +206,7 @@ void main() {
       assets = SceneAssets(cache);
       // "Download" Golden Pagoda's files.
       for (final ref in catalog.assetsFor(mockTheme('golden-pagoda'))) {
-        await cache.put(
-          ref,
-          File('assets/mock/catalog/v1/${ref.url}').readAsBytesSync(),
-        );
+        await cache.put(ref, File('$mockDir/${ref.url}').readAsBytesSync());
       }
     });
     tearDown(() => dir.deleteSync(recursive: true));

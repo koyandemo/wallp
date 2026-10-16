@@ -1,4 +1,4 @@
-// Checks the generated mock catalog (assets/mock/catalog/v1) end to end:
+// Checks the full generated mock catalog (test/fixtures/catalog/v1) end to end:
 // the same checks the app's download code and the dashboard's publish step
 // rely on. Regenerate with `dart run tool/seed/generate.dart`.
 import 'dart:convert';
@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 
-const _dir = 'assets/mock/catalog/v1';
+const _dir = 'test/fixtures/catalog/v1';
 
 Object? _read(String path) =>
     jsonDecode(File('$_dir/$path').readAsStringSync());

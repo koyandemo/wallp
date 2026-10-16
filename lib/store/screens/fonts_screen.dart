@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../render/font_registry.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
@@ -120,9 +120,9 @@ class _FontCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.palette.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.outline),
+            border: Border.all(color: context.palette.outline),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,10 +133,10 @@ class _FontCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: FontRegistry.shared.style(
                   font.family,
-                  const TextStyle(
+                  TextStyle(
                     fontSize: 40,
                     height: 1.1,
-                    color: AppColors.textPrimary,
+                    color: context.palette.text,
                   ),
                 ),
               ),
@@ -146,18 +146,18 @@ class _FontCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       font.family,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: context.palette.text,
                       ),
                     ),
                   ),
                   Text(
                     tag,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.palette.muted,
                     ),
                   ),
                 ],

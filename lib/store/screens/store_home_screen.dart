@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../catalog/catalog.dart' hide Banner;
 import '../../catalog/catalog.dart' as cat show Banner;
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
@@ -151,9 +151,9 @@ class _PackChip extends StatelessWidget {
           width: 150,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.palette.surface,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.outline),
+            border: Border.all(color: context.palette.outline),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,10 +192,10 @@ class _PackChip extends StatelessWidget {
                 pack.name.en,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.palette.text,
                 ),
               ),
             ],
@@ -285,9 +285,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   _go(-1);
                   _restart();
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.chevron_left_rounded,
-                  color: AppColors.textSecondary,
+                  color: context.palette.muted,
                 ),
               ),
               for (var i = 0; i < banners.length; i++)
@@ -297,7 +297,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   width: i == _index ? 22 : 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: i == _index ? AppColors.brand : AppColors.outline,
+                    color: i == _index
+                        ? context.palette.brand
+                        : context.palette.outline,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -307,9 +309,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   _go(1);
                   _restart();
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary,
+                  color: context.palette.muted,
                 ),
               ),
             ],
@@ -355,8 +357,8 @@ class _BannerCard extends StatelessWidget {
     final accent = Color(look.accent.argb);
     final onAccent =
         ThemeData.estimateBrightnessForColor(accent) == Brightness.light
-        ? AppColors.background
-        : AppColors.textPrimary;
+        ? context.palette.background
+        : context.palette.text;
     final style = previewOf(
       art ?? catalog.themes.first,
       catalog,
@@ -378,11 +380,11 @@ class _BannerCard extends StatelessWidget {
                     children: [
                       Text(
                         banner.tag.en,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
-                          color: AppColors.textPrimary,
+                          color: context.palette.text,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -404,9 +406,9 @@ class _BannerCard extends StatelessWidget {
                         banner.subtitle.en,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textPrimary,
+                          color: context.palette.text,
                           height: 1.3,
                         ),
                       ),

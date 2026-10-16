@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 
-const _dir = 'assets/mock/catalog/v1';
+const _dir = 'test/fixtures/catalog/v1';
 
 /// A fresh, editable copy of the seed catalog JSON.
 Map<String, dynamic> _seedCatalog() {

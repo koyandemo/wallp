@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../look/look_controller.dart';
 import '../../widgets/theme_preview.dart';
 import '../apply_flow.dart';
@@ -90,10 +90,7 @@ class _WallpaperDetailScreenState extends State<WallpaperDetailScreen> {
               ?festival,
               if (wallpaper.isLive) 'Live wallpaper' else 'Still wallpaper',
             ].join(' · '),
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: context.palette.muted),
           ),
           const SizedBox(height: 8),
           // Wraps rather than overflows with large text.

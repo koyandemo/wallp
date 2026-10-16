@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../launcher/launcher_icon.dart';
 import '../../models/phone_theme.dart';
 import '../../services/icon_pack_service.dart';
@@ -130,7 +130,7 @@ class _PinShortcutsScreenState extends State<PinShortcutsScreen> {
                       hintText: 'Search apps',
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
-                      fillColor: AppColors.surface,
+                      fillColor: context.palette.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -193,9 +193,9 @@ class _Intro extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.outline),
+        border: Border.all(color: context.palette.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,8 +277,8 @@ class _AppRow extends StatelessWidget {
               label: Text(added ? 'Added' : 'Add'),
               style: TextButton.styleFrom(
                 foregroundColor: added
-                    ? AppColors.textSecondary
-                    : AppColors.brand,
+                    ? context.palette.muted
+                    : context.palette.brand,
               ),
             ),
     );

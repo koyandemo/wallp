@@ -1,13 +1,40 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
 import 'package:wallp/data/catalog/mock_catalog_source.dart';
 
-const mockDir = 'assets/mock/catalog/v1';
+/// The full mock catalog (30 themes): what the tests check features with.
+/// The app itself ships the small demo catalog in assets/mock.
+const mockDir = 'test/fixtures/catalog/v1';
+
+/// Reads "assets" straight from disk, so tests can serve [mockDir] (which
+/// isn't an app asset) through the same MockCatalogSource the app uses.
+class DiskBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    final file = File(key);
+    if (!file.existsSync()) throw FlutterError('No file $key');
+    return ByteData.sublistView(await file.readAsBytes());
+  }
+}
+
+/// The mock CDN over the full fixture catalog.
+MockCatalogSource fixtureSource({
+  NetworkConditions Function()? conditions,
+  Random? random,
+}) => MockCatalogSource(
+  bundle: DiskBundle(),
+  root: '$mockDir/',
+  conditions: conditions,
+  random: random,
+);
 
 /// The seed manifest and catalog JSON, as decoded maps.
 Map<String, dynamic> seedManifestJson() =>
@@ -25,7 +52,7 @@ class TamperingSource extends CatalogSource {
 
   NetworkConditions conditions;
 
-  late final inner = MockCatalogSource(conditions: () => conditions);
+  late final inner = fixtureSource(conditions: () => conditions);
 
   set offline(bool on) =>
       conditions = on ? NetworkConditions.offlineNow : NetworkConditions.fast;

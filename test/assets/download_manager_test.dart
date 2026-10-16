@@ -9,13 +9,14 @@ import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
 import 'package:wallp/data/catalog/mock_catalog_source.dart';
 
+import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
 
 /// The mock CDN, counting requests and how many run at once, and able to
 /// fail the first few requests for chosen files.
 class _Source extends CatalogSource {
   NetworkConditions conditions = NetworkConditions.fast;
-  late final _inner = MockCatalogSource(
+  late final _inner = fixtureSource(
     conditions: () => conditions,
     random: Random(7),
   );

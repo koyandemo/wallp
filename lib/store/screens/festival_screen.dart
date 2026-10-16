@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
@@ -75,10 +75,7 @@ class _FestivalScreenState extends State<FestivalScreen> {
                   if (!countdown.isAnyTime) countdown.label(),
                   plural(all.length, 'theme'),
                 ].join(' · '),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: context.palette.muted),
               ),
             ),
           ),
@@ -103,9 +100,9 @@ class _FestivalScreenState extends State<FestivalScreen> {
                         plural(list.length, 'theme'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textSecondary,
+                          color: context.palette.muted,
                         ),
                       ),
                     ),
@@ -123,8 +120,8 @@ class _FestivalScreenState extends State<FestivalScreen> {
                         style: TextButton.styleFrom(
                           minimumSize: const Size(44, 44),
                           foregroundColor: key == _sort
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
+                              ? context.palette.text
+                              : context.palette.muted,
                         ),
                         child: Text(
                           label,
@@ -180,14 +177,13 @@ class _FestivalScreenState extends State<FestivalScreen> {
                         child: IconButton(
                           tooltip: 'Quick look at ${t.name.en}',
                           style: IconButton.styleFrom(
-                            backgroundColor: AppColors.background.withValues(
-                              alpha: 0.8,
-                            ),
+                            backgroundColor: context.palette.background
+                                .withValues(alpha: 0.8),
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.visibility_outlined,
                             size: 18,
-                            color: AppColors.textPrimary,
+                            color: context.palette.text,
                           ),
                           onPressed: () => showQuickLook(context, list, t),
                         ),
@@ -212,7 +208,7 @@ Future<void> showQuickLook(
 ) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
-  backgroundColor: AppColors.surface,
+  backgroundColor: context.palette.surface,
   showDragHandle: true,
   builder: (_) => _QuickLook(list: list, start: start),
 );
@@ -286,17 +282,17 @@ class _QuickLookState extends State<_QuickLook> {
                       children: [
                         Text(
                           _theme.name.en,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: context.palette.text,
                           ),
                         ),
                         Text(
                           '${i + 1} of ${widget.list.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: context.palette.muted,
                           ),
                         ),
                       ],
@@ -339,7 +335,7 @@ class _QuickLookState extends State<_QuickLook> {
                                 color:
                                     (_variant ?? detail.variants.first.id) ==
                                         v.id
-                                    ? AppColors.textPrimary
+                                    ? context.palette.text
                                     : Colors.transparent,
                                 width: 3,
                               ),

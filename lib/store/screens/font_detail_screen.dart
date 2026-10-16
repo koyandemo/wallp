@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../core/date_format.dart';
 import '../../look/applied_look.dart';
 import '../../look/look_controller.dart';
@@ -66,12 +66,12 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
     }
     final look = context.watch<LookController>().look;
     final accent = look == null
-        ? AppColors.brand
+        ? context.palette.brand
         : Color(look.accent.primary.argb);
     final clockColor = _color.isAccent
         ? accent
         : _color.isText
-        ? AppColors.textPrimary
+        ? context.palette.text
         : Color(_color.hex!.argb);
     final places = [
       if (_lock) 'lock screen clock',
@@ -88,7 +88,7 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
             height: 200,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.palette.surface,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Text(
@@ -103,12 +103,12 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Size',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -122,12 +122,12 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
             onSelectionChanged: (s) => setState(() => _size = s.single),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Colour',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -150,12 +150,12 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Use it on',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           SwitchListTile(
@@ -180,11 +180,11 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
             onChanged: (v) => setState(() => _labels = v),
           ),
           if (font.fallbackFor.containsKey('my'))
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
                 'Burmese app names use Padauk: this font has no Myanmar letters.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: context.palette.muted),
               ),
             ),
         ],
@@ -264,7 +264,7 @@ class _ColourDot extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: selected ? AppColors.textPrimary : Colors.transparent,
+            color: selected ? context.palette.text : Colors.transparent,
             width: 3,
           ),
         ),

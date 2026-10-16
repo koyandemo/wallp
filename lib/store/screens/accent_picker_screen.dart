@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../core/date_format.dart';
 import '../../look/accent_choices.dart';
 import '../../look/accent_contrast.dart';
@@ -136,7 +136,7 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: context.palette.background,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -146,7 +146,7 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
                           fontWeight: FontWeight.w600,
                           color: readable
                               ? const Color(0xFF7BD44A)
-                              : AppColors.brand,
+                              : context.palette.brand,
                         ),
                       ),
                     ),
@@ -190,12 +190,12 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
                 ),
                 if (choices.mine.isNotEmpty) ...[
                   const SizedBox(height: 18),
-                  const Text(
+                  Text(
                     'My accents',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.palette.text,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -273,12 +273,12 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
               label: const Text('Swap colours'),
             ),
           ),
-          const Text(
+          Text(
             'Direction',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -297,11 +297,11 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
                     isSelected: _angle == deg,
                     style: IconButton.styleFrom(
                       backgroundColor: _angle == deg
-                          ? AppColors.textPrimary
-                          : AppColors.surface,
+                          ? context.palette.text
+                          : context.palette.surface,
                       foregroundColor: _angle == deg
-                          ? AppColors.background
-                          : AppColors.textPrimary,
+                          ? context.palette.background
+                          : context.palette.text,
                       minimumSize: const Size(48, 48),
                     ),
                     onPressed: () => setState(() => _angle = deg),
@@ -373,7 +373,7 @@ class _Grid extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: picked != null && sameLook(a, picked!)
-                        ? AppColors.textPrimary
+                        ? context.palette.text
                         : Colors.transparent,
                     width: 3,
                   ),
@@ -432,10 +432,10 @@ class _ColourFieldState extends State<_ColourField> {
             Expanded(
               child: Text(
                 widget.label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.palette.text,
                 ),
               ),
             ),
@@ -494,7 +494,7 @@ class _ColourFieldState extends State<_ColourField> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: widget.value.hex.toUpperCase() == hex
-                            ? AppColors.textPrimary
+                            ? context.palette.text
                             : Colors.transparent,
                         width: 3,
                       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../data/assets/download_manager.dart';
 import '../logic/queries.dart';
 
@@ -46,7 +46,7 @@ class _Card extends StatelessWidget {
     final label =
         'Downloading ${task.label} · ${formatBytes(task.receivedBytes)} of ${formatBytes(task.totalBytes)}';
     return Material(
-      color: AppColors.surfaceHigh,
+      color: context.palette.surface2,
       elevation: 8,
       borderRadius: BorderRadius.circular(18),
       child: Semantics(
@@ -63,10 +63,10 @@ class _Card extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: context.palette.text,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -75,8 +75,8 @@ class _Card extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: task.progress,
                         minHeight: 6,
-                        backgroundColor: AppColors.outline,
-                        color: AppColors.brand,
+                        backgroundColor: context.palette.outline,
+                        color: context.palette.brand,
                       ),
                     ),
                   ],
@@ -86,7 +86,7 @@ class _Card extends StatelessWidget {
               TextButton(
                 onPressed: task.cancel,
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.brand,
+                  foregroundColor: context.palette.brand,
                   minimumSize: const Size(64, 44),
                 ),
                 child: const Text('Cancel'),

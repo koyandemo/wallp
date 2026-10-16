@@ -13,6 +13,7 @@ import 'package:wallp/render/font_registry.dart';
 import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/services/icon_pack_service.dart';
 
+import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
 
 void main() {
@@ -23,10 +24,7 @@ void main() {
 
   Future<void> download(Iterable<AssetRef> refs) async {
     for (final ref in refs) {
-      await cache.put(
-        ref,
-        File('assets/mock/catalog/v1/${ref.url}').readAsBytesSync(),
-      );
+      await cache.put(ref, File('$mockDir/${ref.url}').readAsBytesSync());
     }
   }
 
@@ -191,10 +189,7 @@ void main() {
         assets: assets,
       );
       final picture = look.icons.pack.glyphs['messages']!;
-      expect(
-        sent,
-        File('assets/mock/catalog/v1/${picture.url}').readAsBytesSync(),
-      );
+      expect(sent, File('$mockDir/${picture.url}').readAsBytesSync());
     });
   });
 }

@@ -7,7 +7,7 @@ import 'package:wallp/look/look_store.dart';
 import 'package:wallp/look/resolved_look.dart';
 import 'package:wallp/models/phone_theme.dart';
 
-const _dir = 'assets/mock/catalog/v1';
+const _dir = 'test/fixtures/catalog/v1';
 
 Object? _read(String path) =>
     jsonDecode(File('$_dir/$path').readAsStringSync());

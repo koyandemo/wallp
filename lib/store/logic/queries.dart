@@ -164,7 +164,10 @@ List<Wallpaper> wallpapersTab(Catalog catalog, {String? filter}) =>
             (filter == 'live' ? w.isLive : w.festivalId == filter))
           w,
     ]..sort((a, b) {
-      final f = a.festivalId.compareTo(b.festivalId);
+      // In the festivals' own order (Halloween, Christmas, Thingyan…), then
+      // most popular first.
+      int order(Wallpaper w) => catalog.festival(w.festivalId)?.sort ?? 1 << 30;
+      final f = order(a).compareTo(order(b));
       return f != 0 ? f : a.popularity.compareTo(b.popularity);
     });
 

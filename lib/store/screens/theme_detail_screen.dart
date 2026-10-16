@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../data/assets/asset_cache.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../look/accent_choices.dart';
@@ -107,8 +107,8 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
         if (detail == null || summary == null) {
           return Scaffold(
             appBar: AppBar(title: Text(title)),
-            body: const Center(
-              child: CircularProgressIndicator(color: AppColors.brand),
+            body: Center(
+              child: CircularProgressIndicator(color: context.palette.brand),
             ),
           );
         }
@@ -169,7 +169,7 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
               height: 440,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: AppColors.surfaceHigh, width: 6),
+                border: Border.all(color: context.palette.surface2, width: 6),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(26),
@@ -205,12 +205,12 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
           ),
           if (detail.variants.length > 1) ...[
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'Colours',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.palette.text,
               ),
             ),
             const SizedBox(height: 8),
@@ -236,13 +236,13 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
           const SizedBox(height: 18),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Accent',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.palette.text,
                   ),
                 ),
               ),
@@ -257,7 +257,7 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                   if (picked != null) setState(() => _accent = picked);
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.brand,
+                  foregroundColor: context.palette.brand,
                   minimumSize: const Size(44, 44),
                 ),
                 icon: const Icon(Icons.palette_outlined, size: 18),
@@ -286,22 +286,22 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
             ],
           ),
           const SizedBox(height: 26),
-          const Text(
+          Text(
             'This theme includes',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           const SizedBox(height: 10),
           // Material, not a coloured box: the rows' ink must show.
           Material(
-            color: AppColors.surface,
+            color: context.palette.surface,
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.outline),
+              side: BorderSide(color: context.palette.outline),
             ),
             child: Column(
               children: [
@@ -365,7 +365,7 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
   Future<void> _openApplySheet(ThemeDetail detail) async {
     final option = await showModalBottomSheet<ApplyOption>(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.palette.surface,
       showDragHandle: true,
       builder: (_) => _ApplySheet(theme: detail),
     );
@@ -415,7 +415,7 @@ class _Swatch extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: selected ? AppColors.textPrimary : Colors.transparent,
+              color: selected ? context.palette.text : Colors.transparent,
               width: 3,
             ),
           ),
@@ -447,30 +447,27 @@ class _IncludesRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: last
             ? null
-            : const Border(bottom: BorderSide(color: AppColors.outline)),
+            : Border(bottom: BorderSide(color: context.palette.outline)),
       ),
       child: ListTile(
         minTileHeight: 64,
         onTap: onTap,
-        leading: Icon(icon, color: AppColors.brand),
+        leading: Icon(icon, color: context.palette.brand),
         title: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.palette.text,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: context.palette.muted),
         ),
         trailing: onTap == null
             ? null
-            : const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.textSecondary,
-              ),
+            : Icon(Icons.chevron_right_rounded, color: context.palette.muted),
       ),
     );
   }
@@ -516,10 +513,10 @@ class _ApplySheetState extends State<_ApplySheet> {
           children: [
             Text(
               'Apply ${widget.theme.name.en}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.palette.text,
               ),
             ),
             const SizedBox(height: 10),
@@ -540,9 +537,9 @@ class _ApplySheetState extends State<_ApplySheet> {
                       ),
                       subtitle: Text(
                         sub,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.palette.muted,
                         ),
                       ),
                       contentPadding: EdgeInsets.zero,

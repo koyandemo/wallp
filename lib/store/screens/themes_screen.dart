@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
@@ -184,9 +184,9 @@ class _FestivalCard extends StatelessWidget {
                     ),
                     Text(
                       countdown,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textPrimary,
+                        color: context.palette.text,
                       ),
                     ),
                     const Spacer(),
@@ -196,15 +196,15 @@ class _FestivalCard extends StatelessWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: context.palette.background,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         '${plural(themes.length, 'theme')}  ›',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: context.palette.text,
                         ),
                       ),
                     ),

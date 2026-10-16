@@ -11,7 +11,9 @@ import 'package:wallp/core/clock.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
 import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/catalog/catalog_repository.dart';
+import 'package:wallp/data/catalog/catalog_source.dart';
 import 'package:wallp/data/catalog/catalog_store.dart';
+import 'package:wallp/data/catalog/mock_catalog_source.dart';
 import 'package:wallp/dev/dev_settings.dart';
 import 'package:wallp/look/look_controller.dart';
 import 'package:wallp/look/my_accents.dart';
@@ -19,6 +21,7 @@ import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/store/state/user_store.dart';
 import 'package:wallp/store/store_shell.dart';
 import 'package:wallp/store/widgets/download_overlay.dart';
+import 'package:wallp/store/widgets/store_look_scope.dart';
 
 import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
@@ -40,6 +43,7 @@ class StoreHarness {
     WidgetTester tester, {
     Widget? home,
     List<String> themes = const [],
+    bool demo = false,
   }) async {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferencesAsyncPlatform.instance =
@@ -53,7 +57,10 @@ class StoreHarness {
     await tester.runAsync(() async {
       dir = Directory.systemTemp.createTempSync('wallp_store_');
       cache = AssetCache(dir);
-      final source = TamperingSource();
+      // The app's own demo catalog, or the full fixture (the default).
+      final CatalogSource source = demo
+          ? MockCatalogSource()
+          : TamperingSource();
       catalog = CatalogRepository(source: source, store: MemoryCatalogStore());
       await catalog.start(refresh: false);
       await catalog.refresh();
@@ -94,7 +101,8 @@ class StoreHarness {
           assets: SceneAssets(cache),
           child: MaterialApp(
             theme: AppTheme.dark(),
-            builder: (context, child) => DownloadOverlay(child: child!),
+            builder: (context, child) =>
+                StoreLookScope(child: DownloadOverlay(child: child!)),
             home: home ?? const StoreShell(),
           ),
         ),

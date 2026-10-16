@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/app_colors.dart';
+import '../core/store_palette.dart';
 import '../data/catalog/catalog_repository.dart';
 import '../look/look_controller.dart';
 import 'screens/fonts_screen.dart';
@@ -75,8 +75,8 @@ class _StoreShellState extends State<StoreShell> {
       body: SafeArea(
         bottom: false,
         child: !ready
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.brand),
+            ? Center(
+                child: CircularProgressIndicator(color: context.palette.brand),
               )
             : IndexedStack(
                 index: _tab.index,

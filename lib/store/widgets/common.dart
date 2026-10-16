@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
-import '../../core/app_colors.dart';
+import '../../core/store_palette.dart';
 import '../../core/clock.dart';
 import '../../core/date_format.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../look/look_controller.dart';
 import '../../models/phone_theme.dart';
+import '../../render/font_registry.dart';
 import '../../scenes/scene_view.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
@@ -67,10 +68,10 @@ class ChipRow<T> extends StatelessWidget {
               checked: on,
               button: true,
               child: Material(
-                color: on ? AppColors.textPrimary : AppColors.surface,
+                color: on ? context.palette.text : context.palette.surface,
                 shape: StadiumBorder(
                   side: BorderSide(
-                    color: on ? AppColors.textPrimary : AppColors.outline,
+                    color: on ? context.palette.text : context.palette.outline,
                   ),
                 ),
                 child: InkWell(
@@ -85,8 +86,8 @@ class ChipRow<T> extends StatelessWidget {
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: on
-                              ? AppColors.background
-                              : AppColors.textPrimary,
+                              ? context.palette.background
+                              : context.palette.text,
                         ),
                       ),
                     ),
@@ -110,9 +111,9 @@ class BadgeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (badge) {
       CardBadge.applied ||
-      CardBadge.inUse => (AppColors.brand, AppColors.background),
-      CardBadge.isNew => (AppColors.textPrimary, AppColors.background),
-      CardBadge.live => (AppColors.background, AppColors.textPrimary),
+      CardBadge.inUse => (context.palette.brand, context.palette.background),
+      CardBadge.isNew => (context.palette.text, context.palette.background),
+      CardBadge.live => (context.palette.background, context.palette.text),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -173,7 +174,7 @@ class SceneThumb extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: highlight ? AppColors.brand : Colors.transparent,
+          color: highlight ? context.palette.brand : Colors.transparent,
           width: 2,
         ),
       ),
@@ -280,20 +281,17 @@ class ThemeCard extends StatelessWidget {
               theme.name.en,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.palette.text,
               ),
             ),
             Text(
               line,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: context.palette.muted),
             ),
           ],
         ),
@@ -308,11 +306,13 @@ class WallpaperCard extends StatelessWidget {
     required this.wallpaper,
     required this.onTap,
     this.inUseId,
+    this.height = 290,
   });
 
   final Wallpaper wallpaper;
   final VoidCallback onTap;
   final String? inUseId;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +331,7 @@ class WallpaperCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 290,
+              height: height,
               child: SceneThumb(
                 theme: wallpaperPreviewOf(wallpaper, catalog, nowOf(context)),
                 badge: badge,
@@ -344,22 +344,29 @@ class WallpaperCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
+                  flex: 3,
                   child: Text(
                     wallpaper.name.en,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.palette.text,
                     ),
                   ),
                 ),
-                Text(
-                  festival,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                const SizedBox(width: 6),
+                // Narrow cards: the festival gives way first.
+                Flexible(
+                  child: Text(
+                    festival,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.palette.muted,
+                    ),
                   ),
                 ),
               ],
@@ -398,18 +405,18 @@ class SectionHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.palette.text,
                   ),
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.palette.muted,
                     ),
                   ),
               ],
@@ -419,7 +426,7 @@ class SectionHeader extends StatelessWidget {
             TextButton(
               onPressed: onAction,
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.brand,
+                foregroundColor: context.palette.brand,
                 minimumSize: const Size(44, 44),
               ),
               child: Text(action!),
@@ -448,15 +455,15 @@ class EmptyMessage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: AppColors.textSecondary),
+          Icon(icon, size: 40, color: context.palette.muted),
           const SizedBox(height: 12),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.palette.text,
             ),
           ),
           if (message != null) ...[
@@ -464,9 +471,9 @@ class EmptyMessage extends StatelessWidget {
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppColors.textSecondary,
+                color: context.palette.muted,
                 height: 1.4,
               ),
             ),
@@ -501,22 +508,11 @@ class TabHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+                Text(title, style: headingStyle(context, 28)),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.palette.muted),
                 ),
               ],
             ),
@@ -552,9 +548,9 @@ class RoundIconButton extends StatelessWidget {
         label: label,
         excludeSemantics: true,
         child: Material(
-          color: AppColors.surface,
-          shape: const StadiumBorder(
-            side: BorderSide(color: AppColors.outline),
+          color: context.palette.surface,
+          shape: StadiumBorder(
+            side: BorderSide(color: context.palette.outline),
           ),
           child: InkWell(
             customBorder: const StadiumBorder(),
@@ -568,15 +564,15 @@ class RoundIconButton extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 18, color: AppColors.textPrimary),
+                    Icon(icon, size: 18, color: context.palette.text),
                     if (text != null) ...[
                       const SizedBox(width: 6),
                       Text(
                         text!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: context.palette.text,
                         ),
                       ),
                     ],
@@ -589,4 +585,24 @@ class RoundIconButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A big heading: in the festival's display font when the app wears a
+/// festival's look, else the app's own bold font.
+TextStyle headingStyle(BuildContext context, double size) {
+  final p = context.palette;
+  final base = TextStyle(
+    fontSize: size,
+    fontWeight: FontWeight.w700,
+    letterSpacing: p.displayFamily == null ? -0.5 : 0,
+    color: p.text,
+  );
+  final family = p.displayFamily;
+  // Display fonts run small (Creepster, Caveat): a little bigger reads alike.
+  return family == null
+      ? base
+      : FontRegistry.shared.style(
+          family,
+          base.copyWith(fontSize: size * 1.1, fontWeight: FontWeight.w400),
+        );
 }
