@@ -1,0 +1,5233 @@
+{
+  "catalogVersion": "2026-10-15.1",
+  "festivals": [
+    {
+      "id": "halloween",
+      "name": {
+        "en": "Halloween",
+        "my": "ဟယ်လိုဝင်း"
+      },
+      "kind": "festival",
+      "sort": 10,
+      "fallbackDate": {
+        "month": 10,
+        "day": 31
+      },
+      "unit": "night",
+      "look": {
+        "background": "#120A1C",
+        "surface": "#1E1430",
+        "surface2": "#2A1D40",
+        "outline": "#3D2C57",
+        "nav": "#170E24",
+        "muted": "#B9AECB",
+        "brand": "#FF7A1A",
+        "displayFont": "creepster"
+      },
+      "coverThemeId": "halloween-night"
+    },
+    {
+      "id": "christmas",
+      "name": {
+        "en": "Christmas",
+        "my": "ခရစ္စမတ်"
+      },
+      "kind": "festival",
+      "sort": 20,
+      "fallbackDate": {
+        "month": 12,
+        "day": 25
+      },
+      "unit": "day",
+      "look": {
+        "background": "#0A2A1F",
+        "surface": "#11392B",
+        "surface2": "#184735",
+        "outline": "#255A44",
+        "nav": "#0D3225",
+        "muted": "#B4CEC1",
+        "brand": "#F2B33D",
+        "displayFont": "playfair-display"
+      },
+      "coverThemeId": "christmas-eve"
+    },
+    {
+      "id": "thingyan",
+      "name": {
+        "en": "Thingyan",
+        "my": "သင်္ကြန်"
+      },
+      "kind": "festival",
+      "tags": [
+        "myanmar"
+      ],
+      "sort": 30,
+      "occurrences": [
+        "2027-04-13",
+        "2028-04-13",
+        "2029-04-13"
+      ],
+      "fallbackDate": {
+        "month": 4,
+        "day": 13
+      },
+      "durationDays": 4,
+      "unit": "day",
+      "look": {
+        "background": "#062848",
+        "surface": "#0C375F",
+        "surface2": "#124570",
+        "outline": "#1E5A8C",
+        "nav": "#083054",
+        "muted": "#B6D0E8",
+        "brand": "#FFC21A",
+        "displayFont": "baloo-2"
+      },
+      "coverThemeId": "thingyan-water"
+    },
+    {
+      "id": "thadingyut",
+      "name": {
+        "en": "Thadingyut",
+        "my": "သီတင်းကျွတ်"
+      },
+      "kind": "festival",
+      "tags": [
+        "myanmar"
+      ],
+      "sort": 40,
+      "occurrences": [
+        "2027-10-11",
+        "2028-09-29"
+      ],
+      "fallbackDate": {
+        "month": 10,
+        "day": 10
+      },
+      "durationDays": 3,
+      "unit": "day",
+      "look": {
+        "background": "#130C2A",
+        "surface": "#1E153D",
+        "surface2": "#2A1F52",
+        "outline": "#3B2E6B",
+        "nav": "#181033",
+        "muted": "#C1B8DC",
+        "brand": "#FFD27A",
+        "displayFont": "caveat"
+      },
+      "coverThemeId": "festival-of-lights"
+    },
+    {
+      "id": "minimal",
+      "name": {
+        "en": "Minimal"
+      },
+      "kind": "collection",
+      "sort": 90,
+      "look": {
+        "background": "#0E0C12",
+        "surface": "#1A1720",
+        "surface2": "#26222E",
+        "outline": "#332E3D",
+        "nav": "#15121B",
+        "muted": "#A39DAE",
+        "brand": "#FFB547",
+        "displayFont": "bebas-neue"
+      },
+      "coverThemeId": "quiet-ink"
+    },
+    {
+      "id": "kpop",
+      "name": {
+        "en": "Kpop"
+      },
+      "kind": "festival",
+      "comingSoon": true,
+      "sort": 100,
+      "unit": "day",
+      "look": {
+        "background": "#0E0C12",
+        "surface": "#1A1720",
+        "surface2": "#26222E",
+        "outline": "#332E3D",
+        "nav": "#15121B",
+        "muted": "#A39DAE",
+        "brand": "#FFB547",
+        "displayFont": "bebas-neue"
+      }
+    },
+    {
+      "id": "mid-autumn",
+      "name": {
+        "en": "Mid-Autumn"
+      },
+      "kind": "festival",
+      "comingSoon": true,
+      "sort": 110,
+      "unit": "day",
+      "look": {
+        "background": "#0E0C12",
+        "surface": "#1A1720",
+        "surface2": "#26222E",
+        "outline": "#332E3D",
+        "nav": "#15121B",
+        "muted": "#A39DAE",
+        "brand": "#FFB547",
+        "displayFont": "bebas-neue"
+      }
+    }
+  ],
+  "themes": [
+    {
+      "id": "halloween-night",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Haunted Moon"
+      },
+      "style": "classic",
+      "tags": [
+        "spooky",
+        "moon",
+        "bats"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "halloween",
+        "params": {}
+      },
+      "palette": {
+        "background": "#160C24",
+        "deep": "#0D0717",
+        "surface": "#2A1840",
+        "text": "#F4E9C9",
+        "textMuted": "#CDBFA0"
+      },
+      "accent": {
+        "id": "pumpkin",
+        "name": {
+          "en": "Pumpkin"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF8A2A"
+        ]
+      },
+      "displayFont": "creepster",
+      "variantSwatches": [
+        "#160C24",
+        "#1A0A10"
+      ],
+      "iconPackId": "spooky-glow",
+      "downloadBytes": 199400
+    },
+    {
+      "id": "christmas-eve",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Snowy Pines"
+      },
+      "style": "classic",
+      "tags": [
+        "snow",
+        "tree",
+        "winter"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "christmas",
+        "params": {}
+      },
+      "palette": {
+        "background": "#0F3D2E",
+        "deep": "#0A2A20",
+        "surface": "#1A5C41",
+        "text": "#FFF6E5",
+        "textMuted": "#CFE0D7"
+      },
+      "accent": {
+        "id": "berry-red",
+        "name": {
+          "en": "Berry red"
+        },
+        "type": "solid",
+        "colors": [
+          "#C8102E"
+        ]
+      },
+      "displayFont": "playfair-display",
+      "variantSwatches": [
+        "#0F3D2E",
+        "#10223D",
+        "#4A1020"
+      ],
+      "iconPackId": "gold-ornament",
+      "downloadBytes": 540888
+    },
+    {
+      "id": "thingyan-water",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "subtitle": {
+        "en": "သင်္ကြန်"
+      },
+      "style": "classic",
+      "tags": [
+        "water",
+        "myanmar",
+        "new year"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "thingyan",
+        "params": {}
+      },
+      "palette": {
+        "background": "#0A3D6B",
+        "deep": "#1477C2",
+        "surface": "#0F4F86",
+        "text": "#FFF8E7",
+        "textMuted": "#CFE6F7"
+      },
+      "accent": {
+        "id": "sun",
+        "name": {
+          "en": "Sun"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFC20E"
+        ]
+      },
+      "displayFont": "baloo-2",
+      "iconPackId": "water-splash",
+      "downloadBytes": 1681364
+    },
+    {
+      "id": "pumpkin-patch",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Pumpkin Patch"
+      },
+      "style": "cute",
+      "tags": [
+        "pumpkin",
+        "orange"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-10T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.05,
+              "aspect": 1.2,
+              "color": "#3A5A2A"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.38,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "@motif",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.62,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "@motif",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.7,
+              "width": 0.5,
+              "aspect": 0.78,
+              "color": "@motif"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#2A1033",
+        "deep": "#140A1C",
+        "surface": "#3B2343",
+        "text": "#F5F1EA",
+        "textMuted": "#B8AEB3",
+        "motif": "#FF7A1A"
+      },
+      "accent": {
+        "id": "moon-cream",
+        "name": {
+          "en": "Moon cream"
+        },
+        "type": "solid",
+        "colors": [
+          "#F3E6C4"
+        ]
+      },
+      "displayFont": "creepster",
+      "iconPackId": "moonlit",
+      "downloadBytes": 362411
+    },
+    {
+      "id": "witch-hour",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Witch Hour"
+      },
+      "style": "classic",
+      "tags": [
+        "witch",
+        "purple"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-09-05T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1E1440",
+        "deep": "#120B2A",
+        "surface": "#30274F",
+        "text": "#F5F1EA",
+        "textMuted": "#B5AFB7",
+        "motif": "#A970FF"
+      },
+      "accent": {
+        "id": "witch-purple",
+        "name": {
+          "en": "Witch purple"
+        },
+        "type": "solid",
+        "colors": [
+          "#A970FF"
+        ]
+      },
+      "displayFont": "creepster",
+      "variantSwatches": [
+        "#1E1440",
+        "#0F2A1A"
+      ],
+      "iconPackId": "moonlit",
+      "downloadBytes": 362411
+    },
+    {
+      "id": "ghost-town",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Ghost Town"
+      },
+      "style": "minimal",
+      "tags": [
+        "ghost",
+        "fog"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-08-16T14:00:00.000Z",
+      "popularity": 4,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.335,
+              "width": 0.14,
+              "aspect": 0.25,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.34,
+              "aspect": 1.3,
+              "color": "@motif",
+              "glow": true,
+              "motion": "sway"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.16,
+              "aspect": 1.5,
+              "color": "@text",
+              "opacity": 0.3
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "bats",
+              "count": 14,
+              "color": "@deep",
+              "speed": 0.35,
+              "size": 0.5
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1A1720",
+        "deep": "#0E0C12",
+        "surface": "#2C2A32",
+        "text": "#F5F1EA",
+        "textMuted": "#B3B0AD",
+        "motif": "#E8E4F0"
+      },
+      "accent": {
+        "id": "ghost-white",
+        "name": {
+          "en": "Ghost white"
+        },
+        "type": "solid",
+        "colors": [
+          "#E8E4F0"
+        ]
+      },
+      "displayFont": "caveat",
+      "iconPackId": "moonlit",
+      "downloadBytes": 703335
+    },
+    {
+      "id": "bat-swarm",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Bat Swarm"
+      },
+      "style": "classic",
+      "tags": [
+        "bats",
+        "moon",
+        "night"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-09-15T14:00:00.000Z",
+      "popularity": 5,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "bats",
+              "count": 14,
+              "color": "@deep",
+              "speed": 0.35,
+              "size": 0.5
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#14101E",
+        "deep": "#08060C",
+        "surface": "#272330",
+        "text": "#F5F1EA",
+        "textMuted": "#B2AEAD",
+        "motif": "#D9D2C0"
+      },
+      "accent": {
+        "id": "pumpkin",
+        "name": {
+          "en": "Pumpkin"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF7A1A"
+        ]
+      },
+      "displayFont": "creepster",
+      "iconPackId": "moonlit",
+      "downloadBytes": 362411
+    },
+    {
+      "id": "candy-corn",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Candy Corn"
+      },
+      "style": "cute",
+      "tags": [
+        "candy",
+        "sweet",
+        "orange"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-06T14:00:00.000Z",
+      "popularity": 6,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.05,
+              "aspect": 1.2,
+              "color": "#3A5A2A"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.38,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "@motif",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.62,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "@motif",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.7,
+              "width": 0.5,
+              "aspect": 0.78,
+              "color": "@motif"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#3A1A0A",
+        "deep": "#1E0D05",
+        "surface": "#4A2C1E",
+        "text": "#F5F1EA",
+        "textMuted": "#BDB1A7",
+        "motif": "#FFB547"
+      },
+      "accent": {
+        "id": "candle",
+        "name": {
+          "en": "Candle"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFE08A"
+        ]
+      },
+      "displayFont": "caveat",
+      "iconPackId": "moonlit",
+      "downloadBytes": 703335
+    },
+    {
+      "id": "raven-night",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Raven Night"
+      },
+      "style": "minimal",
+      "tags": [
+        "raven",
+        "dark",
+        "red"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-07-17T14:00:00.000Z",
+      "popularity": 7,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#101014",
+        "deep": "#060608",
+        "surface": "#232327",
+        "text": "#F5F1EA",
+        "textMuted": "#B0AEAA",
+        "motif": "#C9C4D6"
+      },
+      "accent": {
+        "id": "berry-red",
+        "name": {
+          "en": "Berry red"
+        },
+        "type": "solid",
+        "colors": [
+          "#D7263D"
+        ]
+      },
+      "displayFont": "bebas-neue",
+      "iconPackId": "moonlit",
+      "downloadBytes": 361087
+    },
+    {
+      "id": "cobweb",
+      "rev": 1,
+      "festivalId": "halloween",
+      "name": {
+        "en": "Cobweb"
+      },
+      "style": "minimal",
+      "tags": [
+        "spider",
+        "web",
+        "grey"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-03-29T14:00:00.000Z",
+      "popularity": 8,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1C1A22",
+        "deep": "#0E0D12",
+        "surface": "#2E2C34",
+        "text": "#F5F1EA",
+        "textMuted": "#B4B1AE",
+        "motif": "#8A8496"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "space-grotesk",
+      "iconPackId": "moonlit",
+      "downloadBytes": 299687
+    },
+    {
+      "id": "cozy-cabin",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Cozy Cabin"
+      },
+      "style": "cozy",
+      "tags": [
+        "cabin",
+        "warm",
+        "snow"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-10T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.66,
+              "width": 0.56,
+              "aspect": 0.85,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.42
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  0.42
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.42,
+              "y": 0.7,
+              "width": 0.1,
+              "color": "@accent",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.6,
+              "y": 0.73,
+              "width": 0.09,
+              "aspect": 1.5,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c.png",
+                "sha256": "9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c",
+                "bytes": 15577,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "bottom"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#3A2318",
+        "deep": "#F1E9DE",
+        "surface": "#4A352A",
+        "text": "#F5F1EA",
+        "textMuted": "#BDB3AB",
+        "motif": "#7A4A2E"
+      },
+      "accent": {
+        "id": "amber",
+        "name": {
+          "en": "Amber"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFB547"
+        ]
+      },
+      "displayFont": "caveat",
+      "variantSwatches": [
+        "#3A2318",
+        "#2A3440"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 791094
+    },
+    {
+      "id": "gold-ornaments",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Gold Ornaments"
+      },
+      "style": "classic",
+      "tags": [
+        "gold",
+        "red",
+        "ornament"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-08-16T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.3,
+              "width": 0.012,
+              "aspect": 5.0,
+              "color": "@text"
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.345,
+              "width": 0.1,
+              "aspect": 0.5,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.46,
+              "width": 0.46,
+              "color": "@motif",
+              "glow": true,
+              "motion": "sway"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "snow",
+              "count": 70,
+              "color": "#FFFFFF",
+              "speed": 0.3,
+              "size": 0.35,
+              "opacity": 0.9
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#5A1420",
+        "deep": "#2A0E15",
+        "surface": "#672732",
+        "text": "#F5F1EA",
+        "textMuted": "#C7AFAD",
+        "motif": "#F2B33D"
+      },
+      "accent": {
+        "id": "gold",
+        "name": {
+          "en": "Gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#F2B33D"
+        ]
+      },
+      "displayFont": "playfair-display",
+      "variantSwatches": [
+        "#5A1420",
+        "#0F3D2E",
+        "#10223D"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 672593
+    },
+    {
+      "id": "cocoa-night",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Cocoa Night"
+      },
+      "style": "cozy",
+      "tags": [
+        "cocoa",
+        "warm",
+        "night"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-10-12T14:00:00.000Z",
+      "popularity": 4,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.66,
+              "width": 0.56,
+              "aspect": 0.85,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.42
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  0.42
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.42,
+              "y": 0.7,
+              "width": 0.1,
+              "color": "@accent",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.6,
+              "y": 0.73,
+              "width": 0.09,
+              "aspect": 1.5,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c.png",
+                "sha256": "9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c",
+                "bytes": 15577,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "bottom"
+            },
+            {
+              "type": "particles",
+              "effect": "snow",
+              "count": 70,
+              "color": "#FFFFFF",
+              "speed": 0.3,
+              "size": 0.35,
+              "opacity": 0.9
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#2B1A12",
+        "deep": "#1C120C",
+        "surface": "#3C2C25",
+        "text": "#F5F1EA",
+        "textMuted": "#B8B1A9",
+        "motif": "#5C3A26"
+      },
+      "accent": {
+        "id": "moon-cream",
+        "name": {
+          "en": "Moon cream"
+        },
+        "type": "solid",
+        "colors": [
+          "#F3E6C4"
+        ]
+      },
+      "displayFont": "pacifico",
+      "iconPackId": "candy-cane",
+      "downloadBytes": 716826
+    },
+    {
+      "id": "midnight-snow",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Midnight Snow"
+      },
+      "style": "minimal",
+      "tags": [
+        "snow",
+        "night",
+        "minimal"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-09-05T14:00:00.000Z",
+      "popularity": 5,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.8,
+              "width": 0.07,
+              "aspect": 0.7,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.62,
+              "aspect": 1.15,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.42,
+              "width": 0.06,
+              "color": "@accent",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#0E1320",
+        "deep": "#1D2533",
+        "surface": "#212632",
+        "text": "#F5F1EA",
+        "textMuted": "#B0AEAD",
+        "motif": "#1D2533"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "space-grotesk",
+      "variantSwatches": [
+        "#0E1320",
+        "#DCE6EE"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 508545
+    },
+    {
+      "id": "candy-cane",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Candy Cane"
+      },
+      "style": "cute",
+      "tags": [
+        "candy",
+        "red",
+        "pink"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-07T14:00:00.000Z",
+      "popularity": 6,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.3,
+              "width": 0.012,
+              "aspect": 5.0,
+              "color": "@text"
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.345,
+              "width": 0.1,
+              "aspect": 0.5,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.46,
+              "width": 0.46,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#B0182F",
+        "deep": "#FFE3EC",
+        "surface": "#B62A40",
+        "text": "#F5F1EA",
+        "textMuted": "#E0B0B2",
+        "motif": "#F5F1EA"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "mountains-of-christmas",
+      "variantSwatches": [
+        "#B0182F",
+        "#4A1A3A"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 617417
+    },
+    {
+      "id": "little-reindeer",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Little Reindeer"
+      },
+      "style": "cute",
+      "tags": [
+        "reindeer",
+        "cute",
+        "tree"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-07-17T14:00:00.000Z",
+      "popularity": 7,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.8,
+              "width": 0.07,
+              "aspect": 0.7,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.62,
+              "aspect": 1.15,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.42,
+              "width": 0.06,
+              "color": "@accent",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "snow",
+              "count": 70,
+              "color": "#FFFFFF",
+              "speed": 0.3,
+              "size": 0.35,
+              "opacity": 0.9
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#6B3E26",
+        "deep": "#F5E6D3",
+        "surface": "#774D37",
+        "text": "#F5F1EA",
+        "textMuted": "#CCBBAF",
+        "motif": "#A8744F"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "pacifico",
+      "variantSwatches": [
+        "#6B3E26",
+        "#1F4D3A"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 701249
+    },
+    {
+      "id": "bare-branch",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Bare Branch"
+      },
+      "style": "minimal",
+      "tags": [
+        "minimal",
+        "dark",
+        "winter"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-03-29T14:00:00.000Z",
+      "popularity": 8,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.8,
+              "width": 0.07,
+              "aspect": 0.7,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.62,
+              "aspect": 1.15,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.42,
+              "width": 0.06,
+              "color": "@accent",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1A1720",
+        "deep": "#26222E",
+        "surface": "#2C2A32",
+        "text": "#F5F1EA",
+        "textMuted": "#B3B0AD",
+        "motif": "#332E3D"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "bebas-neue",
+      "variantSwatches": [
+        "#1A1720",
+        "#DCE6EE"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 433269
+    },
+    {
+      "id": "silent-night",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Silent Night"
+      },
+      "style": "classic",
+      "tags": [
+        "night",
+        "star",
+        "tree"
+      ],
+      "isLive": true,
+      "publishedAt": "2025-12-19T14:00:00.000Z",
+      "popularity": 9,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.8,
+              "width": 0.07,
+              "aspect": 0.7,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.62,
+              "aspect": 1.15,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.42,
+              "width": 0.06,
+              "color": "@accent",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "snow",
+              "count": 70,
+              "color": "#FFFFFF",
+              "speed": 0.3,
+              "size": 0.35,
+              "opacity": 0.9
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#0B1A2E",
+        "deep": "#E9EFEC",
+        "surface": "#1F2C3F",
+        "text": "#F5F1EA",
+        "textMuted": "#AFB1B2",
+        "motif": "#173A5C"
+      },
+      "accent": {
+        "id": "gold",
+        "name": {
+          "en": "Gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#F2B33D"
+        ]
+      },
+      "displayFont": "playfair-display",
+      "variantSwatches": [
+        "#0B1A2E",
+        "#0F3D2E"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 672593
+    },
+    {
+      "id": "gingerbread",
+      "rev": 1,
+      "festivalId": "christmas",
+      "name": {
+        "en": "Gingerbread"
+      },
+      "style": "cute",
+      "tags": [
+        "gingerbread",
+        "cookie",
+        "sweet"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-13T14:00:00.000Z",
+      "popularity": 10,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.66,
+              "width": 0.56,
+              "aspect": 0.85,
+              "color": "@motif",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.42
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  0.42
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.42,
+              "y": 0.7,
+              "width": 0.1,
+              "color": "@accent",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.6,
+              "y": 0.73,
+              "width": 0.09,
+              "aspect": 1.5,
+              "color": "@deep"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#8A4B22",
+        "deep": "#F5E6D3",
+        "surface": "#935934",
+        "text": "#F5F1EA",
+        "textMuted": "#D5BFAE",
+        "motif": "#B5713A"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "mountains-of-christmas",
+      "variantSwatches": [
+        "#8A4B22",
+        "#F5E6D3"
+      ],
+      "iconPackId": "candy-cane",
+      "downloadBytes": 617417
+    },
+    {
+      "id": "padauk-bloom",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Padauk Bloom"
+      },
+      "style": "cute",
+      "tags": [
+        "padauk",
+        "flowers",
+        "yellow"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-08-26T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.3,
+              "y": 0.38,
+              "width": 0.3,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.26,
+              "width": 0.14,
+              "color": "@accent",
+              "opacity": 0.8
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#0B4B80",
+        "deep": "#5BB2EC",
+        "surface": "#1F598A",
+        "text": "#F5F1EA",
+        "textMuted": "#AFBFCA",
+        "motif": "#FFD54A"
+      },
+      "accent": {
+        "id": "padauk-yellow",
+        "name": {
+          "en": "Padauk yellow"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFD54A"
+        ]
+      },
+      "displayFont": "baloo-2",
+      "variantSwatches": [
+        "#0B4B80",
+        "#2A1A50"
+      ],
+      "iconPackId": "padauk-flower",
+      "downloadBytes": 1859749
+    },
+    {
+      "id": "golden-pagoda",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Golden Pagoda"
+      },
+      "style": "classic",
+      "tags": [
+        "pagoda",
+        "gold",
+        "myanmar"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-09T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.24,
+              "width": 0.24,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642.png",
+                "sha256": "ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642",
+                "bytes": 13561,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "bottom"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1E3A5F",
+        "deep": "#0F2238",
+        "surface": "#304A6C",
+        "text": "#F5F1EA",
+        "textMuted": "#B5BAC0",
+        "motif": "#F2B33D"
+      },
+      "accent": {
+        "id": "gold",
+        "name": {
+          "en": "Gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#F2B33D"
+        ]
+      },
+      "displayFont": "padauk",
+      "iconPackId": "padauk-flower",
+      "downloadBytes": 1190110
+    },
+    {
+      "id": "silver-bowl",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Silver Bowl"
+      },
+      "style": "cozy",
+      "tags": [
+        "water",
+        "bowl",
+        "silver"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-07-27T14:00:00.000Z",
+      "popularity": 4,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.3,
+              "y": 0.38,
+              "width": 0.3,
+              "color": "@motif",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.26,
+              "width": 0.14,
+              "color": "@accent",
+              "opacity": 0.8
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "drops",
+              "count": 45,
+              "color": "#FFFFFF",
+              "speed": 0.7,
+              "size": 0.3,
+              "opacity": 0.7
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#0E5A7A",
+        "deep": "#08364A",
+        "surface": "#216785",
+        "text": "#F5F1EA",
+        "textMuted": "#B0C4C8",
+        "motif": "#DDE6EA"
+      },
+      "accent": {
+        "id": "sun",
+        "name": {
+          "en": "Sun"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFC21A"
+        ]
+      },
+      "displayFont": "baloo-2",
+      "iconPackId": "padauk-flower",
+      "downloadBytes": 1859749
+    },
+    {
+      "id": "new-year-morning",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "New Year Morning"
+      },
+      "style": "minimal",
+      "tags": [
+        "morning",
+        "new",
+        "year",
+        "calm"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 5,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.3,
+              "y": 0.38,
+              "width": 0.3,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.26,
+              "width": 0.14,
+              "color": "@accent",
+              "opacity": 0.8
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#123B5C",
+        "deep": "#0A2238",
+        "surface": "#254B69",
+        "text": "#F5F1EA",
+        "textMuted": "#B1BABF",
+        "motif": "#FFE08A"
+      },
+      "accent": {
+        "id": "candle",
+        "name": {
+          "en": "Candle"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFE08A"
+        ]
+      },
+      "displayFont": "space-grotesk",
+      "iconPackId": "padauk-flower",
+      "downloadBytes": 1313225
+    },
+    {
+      "id": "water-fight",
+      "rev": 1,
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Fight"
+      },
+      "style": "cute",
+      "tags": [
+        "water",
+        "splash",
+        "fun"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-10-11T14:00:00.000Z",
+      "popularity": 6,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.3,
+              "y": 0.38,
+              "width": 0.3,
+              "color": "@motif",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.26,
+              "width": 0.14,
+              "color": "@accent",
+              "opacity": 0.8
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "drops",
+              "count": 45,
+              "color": "#FFFFFF",
+              "speed": 0.7,
+              "size": 0.3,
+              "opacity": 0.7
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#0A6BA8",
+        "deep": "#0A3D6B",
+        "surface": "#1E77AF",
+        "text": "#F5F1EA",
+        "textMuted": "#AFC9D6",
+        "motif": "#7CC6FF"
+      },
+      "accent": {
+        "id": "sun",
+        "name": {
+          "en": "Sun"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFC21A"
+        ]
+      },
+      "displayFont": "baloo-2",
+      "iconPackId": "padauk-flower",
+      "downloadBytes": 1859749
+    },
+    {
+      "id": "festival-of-lights",
+      "rev": 1,
+      "festivalId": "thadingyut",
+      "name": {
+        "en": "Festival of Lights"
+      },
+      "style": "classic",
+      "tags": [
+        "lights",
+        "lantern",
+        "myanmar"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-09-15T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.335,
+              "width": 0.14,
+              "aspect": 0.25,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.34,
+              "aspect": 1.3,
+              "color": "@motif",
+              "glow": true,
+              "motion": "sway"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.16,
+              "aspect": 1.5,
+              "color": "@text",
+              "opacity": 0.3
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52.png",
+                "sha256": "718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52",
+                "bytes": 183909,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "top"
+            },
+            {
+              "type": "particles",
+              "effect": "lanterns",
+              "count": 12,
+              "color": "@accent",
+              "speed": 0.15,
+              "size": 0.6
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1E1440",
+        "deep": "#120B2A",
+        "surface": "#30274F",
+        "text": "#F5F1EA",
+        "textMuted": "#B5AFB7",
+        "motif": "#FFD27A"
+      },
+      "accent": {
+        "id": "lantern-gold",
+        "name": {
+          "en": "Lantern gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFD27A"
+        ]
+      },
+      "displayFont": "caveat",
+      "iconPackId": "lantern-light",
+      "downloadBytes": 2143020
+    },
+    {
+      "id": "candle-glow",
+      "rev": 1,
+      "festivalId": "thadingyut",
+      "name": {
+        "en": "Candle Glow"
+      },
+      "style": "cozy",
+      "tags": [
+        "candle",
+        "warm"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-11T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.335,
+              "width": 0.14,
+              "aspect": 0.25,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.34,
+              "aspect": 1.3,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.16,
+              "aspect": 1.5,
+              "color": "@text",
+              "opacity": 0.3
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#2A1A10",
+        "deep": "#140C06",
+        "surface": "#3B2C23",
+        "text": "#F5F1EA",
+        "textMuted": "#B8B1A9",
+        "motif": "#FFB547"
+      },
+      "accent": {
+        "id": "amber",
+        "name": {
+          "en": "Amber"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFB547"
+        ]
+      },
+      "displayFont": "playfair-display",
+      "iconPackId": "lantern-light",
+      "downloadBytes": 1856187
+    },
+    {
+      "id": "paper-lanterns",
+      "rev": 1,
+      "festivalId": "thadingyut",
+      "name": {
+        "en": "Paper Lanterns"
+      },
+      "style": "cute",
+      "tags": [
+        "paper",
+        "lantern",
+        "pink"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-08-06T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.335,
+              "width": 0.14,
+              "aspect": 0.25,
+              "color": "@accent"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.34,
+              "aspect": 1.3,
+              "color": "@motif",
+              "glow": true,
+              "motion": "sway"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.16,
+              "aspect": 1.5,
+              "color": "@text",
+              "opacity": 0.3
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52.png",
+                "sha256": "718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52",
+                "bytes": 183909,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "top"
+            },
+            {
+              "type": "particles",
+              "effect": "lanterns",
+              "count": 12,
+              "color": "@accent",
+              "speed": 0.15,
+              "size": 0.6
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#2A1F52",
+        "deep": "#181033",
+        "surface": "#3B3160",
+        "text": "#F5F1EA",
+        "textMuted": "#B8B2BC",
+        "motif": "#FF8FC0"
+      },
+      "accent": {
+        "id": "lantern-gold",
+        "name": {
+          "en": "Lantern gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFD27A"
+        ]
+      },
+      "displayFont": "caveat",
+      "iconPackId": "lantern-light",
+      "downloadBytes": 2143020
+    },
+    {
+      "id": "quiet-ink",
+      "rev": 1,
+      "festivalId": "minimal",
+      "name": {
+        "en": "Quiet Ink"
+      },
+      "style": "minimal",
+      "tags": [
+        "minimal",
+        "dark",
+        "simple"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#1A1720",
+        "deep": "#26222E",
+        "surface": "#2C2A32",
+        "text": "#F5F1EA",
+        "textMuted": "#B3B0AD",
+        "motif": "#332E3D"
+      },
+      "accent": {
+        "id": "snow",
+        "name": {
+          "en": "Snow"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      "displayFont": "bebas-neue",
+      "iconPackId": "quiet-line",
+      "downloadBytes": 282652
+    },
+    {
+      "id": "ember",
+      "rev": 1,
+      "festivalId": "minimal",
+      "name": {
+        "en": "Ember"
+      },
+      "style": "minimal",
+      "tags": [
+        "minimal",
+        "warm",
+        "orange"
+      ],
+      "isLive": true,
+      "publishedAt": "2026-07-07T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            },
+            {
+              "type": "particles",
+              "effect": "sparkles",
+              "count": 40,
+              "color": "@text",
+              "speed": 0.1,
+              "size": 0.2,
+              "opacity": 0.6
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#241A12",
+        "deep": "#140F0A",
+        "surface": "#362C25",
+        "text": "#F5F1EA",
+        "textMuted": "#B6B1A9",
+        "motif": "#FFB547"
+      },
+      "accent": {
+        "id": "amber",
+        "name": {
+          "en": "Amber"
+        },
+        "type": "solid",
+        "colors": [
+          "#FFB547"
+        ]
+      },
+      "displayFont": "space-grotesk",
+      "iconPackId": "mono-ember",
+      "downloadBytes": 264252
+    },
+    {
+      "id": "slate",
+      "rev": 1,
+      "festivalId": "minimal",
+      "name": {
+        "en": "Slate"
+      },
+      "style": "minimal",
+      "tags": [
+        "minimal",
+        "grey",
+        "cool"
+      ],
+      "isLive": false,
+      "publishedAt": "2026-10-04T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "@surface",
+                "@background"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "@motif",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "@deep",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "@deep"
+            }
+          ]
+        }
+      },
+      "palette": {
+        "background": "#22272E",
+        "deep": "#15191E",
+        "surface": "#34383F",
+        "text": "#F5F1EA",
+        "textMuted": "#B6B4B2",
+        "motif": "#4A5361"
+      },
+      "accent": {
+        "id": "steel",
+        "name": {
+          "en": "Steel"
+        },
+        "type": "solid",
+        "colors": [
+          "#9FB3C6"
+        ]
+      },
+      "displayFont": "dm-sans",
+      "iconPackId": "quiet-line",
+      "downloadBytes": 461416
+    }
+  ],
+  "wallpapers": [
+    {
+      "id": "harvest-moon",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Harvest Moon"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "halloween",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "moon",
+        "bats"
+      ],
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "bat-swarm",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Bat Swarm"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#272330",
+                "#14101E"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "#D9D2C0",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "#08060C",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#08060C"
+            },
+            {
+              "type": "particles",
+              "effect": "bats",
+              "count": 14,
+              "color": "#08060C",
+              "speed": 0.35,
+              "size": 0.5
+            }
+          ]
+        }
+      },
+      "isLive": true,
+      "tags": [
+        "bats",
+        "moon"
+      ],
+      "publishedAt": "2026-09-15T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "pumpkin-patch",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Pumpkin Patch"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#3B2343",
+                "#2A1033"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.6,
+              "width": 0.05,
+              "aspect": 1.2,
+              "color": "#3A5A2A"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.38,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "#FF7A1A",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.62,
+              "y": 0.7,
+              "width": 0.26,
+              "aspect": 1.4,
+              "color": "#FF7A1A",
+              "opacity": 0.9
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.7,
+              "width": 0.5,
+              "aspect": 0.78,
+              "color": "#FF7A1A"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#140A1C"
+            }
+          ]
+        }
+      },
+      "isLive": false,
+      "tags": [
+        "pumpkin",
+        "orange"
+      ],
+      "publishedAt": "2026-10-10T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "silent-night",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Silent Night"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "christmas",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "snow",
+        "star",
+        "tree"
+      ],
+      "publishedAt": "2025-12-19T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "ornaments",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Ornaments"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#672732",
+                "#5A1420"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.3,
+              "width": 0.012,
+              "aspect": 5.0,
+              "color": "#F5F1EA"
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.345,
+              "width": 0.1,
+              "aspect": 0.5,
+              "color": "#F2B33D"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.5,
+              "y": 0.46,
+              "width": 0.46,
+              "color": "#F2B33D",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#3A0D15"
+            }
+          ]
+        }
+      },
+      "isLive": false,
+      "tags": [
+        "gold",
+        "red"
+      ],
+      "publishedAt": "2026-08-16T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "snowy-cabin",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Snowy Cabin"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#4A352A",
+                "#3A2318"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "polygon",
+              "x": 0.5,
+              "y": 0.66,
+              "width": 0.56,
+              "aspect": 0.85,
+              "color": "#7A4A2E",
+              "points": [
+                [
+                  0.5,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.42
+                ],
+                [
+                  1.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  1.0
+                ],
+                [
+                  0.0,
+                  0.42
+                ]
+              ]
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.42,
+              "y": 0.7,
+              "width": 0.1,
+              "color": "#FFB547",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.6,
+              "y": 0.73,
+              "width": 0.09,
+              "aspect": 1.5,
+              "color": "#F1E9DE"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#F1E9DE"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c.png",
+                "sha256": "9a359a28b15804a2a0769bb5096966794ba27567f3f6221a6e51398c8a35014c",
+                "bytes": 15577,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "bottom"
+            },
+            {
+              "type": "particles",
+              "effect": "snow",
+              "count": 70,
+              "color": "#FFFFFF",
+              "speed": 0.3,
+              "size": 0.35,
+              "opacity": 0.9
+            }
+          ]
+        }
+      },
+      "isLive": true,
+      "tags": [
+        "cabin",
+        "snow",
+        "warm"
+      ],
+      "publishedAt": "2026-10-10T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "water-splash",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "thingyan",
+        "params": {}
+      },
+      "isLive": true,
+      "tags": [
+        "water",
+        "myanmar"
+      ],
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "padauk-bloom",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Padauk Bloom"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#1F598A",
+                "#0B4B80"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.3,
+              "y": 0.38,
+              "width": 0.3,
+              "color": "#FFD54A",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.26,
+              "width": 0.14,
+              "color": "#FFD54A",
+              "opacity": 0.8
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#5BB2EC"
+            }
+          ]
+        }
+      },
+      "isLive": false,
+      "tags": [
+        "padauk",
+        "flowers"
+      ],
+      "publishedAt": "2026-08-26T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "golden-pagoda",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Golden Pagoda"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#304A6C",
+                "#1E3A5F"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.72,
+              "y": 0.24,
+              "width": 0.24,
+              "color": "#F2B33D",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#0F2238"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642.png",
+                "sha256": "ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642",
+                "bytes": 13561,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "bottom"
+            }
+          ]
+        }
+      },
+      "isLive": false,
+      "tags": [
+        "pagoda",
+        "gold"
+      ],
+      "publishedAt": "2026-10-09T14:00:00.000Z",
+      "popularity": 3,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "lanterns",
+      "festivalId": "thadingyut",
+      "name": {
+        "en": "Lanterns"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#30274F",
+                "#1E1440"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "rect",
+              "x": 0.5,
+              "y": 0.335,
+              "width": 0.14,
+              "aspect": 0.25,
+              "color": "#FFD27A"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.34,
+              "aspect": 1.3,
+              "color": "#FFD27A",
+              "glow": true,
+              "motion": "sway"
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 0.44,
+              "width": 0.16,
+              "aspect": 1.5,
+              "color": "#F5F1EA",
+              "opacity": 0.3
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#120B2A"
+            },
+            {
+              "type": "image",
+              "image": {
+                "url": "assets/718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52.png",
+                "sha256": "718c8990513c1a5ca22f9adf3716cdb7cc8a1116404927bef0c8bba2e3149e52",
+                "bytes": 183909,
+                "format": "png"
+              },
+              "fit": "width",
+              "anchor": "top"
+            },
+            {
+              "type": "particles",
+              "effect": "lanterns",
+              "count": 12,
+              "color": "#FFD27A",
+              "speed": 0.15,
+              "size": 0.6
+            }
+          ]
+        }
+      },
+      "isLive": true,
+      "tags": [
+        "lights",
+        "lantern"
+      ],
+      "publishedAt": "2026-09-15T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "ember",
+      "festivalId": "minimal",
+      "name": {
+        "en": "Ember"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#362C25",
+                "#241A12"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "#FFB547",
+              "glow": true,
+              "motion": "pulse"
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "#140F0A",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#140F0A"
+            },
+            {
+              "type": "particles",
+              "effect": "sparkles",
+              "count": 40,
+              "color": "#F5F1EA",
+              "speed": 0.1,
+              "size": 0.2,
+              "opacity": 0.6
+            }
+          ]
+        }
+      },
+      "isLive": true,
+      "tags": [
+        "minimal",
+        "warm"
+      ],
+      "publishedAt": "2026-07-07T14:00:00.000Z",
+      "popularity": 1,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "quiet-ink",
+      "festivalId": "minimal",
+      "name": {
+        "en": "Quiet Ink"
+      },
+      "kind": "scene",
+      "scene": {
+        "engine": "layers",
+        "params": {
+          "layers": [
+            {
+              "type": "gradient",
+              "colors": [
+                "#2C2A32",
+                "#1A1720"
+              ],
+              "angle": 180
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.7,
+              "y": 0.28,
+              "width": 0.5,
+              "color": "#332E3D",
+              "glow": true
+            },
+            {
+              "type": "shape",
+              "shape": "circle",
+              "x": 0.78,
+              "y": 0.25,
+              "width": 0.08,
+              "color": "#26222E",
+              "opacity": 0.25
+            },
+            {
+              "type": "shape",
+              "shape": "ellipse",
+              "x": 0.5,
+              "y": 1.0,
+              "width": 1.8,
+              "aspect": 0.45,
+              "color": "#26222E"
+            }
+          ]
+        }
+      },
+      "isLive": false,
+      "tags": [
+        "minimal",
+        "dark"
+      ],
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 2,
+      "minAppVersion": "1.0.0"
+    }
+  ],
+  "fonts": [
+    {
+      "id": "creepster",
+      "family": "Creepster",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "halloween",
+        "spooky"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44.ttf",
+            "sha256": "402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44",
+            "bytes": 62724,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "playfair-display",
+      "family": "Playfair Display",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "christmas",
+        "serif",
+        "elegant"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 900,
+          "style": "normal",
+          "asset": {
+            "url": "assets/c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6.ttf",
+            "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6",
+            "bytes": 300724,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "baloo-2",
+      "family": "Baloo 2",
+      "category": "display",
+      "scripts": [
+        "latin",
+        "devanagari"
+      ],
+      "tags": [
+        "thingyan",
+        "rounded"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 800,
+          "style": "normal",
+          "asset": {
+            "url": "assets/d47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2.ttf",
+            "sha256": "d47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2",
+            "bytes": 683200,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "bebas-neue",
+      "family": "Bebas Neue",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "bold",
+        "tall"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73.ttf",
+            "sha256": "08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73",
+            "bytes": 61400,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "mountains-of-christmas",
+      "family": "Mountains of Christmas",
+      "category": "handwritten",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "christmas",
+        "handwritten"
+      ],
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/3855303be6b88707c00bb271f9c95e996605e9a8e656b3a30686862352b1052e.ttf",
+            "sha256": "3855303be6b88707c00bb271f9c95e996605e9a8e656b3a30686862352b1052e",
+            "bytes": 122376,
+            "format": "ttf"
+          }
+        },
+        {
+          "weight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/4c6126f43c650c81d236fd04ffc2fccbc3f37438c304cafad6894a835c2250ef.ttf",
+            "sha256": "4c6126f43c650c81d236fd04ffc2fccbc3f37438c304cafad6894a835c2250ef",
+            "bytes": 123172,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "caveat",
+      "family": "Caveat",
+      "category": "handwritten",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "handwritten",
+        "casual"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988.ttf",
+            "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988",
+            "bytes": 403648,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "pacifico",
+      "family": "Pacifico",
+      "category": "handwritten",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "handwritten",
+        "script"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/5b6c0d5334a7bf77dea52b975c5a0c408878c0f7115ed5b6fb151f634b7bf701.ttf",
+            "sha256": "5b6c0d5334a7bf77dea52b975c5a0c408878c0f7115ed5b6fb151f634b7bf701",
+            "bytes": 329380,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "space-grotesk",
+      "family": "Space Grotesk",
+      "category": "clean",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "clean",
+        "modern"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 300,
+          "maxWeight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72.ttf",
+            "sha256": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+            "bytes": 136676,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "dm-sans",
+      "family": "DM Sans",
+      "category": "clean",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "clean",
+        "friendly"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 100,
+          "maxWeight": 1000,
+          "style": "normal",
+          "asset": {
+            "url": "assets/8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d.ttf",
+            "sha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+            "bytes": 240164,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
+      "id": "padauk",
+      "family": "Padauk",
+      "category": "myanmar",
+      "scripts": [
+        "myanmar",
+        "latin"
+      ],
+      "tags": [
+        "myanmar",
+        "burmese"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "asset": {
+            "url": "assets/c89cf56e572abda9652d9e54203bd729b0c59541c4b569046b9b61acd0b532f3.ttf",
+            "sha256": "c89cf56e572abda9652d9e54203bd729b0c59541c4b569046b9b61acd0b532f3",
+            "bytes": 498860,
+            "format": "ttf"
+          }
+        },
+        {
+          "weight": 700,
+          "style": "normal",
+          "asset": {
+            "url": "assets/9dbb46745ae4ed42d9030210e63f7aa53281861c7fa0be072980161f94927115.ttf",
+            "sha256": "9dbb46745ae4ed42d9030210e63f7aa53281861c7fa0be072980161f94927115",
+            "bytes": 499304,
+            "format": "ttf"
+          }
+        }
+      ],
+      "sampleText": {
+        "en": "သင်္ကြန် ၁၉:၄၇"
+      }
+    }
+  ],
+  "iconPacks": [
+    {
+      "id": "spooky-glow",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Spooky Glow"
+      },
+      "style": {
+        "en": "Neon outline"
+      },
+      "kind": "painted",
+      "painter": "halloween",
+      "shape": "squircle",
+      "tile": "#1E1430",
+      "glyph": "#FF7A1A",
+      "ring": "#FF7A1A",
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 1
+    },
+    {
+      "id": "moonlit",
+      "festivalId": "halloween",
+      "name": {
+        "en": "Moonlit"
+      },
+      "style": {
+        "en": "Filled"
+      },
+      "kind": "images",
+      "shape": "circle",
+      "tile": "#F3E6C4",
+      "glyph": "#160C24",
+      "ring": "#F3E6C4",
+      "glyphs": {
+        "phone": {
+          "url": "assets/282960cf6f450f8995ae93343d8405d5f3e05adce9318082e2100aaee5893cc9.png",
+          "sha256": "282960cf6f450f8995ae93343d8405d5f3e05adce9318082e2100aaee5893cc9",
+          "bytes": 9458,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/6bf00e6a3ac55424f746630515978da594ff3167b12108c11e0c5ee3eda77fd4.png",
+          "sha256": "6bf00e6a3ac55424f746630515978da594ff3167b12108c11e0c5ee3eda77fd4",
+          "bytes": 6678,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/ab44bcba1136cb85b922a28e3e4dc35f6094d86aa8b7e5361dce1e5e4e9e4ef2.png",
+          "sha256": "ab44bcba1136cb85b922a28e3e4dc35f6094d86aa8b7e5361dce1e5e4e9e4ef2",
+          "bytes": 8251,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/c3bcb209005768b078946ba336db5d8b815661699cf10831c31363b961f63f5e.png",
+          "sha256": "c3bcb209005768b078946ba336db5d8b815661699cf10831c31363b961f63f5e",
+          "bytes": 10293,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/d1ab882e85a7f88eeaa03da004a1e386626971fb19d646da74c8bb703ad68a73.png",
+          "sha256": "d1ab882e85a7f88eeaa03da004a1e386626971fb19d646da74c8bb703ad68a73",
+          "bytes": 8555,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/2ee6da40cf88f0c1b97371f7201fc5900f62c998d8f762f4d7dc76849b227d65.png",
+          "sha256": "2ee6da40cf88f0c1b97371f7201fc5900f62c998d8f762f4d7dc76849b227d65",
+          "bytes": 7310,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/2f232f8b58c0ed16b0293a5bee7b033cbf7e1a0de8f13fc8ae610cf89d462355.png",
+          "sha256": "2f232f8b58c0ed16b0293a5bee7b033cbf7e1a0de8f13fc8ae610cf89d462355",
+          "bytes": 8166,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/efa226dfeca292abde0bd7e2fe05b2108dd41d94a6ef5648124e92b961e021e8.png",
+          "sha256": "efa226dfeca292abde0bd7e2fe05b2108dd41d94a6ef5648124e92b961e021e8",
+          "bytes": 9977,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/e6b4cb99e2dd26246236a212df9a793d657a6fd002decfdab7c3e7380e6eb505.png",
+          "sha256": "e6b4cb99e2dd26246236a212df9a793d657a6fd002decfdab7c3e7380e6eb505",
+          "bytes": 6294,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/6b7736335eb983136ad6669cbeb6214ff93597631fc1263a99b65793ee81fc90.png",
+          "sha256": "6b7736335eb983136ad6669cbeb6214ff93597631fc1263a99b65793ee81fc90",
+          "bytes": 9734,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/996920302860cd21ea137d2946bd50c25e16c0f966062fb77c302a174b521795.png",
+          "sha256": "996920302860cd21ea137d2946bd50c25e16c0f966062fb77c302a174b521795",
+          "bytes": 10779,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/fa62d01dbbd1534f0967fee49813b0aaa784413127701231d12be089f2169c75.png",
+          "sha256": "fa62d01dbbd1534f0967fee49813b0aaa784413127701231d12be089f2169c75",
+          "bytes": 8409,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/fef2efae91814bb877964313ed40e634cc15d66dc32a49b12a76ba2d23c03444.png",
+          "sha256": "fef2efae91814bb877964313ed40e634cc15d66dc32a49b12a76ba2d23c03444",
+          "bytes": 6741,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/d7fe163d11f19e53ae0d3b45dc0faa107a5828473f90d2ff7839cfdf55ddce0f.png",
+          "sha256": "d7fe163d11f19e53ae0d3b45dc0faa107a5828473f90d2ff7839cfdf55ddce0f",
+          "bytes": 7511,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/3b7df2dbb60906a5fc28678047e438788e280a5029fefc903eb7e7323e48b5c6.png",
+          "sha256": "3b7df2dbb60906a5fc28678047e438788e280a5029fefc903eb7e7323e48b5c6",
+          "bytes": 6481,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/392f90366bf651ebacd0a0db4a4462d21363b72535afba5d70f43f0a27e1b34b.png",
+          "sha256": "392f90366bf651ebacd0a0db4a4462d21363b72535afba5d70f43f0a27e1b34b",
+          "bytes": 6994,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/e2adfbd538b2dc2412250509899acb5f277024b01ab24913a5f2db41168b8c76.png",
+          "sha256": "e2adfbd538b2dc2412250509899acb5f277024b01ab24913a5f2db41168b8c76",
+          "bytes": 6697,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/f2761a6ffef8dde1f9bb1a32dd44438760c0159e9b963e2db5d03240b1706b96.png",
+          "sha256": "f2761a6ffef8dde1f9bb1a32dd44438760c0159e9b963e2db5d03240b1706b96",
+          "bytes": 9167,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/0414b58539f5a0eab0d8bb714a7c6d77afc7644e8d028189c9c342a6235a4a5a.png",
+          "sha256": "0414b58539f5a0eab0d8bb714a7c6d77afc7644e8d028189c9c342a6235a4a5a",
+          "bytes": 6061,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/9be793e6ea26daf87c832e20d4fb68a19cef9d662cf2d60aaff83da3de2392d6.png",
+          "sha256": "9be793e6ea26daf87c832e20d4fb68a19cef9d662cf2d60aaff83da3de2392d6",
+          "bytes": 9455,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-10-09T14:00:00.000Z",
+      "popularity": 4
+    },
+    {
+      "id": "gold-ornament",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Gold Ornament"
+      },
+      "style": {
+        "en": "Gold rim"
+      },
+      "kind": "painted",
+      "painter": "christmas",
+      "shape": "circle",
+      "tile": "#5A1420",
+      "glyph": "#F2B33D",
+      "ring": "#F2B33D",
+      "publishedAt": "2026-06-17T14:00:00.000Z",
+      "popularity": 2
+    },
+    {
+      "id": "candy-cane",
+      "festivalId": "christmas",
+      "name": {
+        "en": "Candy Cane"
+      },
+      "style": {
+        "en": "Filled"
+      },
+      "kind": "images",
+      "shape": "squircle",
+      "tile": "#F5F1EA",
+      "glyph": "#B0182F",
+      "ring": "#B0182F",
+      "glyphs": {
+        "phone": {
+          "url": "assets/538879c7e92284e3c4f4895351dd72f038b48d9fc689fa5c41913e5e78c068d8.png",
+          "sha256": "538879c7e92284e3c4f4895351dd72f038b48d9fc689fa5c41913e5e78c068d8",
+          "bytes": 7886,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/a73b2364e23b195ad6fe879ce3b02581505d1cde234d778e972b1d79446073d2.png",
+          "sha256": "a73b2364e23b195ad6fe879ce3b02581505d1cde234d778e972b1d79446073d2",
+          "bytes": 5058,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/7445b5c38d09298e0c52c1151ab059a46c41aa52c333d0a91098a67c0264b1a1.png",
+          "sha256": "7445b5c38d09298e0c52c1151ab059a46c41aa52c333d0a91098a67c0264b1a1",
+          "bytes": 6626,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/87f60b4780ade87b5e074fd1cff069e1a951e8bf80a8a80cfb2af81df51b5ab4.png",
+          "sha256": "87f60b4780ade87b5e074fd1cff069e1a951e8bf80a8a80cfb2af81df51b5ab4",
+          "bytes": 8808,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/a9b3e3775f16047d0e1d3e68a47345b0cf4b92758f9d28e6bae9fde7bb1b08e2.png",
+          "sha256": "a9b3e3775f16047d0e1d3e68a47345b0cf4b92758f9d28e6bae9fde7bb1b08e2",
+          "bytes": 6927,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/0754c0ecd0e1e33aeb3b182ad4ab4f1d9f30a213dfbd3b75f61199b2f09b07f3.png",
+          "sha256": "0754c0ecd0e1e33aeb3b182ad4ab4f1d9f30a213dfbd3b75f61199b2f09b07f3",
+          "bytes": 5731,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/901790ec7413bb6dc6fb57e73901f83fd90ea5d2d433818041893349f5dc57b6.png",
+          "sha256": "901790ec7413bb6dc6fb57e73901f83fd90ea5d2d433818041893349f5dc57b6",
+          "bytes": 6649,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/31b649b7883c86e6c250a56fcd4ce878287a701a181ed790dfe64bcc41ad4e62.png",
+          "sha256": "31b649b7883c86e6c250a56fcd4ce878287a701a181ed790dfe64bcc41ad4e62",
+          "bytes": 8533,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/fae183b2187090ce0eabde878136d9447a23c53844485bc3b43a641ee8130710.png",
+          "sha256": "fae183b2187090ce0eabde878136d9447a23c53844485bc3b43a641ee8130710",
+          "bytes": 4762,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/ba4f280df25f81046a4731fe54f68038918e3d23dd73f45b6687f792f8f7bbe1.png",
+          "sha256": "ba4f280df25f81046a4731fe54f68038918e3d23dd73f45b6687f792f8f7bbe1",
+          "bytes": 8089,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/701917059b9b547f958e2b461caac763e32247204283d92cb619eedd267405dc.png",
+          "sha256": "701917059b9b547f958e2b461caac763e32247204283d92cb619eedd267405dc",
+          "bytes": 9307,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/60df76fdf11fd2c22cf7114f20d29bcbf47c540b77d25877ccbd5babb0818d5d.png",
+          "sha256": "60df76fdf11fd2c22cf7114f20d29bcbf47c540b77d25877ccbd5babb0818d5d",
+          "bytes": 6817,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/82fa6e06a00acc534c916243d61795805d9cad24d2d0b19b198e3d685f935179.png",
+          "sha256": "82fa6e06a00acc534c916243d61795805d9cad24d2d0b19b198e3d685f935179",
+          "bytes": 5172,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/76a34004c219fa917be93439280de69602154c907eab3d18e7696fe36c63dc55.png",
+          "sha256": "76a34004c219fa917be93439280de69602154c907eab3d18e7696fe36c63dc55",
+          "bytes": 5891,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/cf39b8fca6f803e29ae89c3a7d4dd4150c47b4091a7848a27f2a91e1a1c8f1f7.png",
+          "sha256": "cf39b8fca6f803e29ae89c3a7d4dd4150c47b4091a7848a27f2a91e1a1c8f1f7",
+          "bytes": 4901,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/9ae3ea47a630cd91b203d0da0d4ba0abc069ab111bfc29dc9c1958f28a9bbfbb.png",
+          "sha256": "9ae3ea47a630cd91b203d0da0d4ba0abc069ab111bfc29dc9c1958f28a9bbfbb",
+          "bytes": 5468,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/87130fce155a03d20d6f7e247c158119455869e738b706edda67831ef2f08fe9.png",
+          "sha256": "87130fce155a03d20d6f7e247c158119455869e738b706edda67831ef2f08fe9",
+          "bytes": 5086,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/b9ca8b79294034cab2afb05c191555efae4aa89b7567c9179853c4c4cc8566b1.png",
+          "sha256": "b9ca8b79294034cab2afb05c191555efae4aa89b7567c9179853c4c4cc8566b1",
+          "bytes": 7594,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/75027734cabbc58a7c7ca019a7f449ff545057bbdb496ee4d51e8c770fb75b02.png",
+          "sha256": "75027734cabbc58a7c7ca019a7f449ff545057bbdb496ee4d51e8c770fb75b02",
+          "bytes": 4523,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/2c886f0d9eb6742166f05915089963657dad3b9667924f4f512ca3c33552423d.png",
+          "sha256": "2c886f0d9eb6742166f05915089963657dad3b9667924f4f512ca3c33552423d",
+          "bytes": 7877,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-10-11T14:00:00.000Z",
+      "popularity": 5
+    },
+    {
+      "id": "water-splash",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Water Splash"
+      },
+      "style": {
+        "en": "Filled"
+      },
+      "kind": "painted",
+      "painter": "thingyan",
+      "shape": "leaf",
+      "tile": "#FFC21A",
+      "glyph": "#0A3D6B",
+      "ring": "#FFC21A",
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 3
+    },
+    {
+      "id": "padauk-flower",
+      "festivalId": "thingyan",
+      "name": {
+        "en": "Padauk"
+      },
+      "style": {
+        "en": "Outline"
+      },
+      "kind": "images",
+      "shape": "squircle",
+      "tile": "#0B4B80",
+      "glyph": "#FFD54A",
+      "ring": "#FFD54A",
+      "glyphs": {
+        "phone": {
+          "url": "assets/18bbc2a790edfccccecc56a6be718252c9ad65be127d63ea46e39716738e7ae6.png",
+          "sha256": "18bbc2a790edfccccecc56a6be718252c9ad65be127d63ea46e39716738e7ae6",
+          "bytes": 10176,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/cb7af34948e9acbd18011868f965de9b1f381bd54a84b08e3a06101a138e7038.png",
+          "sha256": "cb7af34948e9acbd18011868f965de9b1f381bd54a84b08e3a06101a138e7038",
+          "bytes": 7491,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/ca1d18c8d08f76bf7064b95a4dc75f1e14004c4219bed97096888cc4ec6c9ed9.png",
+          "sha256": "ca1d18c8d08f76bf7064b95a4dc75f1e14004c4219bed97096888cc4ec6c9ed9",
+          "bytes": 8884,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/b978b317513f9dd81eda9bd0ad67864fe7b336863235b0ba8ad1bdfa78e74656.png",
+          "sha256": "b978b317513f9dd81eda9bd0ad67864fe7b336863235b0ba8ad1bdfa78e74656",
+          "bytes": 10910,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/d68f2cc9429d6304d47d3e556ec58eaf31177e0d04846941c3f94f84cfb2fa64.png",
+          "sha256": "d68f2cc9429d6304d47d3e556ec58eaf31177e0d04846941c3f94f84cfb2fa64",
+          "bytes": 9254,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/14a5960e58d9722049b6f1205135c52804f127aa6b92567a5611943883d9d99c.png",
+          "sha256": "14a5960e58d9722049b6f1205135c52804f127aa6b92567a5611943883d9d99c",
+          "bytes": 8112,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/3f886d25c7f846435705918fcf6b8f990bef460cc229dd3736422dc7a4c76a60.png",
+          "sha256": "3f886d25c7f846435705918fcf6b8f990bef460cc229dd3736422dc7a4c76a60",
+          "bytes": 8979,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/3be6d7ea784a83c60689f49e2d8cdf3349b26306c7fe71c44f698371bfb1b198.png",
+          "sha256": "3be6d7ea784a83c60689f49e2d8cdf3349b26306c7fe71c44f698371bfb1b198",
+          "bytes": 10829,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/b7c79f0d7fea31ea34fde5058f2c163bd0546b3b842ebf9f2bb430c563963cb4.png",
+          "sha256": "b7c79f0d7fea31ea34fde5058f2c163bd0546b3b842ebf9f2bb430c563963cb4",
+          "bytes": 7180,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/586987784bc4398c5196e22f0a1e2d1192b1610e00d6edd88066362045927815.png",
+          "sha256": "586987784bc4398c5196e22f0a1e2d1192b1610e00d6edd88066362045927815",
+          "bytes": 10376,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/77bb2273bc0cc3b3363553a788d8eb5e197d8659a57371bdce3fe7a649aa1829.png",
+          "sha256": "77bb2273bc0cc3b3363553a788d8eb5e197d8659a57371bdce3fe7a649aa1829",
+          "bytes": 11472,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/087b255d2dc829ec5eaac1d720b6bff921de9e55485a2588649d84a8c3cce662.png",
+          "sha256": "087b255d2dc829ec5eaac1d720b6bff921de9e55485a2588649d84a8c3cce662",
+          "bytes": 9124,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/5a3c713b974d0bc9c355b3b9615355084d46b51a38b7f504c686192f1151357e.png",
+          "sha256": "5a3c713b974d0bc9c355b3b9615355084d46b51a38b7f504c686192f1151357e",
+          "bytes": 7593,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/3ad1c6189b92ca94530ff2cdd6a93abd5590177ba547b4fbd0d189485287966b.png",
+          "sha256": "3ad1c6189b92ca94530ff2cdd6a93abd5590177ba547b4fbd0d189485287966b",
+          "bytes": 8254,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/d9a5ed4badf896932eeed76e83f3f3456a18af5409641cf422e66d47e9b92542.png",
+          "sha256": "d9a5ed4badf896932eeed76e83f3f3456a18af5409641cf422e66d47e9b92542",
+          "bytes": 7334,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/2d6bad2bc361139e1e511bb29b10a394b8818ed93c0b6f008feb503070cde05a.png",
+          "sha256": "2d6bad2bc361139e1e511bb29b10a394b8818ed93c0b6f008feb503070cde05a",
+          "bytes": 7853,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/e9e3912131faf56e293a0e674cb3c7a04de7d912428c919fc29819fdebe7b951.png",
+          "sha256": "e9e3912131faf56e293a0e674cb3c7a04de7d912428c919fc29819fdebe7b951",
+          "bytes": 7488,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/8fe08552c55182b5fc5cba0fd2b9d7b919be9f9865b7ca4e0307744772915385.png",
+          "sha256": "8fe08552c55182b5fc5cba0fd2b9d7b919be9f9865b7ca4e0307744772915385",
+          "bytes": 9940,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/cde9af81a712edeecb59ce5639395325f589d5251e7eea69729f58afa41ab0eb.png",
+          "sha256": "cde9af81a712edeecb59ce5639395325f589d5251e7eea69729f58afa41ab0eb",
+          "bytes": 6931,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/683fce1e477b0608282d5ac49d9de9338bb652341125be8473683c15520eaf4b.png",
+          "sha256": "683fce1e477b0608282d5ac49d9de9338bb652341125be8473683c15520eaf4b",
+          "bytes": 10205,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-08-16T14:00:00.000Z",
+      "popularity": 7
+    },
+    {
+      "id": "lantern-light",
+      "festivalId": "thadingyut",
+      "name": {
+        "en": "Lantern Light"
+      },
+      "style": {
+        "en": "Glow rim"
+      },
+      "kind": "images",
+      "shape": "circle",
+      "tile": "#2A1F52",
+      "glyph": "#FFD27A",
+      "ring": "#FFD27A",
+      "glyphs": {
+        "phone": {
+          "url": "assets/6281021b71ec7d880cb75751e70bfd2bce7877acd14fab4b827de32fc87f9778.png",
+          "sha256": "6281021b71ec7d880cb75751e70bfd2bce7877acd14fab4b827de32fc87f9778",
+          "bytes": 29153,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/d9b467b71fa30cddd920f1e7dfa084ad94ee8f10c8db3c5ff5d12ac237e6b05f.png",
+          "sha256": "d9b467b71fa30cddd920f1e7dfa084ad94ee8f10c8db3c5ff5d12ac237e6b05f",
+          "bytes": 26453,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/125a73b7d4b0b54471a9fa66fa3cfb5ab883bdb3497164ed8e5b7f1c6bd5dc2a.png",
+          "sha256": "125a73b7d4b0b54471a9fa66fa3cfb5ab883bdb3497164ed8e5b7f1c6bd5dc2a",
+          "bytes": 27832,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/a86fbada873d85058692de5c0e51142cff3a79e23d361e1fab6ced7cb1044652.png",
+          "sha256": "a86fbada873d85058692de5c0e51142cff3a79e23d361e1fab6ced7cb1044652",
+          "bytes": 29755,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/a40422ec60c44e4ce60bace4ecbef9c611101c61e25570fe5a799da5d58a7570.png",
+          "sha256": "a40422ec60c44e4ce60bace4ecbef9c611101c61e25570fe5a799da5d58a7570",
+          "bytes": 28519,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/c4c18c7cb0e2e760ba9e80cea7897695729daeb36cc76d67501916996142a2f0.png",
+          "sha256": "c4c18c7cb0e2e760ba9e80cea7897695729daeb36cc76d67501916996142a2f0",
+          "bytes": 26867,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/09e80130a0d0709b74ae1cbbcdaee72ae436c9f42d4f73c9ad9370b50f2d19ec.png",
+          "sha256": "09e80130a0d0709b74ae1cbbcdaee72ae436c9f42d4f73c9ad9370b50f2d19ec",
+          "bytes": 27879,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/02a31ffadc5551e73915139d5167df55e5f6977699ce51e728cf41c2904e8189.png",
+          "sha256": "02a31ffadc5551e73915139d5167df55e5f6977699ce51e728cf41c2904e8189",
+          "bytes": 29933,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/2ea0391dec5ab6df95089816e5eeb720d5dd324636e93f34cb77755fc631b3b6.png",
+          "sha256": "2ea0391dec5ab6df95089816e5eeb720d5dd324636e93f34cb77755fc631b3b6",
+          "bytes": 26045,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/80877b0d1eb671042bfade961a6b242da459cf7a66843084265b61c4c09b6989.png",
+          "sha256": "80877b0d1eb671042bfade961a6b242da459cf7a66843084265b61c4c09b6989",
+          "bytes": 29337,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/e1cb89d6fa3be849425a218510d6cff0062739cfd313b1c68fcb6f66c47d1f96.png",
+          "sha256": "e1cb89d6fa3be849425a218510d6cff0062739cfd313b1c68fcb6f66c47d1f96",
+          "bytes": 30478,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/9756c4136ed09713072a2fa77ad19175423d19870c1bcfa73c4b2be9fc4f532b.png",
+          "sha256": "9756c4136ed09713072a2fa77ad19175423d19870c1bcfa73c4b2be9fc4f532b",
+          "bytes": 27943,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/34bb5398d4914142af5983e3dea2ceedc634ba032320027fd109de228fff8962.png",
+          "sha256": "34bb5398d4914142af5983e3dea2ceedc634ba032320027fd109de228fff8962",
+          "bytes": 26583,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/58e9fadc3be8349df3af3898281c08a779c87593c257c04a3132c5f331ec2919.png",
+          "sha256": "58e9fadc3be8349df3af3898281c08a779c87593c257c04a3132c5f331ec2919",
+          "bytes": 27334,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/e864a2a217cac3bea2e59841db8c10baaad76a8acf77f915da16b31410bf2a79.png",
+          "sha256": "e864a2a217cac3bea2e59841db8c10baaad76a8acf77f915da16b31410bf2a79",
+          "bytes": 26500,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/4af59411aed4725d08e368fd7537d5f44bafeef468597ef74446c04c89bf26f2.png",
+          "sha256": "4af59411aed4725d08e368fd7537d5f44bafeef468597ef74446c04c89bf26f2",
+          "bytes": 26743,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/883037bc2949afe078c966fb838bc7aec7eac92554a98c77699bc014ce6841f4.png",
+          "sha256": "883037bc2949afe078c966fb838bc7aec7eac92554a98c77699bc014ce6841f4",
+          "bytes": 26499,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/72e71bc7b0b8a16b5da79a7bd796fdaaea039ffd84f7855dfa05ace41423897d.png",
+          "sha256": "72e71bc7b0b8a16b5da79a7bd796fdaaea039ffd84f7855dfa05ace41423897d",
+          "bytes": 28834,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/004b28943f3bba6d12d36325eb3e1bba233101d324b4c62fc3e0435cfa66444e.png",
+          "sha256": "004b28943f3bba6d12d36325eb3e1bba233101d324b4c62fc3e0435cfa66444e",
+          "bytes": 25676,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/87dce7935abd813acfa7b2482e2f9ba7dde04b85659ad7119f4fd7e36c1f3c89.png",
+          "sha256": "87dce7935abd813acfa7b2482e2f9ba7dde04b85659ad7119f4fd7e36c1f3c89",
+          "bytes": 28936,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-10-12T14:00:00.000Z",
+      "popularity": 6
+    },
+    {
+      "id": "quiet-line",
+      "festivalId": "minimal",
+      "name": {
+        "en": "Quiet Line"
+      },
+      "style": {
+        "en": "Line"
+      },
+      "kind": "images",
+      "shape": "square",
+      "glyph": "#F5F1EA",
+      "ring": "#F5F1EA",
+      "glyphs": {
+        "phone": {
+          "url": "assets/9b1e7521850ebf6e3fa8e4dc77abdcd2f81bf81c9540708ed1fde09b4a68850e.png",
+          "sha256": "9b1e7521850ebf6e3fa8e4dc77abdcd2f81bf81c9540708ed1fde09b4a68850e",
+          "bytes": 5883,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/428f801c04d552bf8b528c6eba5e6d7e3bca9b3ec3a9cc75f0937a0ee7163caa.png",
+          "sha256": "428f801c04d552bf8b528c6eba5e6d7e3bca9b3ec3a9cc75f0937a0ee7163caa",
+          "bytes": 2524,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/5ccd772c930b1c77fd68dc8bf6b192c857d57356df32b9698dde66c9d6220e71.png",
+          "sha256": "5ccd772c930b1c77fd68dc8bf6b192c857d57356df32b9698dde66c9d6220e71",
+          "bytes": 4372,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/e9f31b83443f4d390e2858a34d997b895a82ec42e445a9626df5a6d44ba37bad.png",
+          "sha256": "e9f31b83443f4d390e2858a34d997b895a82ec42e445a9626df5a6d44ba37bad",
+          "bytes": 7099,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/891ce2a6127310401b59d4ce606de1372f95e30a82729b17a6ccd17fd4657be3.png",
+          "sha256": "891ce2a6127310401b59d4ce606de1372f95e30a82729b17a6ccd17fd4657be3",
+          "bytes": 5108,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/299c55d81dcef5555df5e027668c1a17e7d3be1ddfc2d68ff60e94800dd9ed40.png",
+          "sha256": "299c55d81dcef5555df5e027668c1a17e7d3be1ddfc2d68ff60e94800dd9ed40",
+          "bytes": 2534,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/6fa4b90f79aca50363d90d99fe933ec6dc491890e515aa81309120382ddeaa27.png",
+          "sha256": "6fa4b90f79aca50363d90d99fe933ec6dc491890e515aa81309120382ddeaa27",
+          "bytes": 4279,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/989a302e7a4bb6e7f560e4d6fcd08cced47832480663f93100137d3b249851d7.png",
+          "sha256": "989a302e7a4bb6e7f560e4d6fcd08cced47832480663f93100137d3b249851d7",
+          "bytes": 6619,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/3e72d5e1131aaaead3ade04077b0ae4486f55831fd302ecee34c819d12de09ef.png",
+          "sha256": "3e72d5e1131aaaead3ade04077b0ae4486f55831fd302ecee34c819d12de09ef",
+          "bytes": 1960,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/fc57501acccdf65730bc6a590a989dd6ecbfa330233e1b2c4fbedf1e28f582d3.png",
+          "sha256": "fc57501acccdf65730bc6a590a989dd6ecbfa330233e1b2c4fbedf1e28f582d3",
+          "bytes": 5591,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/bde0aab24820f81138c2811d2870b56e2b7ae4c3c7fff601626bdd58b8a30eba.png",
+          "sha256": "bde0aab24820f81138c2811d2870b56e2b7ae4c3c7fff601626bdd58b8a30eba",
+          "bytes": 8060,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/b09adff9a45db119ac3cd486176a95e18c02b0f94d11d7b09802f69ced770d16.png",
+          "sha256": "b09adff9a45db119ac3cd486176a95e18c02b0f94d11d7b09802f69ced770d16",
+          "bytes": 4396,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/4896104c79a98b03429a0708f22540ba35a24e5f5b0796423d5c560a0ec7c412.png",
+          "sha256": "4896104c79a98b03429a0708f22540ba35a24e5f5b0796423d5c560a0ec7c412",
+          "bytes": 2132,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/fd0251898c3de930dc681008d454c7367776ae620ef3e64ab0ac423d3a5b45ee.png",
+          "sha256": "fd0251898c3de930dc681008d454c7367776ae620ef3e64ab0ac423d3a5b45ee",
+          "bytes": 3136,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/d60323ad4df06408e58ed077219f1a1aded69356b67260f5317b46b494c03a03.png",
+          "sha256": "d60323ad4df06408e58ed077219f1a1aded69356b67260f5317b46b494c03a03",
+          "bytes": 2285,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/d245a07ee83343c96993f2b180dca960605f788604c89e6013213e52f290b7d4.png",
+          "sha256": "d245a07ee83343c96993f2b180dca960605f788604c89e6013213e52f290b7d4",
+          "bytes": 3134,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/8019921d7a9351e245e6de4b034582552946663398a1095d9fc3ca5adc770e59.png",
+          "sha256": "8019921d7a9351e245e6de4b034582552946663398a1095d9fc3ca5adc770e59",
+          "bytes": 2572,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/28c1aa8b000343278e1d58737753d7c39420f4165dcb506d1c31e101c9434caa.png",
+          "sha256": "28c1aa8b000343278e1d58737753d7c39420f4165dcb506d1c31e101c9434caa",
+          "bytes": 5288,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/3a4e04e8bb07feb4bf6e88dc84520626f12287830a1ca8e24d3447f14e20cebd.png",
+          "sha256": "3a4e04e8bb07feb4bf6e88dc84520626f12287830a1ca8e24d3447f14e20cebd",
+          "bytes": 1493,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/d2073c486d9ed69a82b4995d22dd39c92cb49bb9e63b41168cdb37591438944f.png",
+          "sha256": "d2073c486d9ed69a82b4995d22dd39c92cb49bb9e63b41168cdb37591438944f",
+          "bytes": 6111,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-05-18T14:00:00.000Z",
+      "popularity": 8
+    },
+    {
+      "id": "mono-ember",
+      "festivalId": "minimal",
+      "name": {
+        "en": "Mono Ember"
+      },
+      "style": {
+        "en": "Filled"
+      },
+      "kind": "images",
+      "shape": "squircle",
+      "tile": "#FFB547",
+      "glyph": "#241A12",
+      "ring": "#FFB547",
+      "glyphs": {
+        "phone": {
+          "url": "assets/193eaf130145493b510266b86fdcdbf5c269e096ef811855dda6ada14d5292a9.png",
+          "sha256": "193eaf130145493b510266b86fdcdbf5c269e096ef811855dda6ada14d5292a9",
+          "bytes": 7683,
+          "format": "png"
+        },
+        "messages": {
+          "url": "assets/6e03a191488ae153978e56db58a10c6c71bd1adfe1e624dc8618c2ac028ba067.png",
+          "sha256": "6e03a191488ae153978e56db58a10c6c71bd1adfe1e624dc8618c2ac028ba067",
+          "bytes": 4903,
+          "format": "png"
+        },
+        "camera": {
+          "url": "assets/5612db6c7fa89a82321aedad3710fd810deedfbdb3636c2329378c70cc717974.png",
+          "sha256": "5612db6c7fa89a82321aedad3710fd810deedfbdb3636c2329378c70cc717974",
+          "bytes": 6359,
+          "format": "png"
+        },
+        "maps": {
+          "url": "assets/9f7bdbfeaec709a7887861ca3b629cae41c4afd46848ae7904e3a96f55b767f6.png",
+          "sha256": "9f7bdbfeaec709a7887861ca3b629cae41c4afd46848ae7904e3a96f55b767f6",
+          "bytes": 8440,
+          "format": "png"
+        },
+        "music": {
+          "url": "assets/e334e4f8b2936a736745f85be988a3476a53840d46da4a1a4c4f31ae4f1d3d30.png",
+          "sha256": "e334e4f8b2936a736745f85be988a3476a53840d46da4a1a4c4f31ae4f1d3d30",
+          "bytes": 6753,
+          "format": "png"
+        },
+        "mail": {
+          "url": "assets/3a137597f767ab55c473c915771b58df046caf76c5add8aa86aa7c7b1c39b600.png",
+          "sha256": "3a137597f767ab55c473c915771b58df046caf76c5add8aa86aa7c7b1c39b600",
+          "bytes": 5539,
+          "format": "png"
+        },
+        "photos": {
+          "url": "assets/a7f2fa00dda3e63b2e53eb550b3f9ef916caa77d3a2480fd0d098b44d4bbfa5a.png",
+          "sha256": "a7f2fa00dda3e63b2e53eb550b3f9ef916caa77d3a2480fd0d098b44d4bbfa5a",
+          "bytes": 6432,
+          "format": "png"
+        },
+        "clock": {
+          "url": "assets/48f31a2f05188593ad7e195137808e74117939da2e376a791e2a8a6adcc659fe.png",
+          "sha256": "48f31a2f05188593ad7e195137808e74117939da2e376a791e2a8a6adcc659fe",
+          "bytes": 8339,
+          "format": "png"
+        },
+        "calendar": {
+          "url": "assets/f5a57ef71769d45ed8d5aee02921add6bf036a5af6e16fa9a765e05130b39e6b.png",
+          "sha256": "f5a57ef71769d45ed8d5aee02921add6bf036a5af6e16fa9a765e05130b39e6b",
+          "bytes": 4602,
+          "format": "png"
+        },
+        "settings": {
+          "url": "assets/7ad88f3ce4963d6e3c410299ab352179e0542132d888e7a5bce2a11fb3ddb5fb.png",
+          "sha256": "7ad88f3ce4963d6e3c410299ab352179e0542132d888e7a5bce2a11fb3ddb5fb",
+          "bytes": 7888,
+          "format": "png"
+        },
+        "browser": {
+          "url": "assets/8a663a13d97bb1b495427470fd0373a4322b608fa4b9f65ac2a06505547ca3ae.png",
+          "sha256": "8a663a13d97bb1b495427470fd0373a4322b608fa4b9f65ac2a06505547ca3ae",
+          "bytes": 8957,
+          "format": "png"
+        },
+        "weather": {
+          "url": "assets/6e0e2d5d736ea1808bd9418d58008350d9167ced00c5ceac54f58d8475f928a3.png",
+          "sha256": "6e0e2d5d736ea1808bd9418d58008350d9167ced00c5ceac54f58d8475f928a3",
+          "bytes": 6602,
+          "format": "png"
+        },
+        "notes": {
+          "url": "assets/721d722873c43bb82b70603b094650b4c3dda9ca4a7c224d7e3c027d28a54207.png",
+          "sha256": "721d722873c43bb82b70603b094650b4c3dda9ca4a7c224d7e3c027d28a54207",
+          "bytes": 4996,
+          "format": "png"
+        },
+        "calculator": {
+          "url": "assets/7276c39cce0932bcdfc9c24de5ea9060201af9f5d729fe6001cefee678894b1f.png",
+          "sha256": "7276c39cce0932bcdfc9c24de5ea9060201af9f5d729fe6001cefee678894b1f",
+          "bytes": 5712,
+          "format": "png"
+        },
+        "wallet": {
+          "url": "assets/79106867ae98ac660ce528ef0687ae614de9dc673ddc78387f78991699d3dcc8.png",
+          "sha256": "79106867ae98ac660ce528ef0687ae614de9dc673ddc78387f78991699d3dcc8",
+          "bytes": 4752,
+          "format": "png"
+        },
+        "store": {
+          "url": "assets/920bea2a55cadc0d6a410797d504a82cd560f689f1d881c9e7636857427446ac.png",
+          "sha256": "920bea2a55cadc0d6a410797d504a82cd560f689f1d881c9e7636857427446ac",
+          "bytes": 5301,
+          "format": "png"
+        },
+        "video": {
+          "url": "assets/239b6f43ded388ad408a6a65d3ea1052cbe94c735a059c4a1fda66de5309c22e.png",
+          "sha256": "239b6f43ded388ad408a6a65d3ea1052cbe94c735a059c4a1fda66de5309c22e",
+          "bytes": 4890,
+          "format": "png"
+        },
+        "contacts": {
+          "url": "assets/e815e6c4aabaea412cdac772829ad333646d1c15b2ab06f5f570413850d2999e.png",
+          "sha256": "e815e6c4aabaea412cdac772829ad333646d1c15b2ab06f5f570413850d2999e",
+          "bytes": 7375,
+          "format": "png"
+        },
+        "files": {
+          "url": "assets/2ee9d93983f07dcee0f026e44c5fcc963e72c6ab002ba7e9f90b605f9443e3e5.png",
+          "sha256": "2ee9d93983f07dcee0f026e44c5fcc963e72c6ab002ba7e9f90b605f9443e3e5",
+          "bytes": 4359,
+          "format": "png"
+        },
+        "health": {
+          "url": "assets/48204ddd213dfdf95daf6ce4bcdede8e2ed59bec01fbdf9ee57de1d9d8cf450f.png",
+          "sha256": "48204ddd213dfdf95daf6ce4bcdede8e2ed59bec01fbdf9ee57de1d9d8cf450f",
+          "bytes": 7694,
+          "format": "png"
+        }
+      },
+      "publishedAt": "2026-07-07T14:00:00.000Z",
+      "popularity": 9
+    }
+  ],
+  "banners": [
+    {
+      "id": "halloween-2026",
+      "title": {
+        "en": "Halloween Night"
+      },
+      "subtitle": {
+        "en": "Wallpaper, icons and a spooky clock font."
+      },
+      "tag": {
+        "en": "THEME"
+      },
+      "cta": {
+        "en": "Get theme"
+      },
+      "action": {
+        "type": "theme",
+        "id": "halloween-night"
+      },
+      "look": {
+        "background": "#160C24",
+        "accent": "#FF7A1A",
+        "titleColor": "#FF7A1A",
+        "font": "creepster",
+        "artThemeId": "halloween-night"
+      },
+      "startsAt": "2026-10-01T00:00:00.000Z",
+      "endsAt": "2026-11-01T00:00:00.000Z",
+      "sort": 10
+    },
+    {
+      "id": "christmas-2026",
+      "title": {
+        "en": "Snowy Christmas"
+      },
+      "subtitle": {
+        "en": "Snowy pines, gold ornaments and cozy cabins."
+      },
+      "tag": {
+        "en": "WALLPAPERS"
+      },
+      "cta": {
+        "en": "Browse"
+      },
+      "action": {
+        "type": "wallpapers",
+        "id": "christmas"
+      },
+      "look": {
+        "background": "#0F3D2E",
+        "accent": "#F2B33D",
+        "titleColor": "#F5F1EA",
+        "font": "playfair-display",
+        "artThemeId": "christmas-eve"
+      },
+      "startsAt": "2026-10-10T00:00:00.000Z",
+      "endsAt": "2026-12-27T00:00:00.000Z",
+      "sort": 20
+    },
+    {
+      "id": "clock-fonts",
+      "title": {
+        "en": "Clock fonts"
+      },
+      "subtitle": {
+        "en": "Pick a font for the wallp Home and lock screen clock."
+      },
+      "tag": {
+        "en": "NEW · FONTS"
+      },
+      "cta": {
+        "en": "Try fonts"
+      },
+      "action": {
+        "type": "fonts"
+      },
+      "look": {
+        "background": "#26222E",
+        "accent": "#FFB547",
+        "titleColor": "#F5F1EA",
+        "font": "space-grotesk"
+      },
+      "sort": 30
+    },
+    {
+      "id": "thingyan-2027",
+      "title": {
+        "en": "Thingyan",
+        "my": "သင်္ကြန်"
+      },
+      "subtitle": {
+        "en": "Water festival themes with Padauk flowers."
+      },
+      "tag": {
+        "en": "THEME"
+      },
+      "cta": {
+        "en": "Explore"
+      },
+      "action": {
+        "type": "festival",
+        "id": "thingyan"
+      },
+      "look": {
+        "background": "#0A3D6B",
+        "accent": "#FFC21A",
+        "titleColor": "#FFC21A",
+        "font": "baloo-2",
+        "artThemeId": "thingyan-water"
+      },
+      "sort": 40
+    },
+    {
+      "id": "thadingyut-2027",
+      "title": {
+        "en": "Festival of Lights"
+      },
+      "subtitle": {
+        "en": "Lanterns and candle glow for Thadingyut."
+      },
+      "tag": {
+        "en": "THEME"
+      },
+      "cta": {
+        "en": "Explore"
+      },
+      "action": {
+        "type": "festival",
+        "id": "thadingyut"
+      },
+      "look": {
+        "background": "#1E1440",
+        "accent": "#FFD27A",
+        "titleColor": "#FFD27A",
+        "font": "caveat",
+        "artThemeId": "festival-of-lights"
+      },
+      "startsAt": "2027-09-15T00:00:00.000Z",
+      "endsAt": "2027-10-15T00:00:00.000Z",
+      "sort": 50
+    }
+  ],
+  "accentPresets": {
+    "solids": [
+      {
+        "id": "pumpkin",
+        "name": {
+          "en": "Pumpkin"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF7A1A"
+        ]
+      },
+      {
+        "id": "ember",
+        "name": {
+          "en": "Ember"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF4D2E"
+        ]
+      },
+      {
+        "id": "candy",
+        "name": {
+          "en": "Candy"
+        },
+        "type": "solid",
+        "colors": [
+          "#FF5FA2"
+        ]
+      },
+      {
+        "id": "witch-purple",
+        "name": {
+          "en": "Witch purple"
+        },
+        "type": "solid",
+        "colors": [
+          "#A970FF"
+        ]
+      },
+      {
+        "id": "ghost-blue",
+        "name": {
+          "en": "Ghost blue"
+        },
+        "type": "solid",
+        "colors": [
+          "#7CC6FF"
+        ]
+      },
+      {
+        "id": "slime",
+        "name": {
+          "en": "Slime"
+        },
+        "type": "solid",
+        "colors": [
+          "#7BD44A"
+        ]
+      },
+      {
+        "id": "moon-cream",
+        "name": {
+          "en": "Moon cream"
+        },
+        "type": "solid",
+        "colors": [
+          "#F3E6C4"
+        ]
+      },
+      {
+        "id": "gold",
+        "name": {
+          "en": "Gold"
+        },
+        "type": "solid",
+        "colors": [
+          "#F2B33D"
+        ]
+      },
+      {
+        "id": "bone",
+        "name": {
+          "en": "Bone"
+        },
+        "type": "solid",
+        "colors": [
+          "#F5F1EA"
+        ]
+      },
+      {
+        "id": "blood",
+        "name": {
+          "en": "Blood"
+        },
+        "type": "solid",
+        "colors": [
+          "#D7263D"
+        ]
+      }
+    ],
+    "gradients": [
+      {
+        "id": "pumpkin-glow",
+        "name": {
+          "en": "Pumpkin glow"
+        },
+        "type": "gradient",
+        "colors": [
+          "#FFB547",
+          "#FF4D2E"
+        ],
+        "angle": 135
+      },
+      {
+        "id": "witching-hour",
+        "name": {
+          "en": "Witching hour"
+        },
+        "type": "gradient",
+        "colors": [
+          "#A970FF",
+          "#FF5FA2"
+        ],
+        "angle": 135
+      },
+      {
+        "id": "moonrise",
+        "name": {
+          "en": "Moonrise"
+        },
+        "type": "gradient",
+        "colors": [
+          "#F3E6C4",
+          "#FF7A1A"
+        ],
+        "angle": 180
+      },
+      {
+        "id": "potion",
+        "name": {
+          "en": "Potion"
+        },
+        "type": "gradient",
+        "colors": [
+          "#7BD44A",
+          "#2EC4B6"
+        ],
+        "angle": 90
+      },
+      {
+        "id": "frost",
+        "name": {
+          "en": "Frost"
+        },
+        "type": "gradient",
+        "colors": [
+          "#F5F1EA",
+          "#7CC6FF"
+        ],
+        "angle": 180
+      },
+      {
+        "id": "candle",
+        "name": {
+          "en": "Candle"
+        },
+        "type": "gradient",
+        "colors": [
+          "#FFE08A",
+          "#FF7A1A",
+          "#D7263D"
+        ],
+        "angle": 180
+      }
+    ]
+  },
+  "searchSuggestions": [
+    "Halloween",
+    "moon",
+    "snow",
+    "Thingyan",
+    "handwritten",
+    "minimal",
+    "live"
+  ]
+}

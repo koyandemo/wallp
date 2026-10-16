@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/date_format.dart';
+import '../look/accent_paint.dart';
 import '../models/phone_theme.dart';
 
 /// Icon color that reads on top of [accent]: dark on light accents
@@ -18,11 +19,31 @@ class LockScreenOverlay extends StatelessWidget {
     required this.accent,
     required this.now,
     this.top = 76,
+    this.clockColor,
+    this.clockScale = 1,
+    this.clockGradient,
+    this.accentGradient,
+    this.onAccent,
   });
 
   final PhoneTheme theme;
   final Color accent;
   final DateTime now;
+
+  /// The applied clock style's colour; null = accent or text, by theme.
+  final Color? clockColor;
+
+  /// The applied clock style's size (1 = the design's medium).
+  final double clockScale;
+
+  /// Paints the clock when it's drawn in a gradient accent.
+  final Gradient? clockGradient;
+
+  /// Fills the countdown badge when the accent is a gradient.
+  final Gradient? accentGradient;
+
+  /// The badge icon's colour; null works it out from [accent].
+  final Color? onAccent;
 
   /// Distance from the top to the date line. The live wallpaper moves it
   /// down, below the phone's own lock screen clock.
@@ -32,7 +53,7 @@ class LockScreenOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = theme.palette;
     final use24h = MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false;
-    final eventDate = theme.event.nextDate(now);
+    final event = theme.event;
 
     return Stack(
       children: [
@@ -52,75 +73,82 @@ class LockScreenOverlay extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                DateFormatX.clock(now, use24h: use24h),
-                style: theme.displayStyle(
-                  TextStyle(
-                    fontSize: 108,
-                    fontWeight: FontWeight.w700,
-                    height: 1.05,
-                    color: theme.accentClock ? accent : p.text,
+              GradientText(
+                gradient: clockGradient,
+                child: Text(
+                  DateFormatX.clock(now, use24h: use24h),
+                  style: theme.displayStyle(
+                    TextStyle(
+                      fontSize: 108 * clockScale,
+                      fontWeight: FontWeight.w700,
+                      height: 1.05,
+                      color:
+                          clockColor ?? (theme.accentClock ? accent : p.text),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        Positioned(
-          left: 24,
-          right: 24,
-          top: top + 192,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            decoration: BoxDecoration(
-              color: p.background.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: p.text.withValues(alpha: 0.18)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: accent,
-                    shape: BoxShape.circle,
+        // Undated collections (Minimal) have no countdown card.
+        if (event != null)
+          Positioned(
+            left: 24,
+            right: 24,
+            top: top + 192 + 108 * (clockScale - 1),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              decoration: BoxDecoration(
+                color: p.background.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: p.text.withValues(alpha: 0.18)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: accentGradient == null ? accent : null,
+                      gradient: accentGradient,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      theme.eventIcon,
+                      color: onAccent ?? _onAccent(theme, accent),
+                      size: 22,
+                    ),
                   ),
-                  child: Icon(
-                    theme.eventIcon,
-                    color: _onAccent(theme, accent),
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        theme.event.countdownLabel(now),
-                        style: theme.bodyStyle(
-                          TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w700,
-                            color: p.text,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.countdownLabel(now),
+                          style: theme.bodyStyle(
+                            TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w700,
+                              color: p.text,
+                            ),
                           ),
                         ),
-                      ),
-                      Text(
-                        'until ${theme.event.name} · '
-                        '${DateFormatX.shortDate(eventDate)}',
-                        style: theme.bodyStyle(
-                          TextStyle(fontSize: 14, color: p.textMuted),
+                        Text(
+                          'until ${event.name} · '
+                          '${DateFormatX.shortDate(event.nextDate(now))}',
+                          style: theme.bodyStyle(
+                            TextStyle(fontSize: 14, color: p.textMuted),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -160,7 +188,7 @@ class HomeScreenOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = theme.palette;
-    final eventDate = theme.event.nextDate(now);
+    final event = theme.event;
 
     Widget appRow(Iterable<(String, IconData)> apps) => Row(
       children: [
@@ -232,7 +260,7 @@ class HomeScreenOverlay extends StatelessWidget {
                               Text(
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                theme.event.countdownValue(now),
+                                event?.countdownValue(now) ?? 'Any time',
                                 style: theme.bodyStyle(
                                   TextStyle(
                                     fontSize: 30,
@@ -244,7 +272,9 @@ class HomeScreenOverlay extends StatelessWidget {
                               Text(
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                'until ${DateFormatX.longDate(eventDate)}',
+                                event == null
+                                    ? 'Fits every season'
+                                    : 'until ${DateFormatX.longDate(event.nextDate(now))}',
                                 style: theme.bodyStyle(
                                   TextStyle(fontSize: 14, color: p.textMuted),
                                 ),

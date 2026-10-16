@@ -3,9 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/icons/themed_icon_painter.dart';
 import 'package:wallp/models/phone_theme.dart';
+
+import 'look/fixtures.dart';
 
 void main() {
   test('every festival style paints, with a glyph and without', () {
@@ -23,7 +24,7 @@ void main() {
   });
 
   test('glyph uses the accent only when it reads on the tile', () {
-    final christmas = ThemeCatalog.byId('christmas-eve')!;
+    final christmas = builtInTheme('christmas-eve');
     final red = christmas.palette.accentOptions[0];
     const paleGold = Color(0xFFFFE08A);
     ThemedIconPainter painter(Color accent) =>
@@ -33,7 +34,7 @@ void main() {
     expect(painter(red).glyphColor, const Color(0xFFFFF6E5));
     expect(painter(paleGold).glyphColor, paleGold);
 
-    final halloween = ThemeCatalog.byId('halloween-night')!;
+    final halloween = builtInTheme('halloween-night');
     expect(
       ThemedIconPainter(
         style: SceneKind.halloween,
@@ -44,7 +45,7 @@ void main() {
   });
 
   test('Thingyan keeps its yellow accent on the glyph', () {
-    final thingyan = ThemeCatalog.byId('thingyan-water')!;
+    final thingyan = builtInTheme('thingyan-water');
     final yellow = thingyan.palette.accent;
     expect(
       ThemedIconPainter(style: SceneKind.thingyan, accent: yellow).glyphColor,
@@ -58,6 +59,6 @@ void main() {
   });
 
   test('all themes now offer icon packs', () {
-    expect(ThemeCatalog.themes.every((t) => t.hasIconPack), isTrue);
+    expect(builtInThemes().every((t) => t.hasIconPack), isTrue);
   });
 }

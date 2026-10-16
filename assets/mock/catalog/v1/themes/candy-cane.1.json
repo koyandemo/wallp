@@ -1,0 +1,175 @@
+{
+  "id": "candy-cane",
+  "rev": 1,
+  "festivalId": "christmas",
+  "name": {
+    "en": "Candy Cane"
+  },
+  "style": "cute",
+  "tags": [
+    "candy",
+    "red",
+    "pink"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-10-07T14:00:00.000Z",
+  "popularity": 6,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.3,
+          "width": 0.012,
+          "aspect": 5.0,
+          "color": "@text"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.345,
+          "width": 0.1,
+          "aspect": 0.5,
+          "color": "@accent"
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.5,
+          "y": 0.46,
+          "width": 0.46,
+          "color": "@motif",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#B0182F",
+    "deep": "#FFE3EC",
+    "surface": "#B62A40",
+    "text": "#F5F1EA",
+    "textMuted": "#E0B0B2",
+    "motif": "#F5F1EA"
+  },
+  "accents": [
+    {
+      "id": "snow",
+      "name": {
+        "en": "Snow"
+      },
+      "type": "solid",
+      "colors": [
+        "#F5F1EA"
+      ]
+    },
+    {
+      "id": "pink-icing",
+      "name": {
+        "en": "Pink icing"
+      },
+      "type": "solid",
+      "colors": [
+        "#FFE3EC"
+      ]
+    },
+    {
+      "id": "gold",
+      "name": {
+        "en": "Gold"
+      },
+      "type": "solid",
+      "colors": [
+        "#F2B33D"
+      ]
+    },
+    {
+      "id": "berry-red",
+      "name": {
+        "en": "Berry red"
+      },
+      "type": "solid",
+      "colors": [
+        "#D7263D"
+      ]
+    },
+    {
+      "id": "pine",
+      "name": {
+        "en": "Pine"
+      },
+      "type": "solid",
+      "colors": [
+        "#2C7A57"
+      ]
+    },
+    {
+      "id": "frost",
+      "name": {
+        "en": "Frost"
+      },
+      "type": "gradient",
+      "colors": [
+        "#F5F1EA",
+        "#7CC6FF"
+      ],
+      "angle": 180
+    }
+  ],
+  "variants": [
+    {
+      "id": "peppermint",
+      "name": {
+        "en": "Peppermint"
+      },
+      "accentId": "snow"
+    },
+    {
+      "id": "plum",
+      "name": {
+        "en": "Plum"
+      },
+      "palette": {
+        "background": "#4A1A3A",
+        "surface": "#582C4A",
+        "textMuted": "#C2B1B5",
+        "motif": "#FF8FC0"
+      },
+      "accentId": "pink-icing"
+    }
+  ],
+  "fonts": {
+    "display": "mountains-of-christmas",
+    "body": "dm-sans",
+    "labels": "dm-sans"
+  },
+  "clock": {
+    "useAccent": false
+  },
+  "eventIcon": "card_giftcard_rounded",
+  "iconPackId": "candy-cane",
+  "wallpaperIds": [],
+  "downloadBytes": 617417
+}

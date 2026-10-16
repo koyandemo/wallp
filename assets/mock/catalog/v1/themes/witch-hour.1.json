@@ -1,0 +1,156 @@
+{
+  "id": "witch-hour",
+  "rev": 1,
+  "festivalId": "halloween",
+  "name": {
+    "en": "Witch Hour"
+  },
+  "style": "classic",
+  "tags": [
+    "witch",
+    "purple"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-09-05T14:00:00.000Z",
+  "popularity": 3,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.7,
+          "y": 0.28,
+          "width": 0.5,
+          "color": "@motif",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.78,
+          "y": 0.25,
+          "width": 0.08,
+          "color": "@deep",
+          "opacity": 0.25
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#1E1440",
+    "deep": "#120B2A",
+    "surface": "#30274F",
+    "text": "#F5F1EA",
+    "textMuted": "#B5AFB7",
+    "motif": "#A970FF"
+  },
+  "accents": [
+    {
+      "id": "witch-purple",
+      "name": {
+        "en": "Witch purple"
+      },
+      "type": "solid",
+      "colors": [
+        "#A970FF"
+      ]
+    },
+    {
+      "id": "slime",
+      "name": {
+        "en": "Slime"
+      },
+      "type": "solid",
+      "colors": [
+        "#7BD44A"
+      ]
+    },
+    {
+      "id": "pumpkin",
+      "name": {
+        "en": "Pumpkin"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF7A1A"
+      ]
+    },
+    {
+      "id": "moon-cream",
+      "name": {
+        "en": "Moon cream"
+      },
+      "type": "solid",
+      "colors": [
+        "#F3E6C4"
+      ]
+    },
+    {
+      "id": "pumpkin-glow",
+      "name": {
+        "en": "Pumpkin glow"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFB547",
+        "#FF4D2E"
+      ],
+      "angle": 135
+    }
+  ],
+  "variants": [
+    {
+      "id": "violet",
+      "name": {
+        "en": "Violet"
+      },
+      "accentId": "witch-purple"
+    },
+    {
+      "id": "slime",
+      "name": {
+        "en": "Slime"
+      },
+      "palette": {
+        "background": "#0F2A1A",
+        "deep": "#081A10",
+        "surface": "#223B2C",
+        "textMuted": "#B0B5AC",
+        "motif": "#7BD44A"
+      },
+      "accentId": "slime"
+    }
+  ],
+  "fonts": {
+    "display": "creepster",
+    "body": "space-grotesk",
+    "labels": "space-grotesk"
+  },
+  "clock": {
+    "useAccent": true
+  },
+  "eventIcon": "nightlight_round",
+  "iconPackId": "moonlit",
+  "wallpaperIds": [],
+  "downloadBytes": 362411
+}

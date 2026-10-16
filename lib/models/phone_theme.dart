@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import '../render/font_registry.dart';
+import '../render/image_icons.dart';
+import '../render/layered_scene.dart';
 
 /// Which painted scene draws this theme's wallpapers (built in Step 4).
 enum SceneKind { halloween, christmas, thingyan }
@@ -98,6 +101,9 @@ class PhoneTheme {
     this.accentClock = false,
     this.hasIconPack = false,
     this.subtitle,
+    this._iconStyle,
+    this.layered,
+    this.imageIcons,
   });
 
   final String id;
@@ -107,14 +113,17 @@ class PhoneTheme {
   /// Optional second title line, e.g. the Burmese name for Thingyan.
   final String? subtitle;
 
-  final SceneKind scene;
+  /// The painter for this theme's wallpaper; null draws a placeholder
+  /// (catalog themes on the `layers` engine, until it exists: Phase 6).
+  final SceneKind? scene;
   final ThemePalette palette;
 
   /// Google Fonts family names.
   final String displayFont;
   final String bodyFont;
 
-  final ThemeEvent event;
+  /// What the countdown counts to; null for undated collections (Minimal).
+  final ThemeEvent? event;
 
   /// Icon in the lock screen's countdown card.
   final IconData eventIcon;
@@ -123,12 +132,51 @@ class PhoneTheme {
   final bool accentClock;
 
   /// Has themed app icons (home screen + icon shortcuts), drawn by
-  /// ThemedIconPainter in this theme's [scene] style.
+  /// ThemedIconPainter in the [iconStyle] style.
   final bool hasIconPack;
 
+  final SceneKind? _iconStyle;
+
+  /// The ThemedIconPainter style: the applied icon pack's, else the
+  /// scene's.
+  SceneKind? get iconStyle => _iconStyle ?? scene;
+
+  /// A dashboard-made scene for the `layers` engine; drawn instead of the
+  /// placeholder when [scene] is null.
+  final LayeredScene? layered;
+
+  /// A downloaded icon pack; drawn instead of [iconStyle] icons.
+  final ImageIconPack? imageIcons;
+
+  /// In the downloaded font if this engine loaded it, else google_fonts.
   TextStyle displayStyle([TextStyle? style]) =>
-      GoogleFonts.getFont(displayFont, textStyle: style);
+      FontRegistry.shared.style(displayFont, style);
 
   TextStyle bodyStyle([TextStyle? style]) =>
-      GoogleFonts.getFont(bodyFont, textStyle: style);
+      FontRegistry.shared.style(bodyFont, style);
+
+  PhoneTheme copyWith({
+    String? displayFont,
+    String? bodyFont,
+    bool? accentClock,
+    bool? hasIconPack,
+    SceneKind? iconStyle,
+    ImageIconPack? imageIcons,
+  }) => PhoneTheme(
+    id: id,
+    categoryId: categoryId,
+    name: name,
+    subtitle: subtitle,
+    scene: scene,
+    palette: palette,
+    displayFont: displayFont ?? this.displayFont,
+    bodyFont: bodyFont ?? this.bodyFont,
+    event: event,
+    eventIcon: eventIcon,
+    accentClock: accentClock ?? this.accentClock,
+    hasIconPack: hasIconPack ?? this.hasIconPack,
+    iconStyle: iconStyle ?? _iconStyle,
+    layered: layered,
+    imageIcons: imageIcons ?? this.imageIcons,
+  );
 }

@@ -1,0 +1,163 @@
+{
+  "id": "ghost-town",
+  "rev": 1,
+  "festivalId": "halloween",
+  "name": {
+    "en": "Ghost Town"
+  },
+  "style": "minimal",
+  "tags": [
+    "ghost",
+    "fog"
+  ],
+  "isLive": true,
+  "publishedAt": "2026-08-16T14:00:00.000Z",
+  "popularity": 4,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.335,
+          "width": 0.14,
+          "aspect": 0.25,
+          "color": "@accent"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 0.44,
+          "width": 0.34,
+          "aspect": 1.3,
+          "color": "@motif",
+          "glow": true,
+          "motion": "sway"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 0.44,
+          "width": 0.16,
+          "aspect": 1.5,
+          "color": "@text",
+          "opacity": 0.3
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        },
+        {
+          "type": "particles",
+          "effect": "bats",
+          "count": 14,
+          "color": "@deep",
+          "speed": 0.35,
+          "size": 0.5
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#1A1720",
+    "deep": "#0E0C12",
+    "surface": "#2C2A32",
+    "text": "#F5F1EA",
+    "textMuted": "#B3B0AD",
+    "motif": "#E8E4F0"
+  },
+  "accents": [
+    {
+      "id": "ghost-white",
+      "name": {
+        "en": "Ghost white"
+      },
+      "type": "solid",
+      "colors": [
+        "#E8E4F0"
+      ]
+    },
+    {
+      "id": "pumpkin",
+      "name": {
+        "en": "Pumpkin"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF7A1A"
+      ]
+    },
+    {
+      "id": "witch-purple",
+      "name": {
+        "en": "Witch purple"
+      },
+      "type": "solid",
+      "colors": [
+        "#A970FF"
+      ]
+    },
+    {
+      "id": "slime",
+      "name": {
+        "en": "Slime"
+      },
+      "type": "solid",
+      "colors": [
+        "#7BD44A"
+      ]
+    },
+    {
+      "id": "moon-cream",
+      "name": {
+        "en": "Moon cream"
+      },
+      "type": "solid",
+      "colors": [
+        "#F3E6C4"
+      ]
+    },
+    {
+      "id": "pumpkin-glow",
+      "name": {
+        "en": "Pumpkin glow"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFB547",
+        "#FF4D2E"
+      ],
+      "angle": 135
+    }
+  ],
+  "fonts": {
+    "display": "caveat",
+    "body": "space-grotesk",
+    "labels": "space-grotesk"
+  },
+  "clock": {
+    "useAccent": true
+  },
+  "eventIcon": "nightlight_round",
+  "iconPackId": "moonlit",
+  "wallpaperIds": [],
+  "downloadBytes": 703335
+}

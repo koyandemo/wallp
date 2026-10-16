@@ -1,0 +1,199 @@
+{
+  "id": "gingerbread",
+  "rev": 1,
+  "festivalId": "christmas",
+  "name": {
+    "en": "Gingerbread"
+  },
+  "style": "cute",
+  "tags": [
+    "gingerbread",
+    "cookie",
+    "sweet"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-10-13T14:00:00.000Z",
+  "popularity": 10,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "polygon",
+          "x": 0.5,
+          "y": 0.66,
+          "width": 0.56,
+          "aspect": 0.85,
+          "color": "@motif",
+          "points": [
+            [
+              0.5,
+              0.0
+            ],
+            [
+              1.0,
+              0.42
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.42
+            ]
+          ]
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.42,
+          "y": 0.7,
+          "width": 0.1,
+          "color": "@accent",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.6,
+          "y": 0.73,
+          "width": 0.09,
+          "aspect": 1.5,
+          "color": "@deep"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#8A4B22",
+    "deep": "#F5E6D3",
+    "surface": "#935934",
+    "text": "#F5F1EA",
+    "textMuted": "#D5BFAE",
+    "motif": "#B5713A"
+  },
+  "accents": [
+    {
+      "id": "snow",
+      "name": {
+        "en": "Snow"
+      },
+      "type": "solid",
+      "colors": [
+        "#F5F1EA"
+      ]
+    },
+    {
+      "id": "icing",
+      "name": {
+        "en": "Icing"
+      },
+      "type": "solid",
+      "colors": [
+        "#8A4B22"
+      ]
+    },
+    {
+      "id": "gold",
+      "name": {
+        "en": "Gold"
+      },
+      "type": "solid",
+      "colors": [
+        "#F2B33D"
+      ]
+    },
+    {
+      "id": "berry-red",
+      "name": {
+        "en": "Berry red"
+      },
+      "type": "solid",
+      "colors": [
+        "#D7263D"
+      ]
+    },
+    {
+      "id": "pine",
+      "name": {
+        "en": "Pine"
+      },
+      "type": "solid",
+      "colors": [
+        "#2C7A57"
+      ]
+    },
+    {
+      "id": "frost",
+      "name": {
+        "en": "Frost"
+      },
+      "type": "gradient",
+      "colors": [
+        "#F5F1EA",
+        "#7CC6FF"
+      ],
+      "angle": 180
+    }
+  ],
+  "variants": [
+    {
+      "id": "ginger",
+      "name": {
+        "en": "Ginger"
+      },
+      "accentId": "snow"
+    },
+    {
+      "id": "icing",
+      "name": {
+        "en": "Icing"
+      },
+      "palette": {
+        "background": "#F5E6D3",
+        "deep": "#E8D2B8",
+        "surface": "#E6D8C6",
+        "text": "#1A1720",
+        "textMuted": "#5C5556",
+        "motif": "#D9A066"
+      },
+      "accentId": "icing"
+    }
+  ],
+  "fonts": {
+    "display": "mountains-of-christmas",
+    "body": "dm-sans",
+    "labels": "dm-sans"
+  },
+  "clock": {
+    "useAccent": false
+  },
+  "eventIcon": "card_giftcard_rounded",
+  "iconPackId": "candy-cane",
+  "wallpaperIds": [],
+  "downloadBytes": 617417
+}

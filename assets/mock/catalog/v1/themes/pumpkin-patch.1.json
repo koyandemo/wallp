@@ -1,0 +1,155 @@
+{
+  "id": "pumpkin-patch",
+  "rev": 1,
+  "festivalId": "halloween",
+  "name": {
+    "en": "Pumpkin Patch"
+  },
+  "style": "cute",
+  "tags": [
+    "pumpkin",
+    "orange"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-10-10T14:00:00.000Z",
+  "popularity": 2,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.6,
+          "width": 0.05,
+          "aspect": 1.2,
+          "color": "#3A5A2A"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.38,
+          "y": 0.7,
+          "width": 0.26,
+          "aspect": 1.4,
+          "color": "@motif",
+          "opacity": 0.9
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.62,
+          "y": 0.7,
+          "width": 0.26,
+          "aspect": 1.4,
+          "color": "@motif",
+          "opacity": 0.9
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 0.7,
+          "width": 0.5,
+          "aspect": 0.78,
+          "color": "@motif"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#2A1033",
+    "deep": "#140A1C",
+    "surface": "#3B2343",
+    "text": "#F5F1EA",
+    "textMuted": "#B8AEB3",
+    "motif": "#FF7A1A"
+  },
+  "accents": [
+    {
+      "id": "moon-cream",
+      "name": {
+        "en": "Moon cream"
+      },
+      "type": "solid",
+      "colors": [
+        "#F3E6C4"
+      ]
+    },
+    {
+      "id": "pumpkin",
+      "name": {
+        "en": "Pumpkin"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF7A1A"
+      ]
+    },
+    {
+      "id": "witch-purple",
+      "name": {
+        "en": "Witch purple"
+      },
+      "type": "solid",
+      "colors": [
+        "#A970FF"
+      ]
+    },
+    {
+      "id": "slime",
+      "name": {
+        "en": "Slime"
+      },
+      "type": "solid",
+      "colors": [
+        "#7BD44A"
+      ]
+    },
+    {
+      "id": "pumpkin-glow",
+      "name": {
+        "en": "Pumpkin glow"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFB547",
+        "#FF4D2E"
+      ],
+      "angle": 135
+    }
+  ],
+  "fonts": {
+    "display": "creepster",
+    "body": "space-grotesk",
+    "labels": "space-grotesk"
+  },
+  "clock": {
+    "useAccent": true
+  },
+  "eventIcon": "nightlight_round",
+  "iconPackId": "moonlit",
+  "wallpaperIds": [
+    "pumpkin-patch"
+  ],
+  "downloadBytes": 362411
+}

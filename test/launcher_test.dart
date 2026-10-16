@@ -5,12 +5,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/launcher/home_arrangement.dart';
 import 'package:wallp/launcher/home_layout.dart';
+import 'package:wallp/icons/themed_icon_painter.dart';
 import 'package:wallp/launcher/launcher_app.dart';
+import 'package:wallp/look/applied_look.dart';
+import 'package:wallp/look/look_store.dart';
 import 'package:wallp/services/icon_pack_service.dart';
-import 'package:wallp/services/theme_prefs.dart';
+import 'package:wallp/store/state/user_store.dart';
+
+import 'look/fixtures.dart';
 
 InstalledApp app(String pkg, String label) =>
     InstalledApp(packageName: pkg, label: label);
@@ -21,22 +25,6 @@ void main() {
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
-  });
-
-  group('ThemePrefs', () {
-    test('falls back to the next festival when nothing was applied', () async {
-      final applied = await ThemePrefs().load(now: DateTime(2026, 11, 2));
-      expect(applied.theme.id, 'christmas-eve');
-      expect(applied.accent, applied.theme.palette.accent);
-    });
-
-    test('remembers the applied theme and accent', () async {
-      final halloween = ThemeCatalog.byId('halloween-night')!;
-      await ThemePrefs().save(halloween, halloween.palette.accentOptions[2]);
-      final applied = await ThemePrefs().load();
-      expect(applied.theme, halloween);
-      expect(applied.accent, halloween.palette.accentOptions[2]);
-    });
   });
 
   test('suggested layout puts phone/messages/browser/camera in the dock', () {
@@ -87,8 +75,7 @@ void main() {
       messenger.setMockMethodCallHandler(launcher, null);
     });
 
-    final halloween = ThemeCatalog.byId('halloween-night')!;
-    await ThemePrefs().save(halloween, halloween.palette.accent);
+    await applyBuiltIn('halloween-night');
 
     await tester.pumpWidget(const LauncherApp());
     await tester.pumpAndSettle();
@@ -134,8 +121,7 @@ void main() {
     });
     addTearDown(() => messenger.setMockMethodCallHandler(icons, null));
 
-    final halloween = ThemeCatalog.byId('halloween-night')!;
-    await ThemePrefs().save(halloween, halloween.palette.accent);
+    await applyBuiltIn('halloween-night');
     await tester.pumpWidget(const LauncherApp());
     await tester.pumpAndSettle();
 
@@ -208,8 +194,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    final halloween = ThemeCatalog.byId('halloween-night')!;
-    await ThemePrefs().save(halloween, halloween.palette.accent);
+    await applyBuiltIn('halloween-night');
     await tester.pumpWidget(const LauncherApp());
     await tester.pumpAndSettle();
     expect(find.text('Cool Game'), findsOneWidget);
@@ -243,8 +228,13 @@ void main() {
 
     // Halloween was the fallback; the user was applying Christmas when
     // Android jumped to wallp Home.
-    final christmas = ThemeCatalog.byId('christmas-eve')!;
-    await ThemePrefs().savePending(christmas, christmas.palette.accent);
+    await LookStore().savePending(
+      AppliedLook.wholeTheme(
+        mockCatalog(),
+        mockTheme('christmas-eve'),
+        at: DateTime.now(),
+      ),
+    );
 
     await tester.pumpWidget(const LauncherApp());
     await tester.pumpAndSettle();
@@ -252,8 +242,52 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.textContaining('· Christmas'), findsOneWidget);
     expect(find.text('WhatsApp'), findsOneWidget);
-    expect(find.text('Christmas applied'), findsOneWidget);
-    expect((await ThemePrefs().load()).theme, christmas);
+    // The catalog's name for christmas-eve.
+    expect(find.text('Snowy Pines applied'), findsOneWidget);
+    expect((await LookStore().load()).theme.id, 'christmas-eve');
+    // wallp Home recorded it in the store's history too.
+    final user = UserStore();
+    await user.load();
+    expect(user.history.first.themeId, 'christmas-eve');
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('follows a partial apply: icon pack and clock places', (
+    tester,
+  ) async {
+    const icons = MethodChannel('wallp/icons');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(icons, (call) async {
+      if (call.method != 'listApps') return null;
+      return [
+        {'package': 'com.google.android.dialer', 'label': 'Phone'},
+        {'package': 'com.whatsapp', 'label': 'WhatsApp'},
+      ];
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(icons, null));
+
+    final catalog = mockCatalog();
+    final halloween = AppliedLook.wholeTheme(
+      catalog,
+      mockTheme('halloween-night'),
+      at: designDay,
+    );
+    await LookStore().save(halloween);
+    await tester.pumpWidget(const LauncherApp());
+    await tester.pumpAndSettle();
+    expect(find.byType(ThemedIcon), findsWidgets, reason: 'Spooky Glow icons');
+
+    // A downloaded (image) icon pack: drawn in Phase 6, own icons until then.
+    await LookStore().save(
+      halloween.withIconPack(catalog.iconPack('moonlit')!, at: designDay),
+    );
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.byType(ThemedIcon), findsNothing);
+    expect(find.textContaining('· Halloween'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
   });

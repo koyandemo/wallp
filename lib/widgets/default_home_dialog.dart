@@ -28,12 +28,24 @@ Future<bool?> showDefaultHomeDialog(
             ])
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: ThemedIcon(
-                  style: theme.scene,
-                  accent: accent,
-                  glyph: glyph,
-                  size: 52,
-                ),
+                // Dashboard themes have downloaded icons, not painted ones.
+                child: theme.iconStyle == null
+                    ? Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: theme.palette.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: accent, width: 2),
+                        ),
+                        child: Icon(glyph, color: accent, size: 26),
+                      )
+                    : ThemedIcon(
+                        style: theme.iconStyle!,
+                        accent: accent,
+                        glyph: glyph,
+                        size: 52,
+                      ),
               ),
           ],
         ),

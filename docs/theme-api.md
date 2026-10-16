@@ -109,218 +109,307 @@ Every file except `manifest.json` has its version or hash in the name, so it nev
 
 ```json
 {
-  "catalogVersion": "2026-10-15.3",
-  "festivals": [ /* Festival, section 4.1 */ ],
-  "themes":    [ /* ThemeSummary, section 4.3 */ ],
-  "wallpapers":[ /* Wallpaper, section 4.5 */ ],
-  "fonts":     [ /* Font, section 4.6 */ ],
-  "banners":   [ /* Banner, section 4.7 */ ]
+  "catalogVersion": "2026-10-15.1",
+  "festivals":  [ /* Festival, section 4.2 */ ],
+  "themes":     [ /* ThemeSummary, section 4.4 */ ],
+  "wallpapers": [ /* Wallpaper, section 4.5 */ ],
+  "fonts":      [ /* Font, section 4.6 */ ],
+  "iconPacks":  [ /* IconPack, section 4.7 */ ],
+  "banners":    [ /* Banner, section 4.8 */ ],
+  "accentPresets": { "solids": [ /* Accent */ ], "gradients": [ /* Accent */ ] },
+  "searchSuggestions": ["Halloween", "moon", "snow", "Thingyan", "handwritten", "minimal", "live"]
 }
 ```
 
-The summary is everything the store home, Themes list, festival pages and search need. The app downloads a theme's **full** file only when the user opens its detail page.
+The summary is everything the store home, Themes list, festival pages, icon pack screens and search need. The app downloads a theme's **full** file only when the user opens its detail page.
+
+- **`accentPresets`:** the Solid and Gradient tabs of the accent picker, offered on every theme after the theme's own accents.
+- **`searchSuggestions`:** "Popular searches" on the Search screen.
 
 ---
 
 ## 4. Data format
 
+The Dart models for every object below are in [lib/catalog/](../lib/catalog/). They are pure Dart, so the app, the tests and the seed generator share one parser. A working example of every object is in the mock catalog (section 4.11).
+
 Format rules:
-- **Colours:** strings `"#RRGGBB"`; an optional opacity goes in a separate `opacity` field (0–1). This maps to Flutter's `Color(0xFFRRGGBB)`.
-- **IDs:** lowercase `kebab-case`, never reused, e.g. `halloween-night`.
-- **Text people read:** a localized object, `{ "en": "Water Festival", "my": "သင်္ကြန်" }`. The app picks the phone's language, falling back to `en`.
-- **Dates:** `YYYY-MM-DD`. Times are ISO 8601 UTC.
+- **Colours:** strings `"#RRGGBB"`. This maps to Flutter's `Color(0xFFRRGGBB)`.
+- **IDs:** lowercase `kebab-case`, never reused, e.g. `halloween-night`. Each list (themes, wallpapers, fonts…) has its own IDs, so a theme and a wallpaper may both be `pumpkin-patch`.
+- **Text people read:** a localized object, `{ "en": "Water Festival", "my": "သင်္ကြန်" }`. `en` is required. The app picks the phone's language, falling back to `en`.
+- **Dates:** `YYYY-MM-DD`; impossible dates like `2027-02-31` are rejected, not rolled over. **Times:** ISO 8601 UTC with `Z`.
+- **Derived fields** such as `isLive` are written for people reading the JSON, but the app computes them itself and ignores the written value.
+- **Unknown fields are ignored**, so adding an optional field never breaks old apps (section 9).
 
-### 4.1 Festival
+### 4.1 Asset
 
-A festival is a collection, matching `ThemeCategory` in [theme_category.dart](../lib/models/theme_category.dart).
+Every downloadable file (images, icon pictures, fonts) is an Asset object:
+
+```json
+{ "url": "assets/9a359a28….png", "sha256": "9a359a28…", "bytes": 15577, "format": "png" }
+```
+
+- **`url`** is relative to the catalog base URL and must be exactly `assets/<sha256>.<format>`. A file can't be swapped without its name changing, so every asset is cached forever.
+- **`format`**: `png`, `webp`, `jpg`, `ttf`, `otf`, `woff2` or `json`.
+- **`bytes`** at most 10 MB (section 8). The app checks size and hash after downloading and throws the file away if either is wrong.
+
+### 4.2 Festival
+
+A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 
 ```json
 {
   "id": "thingyan",
   "name": { "en": "Thingyan", "my": "သင်္ကြန်" },
-  "comingSoon": false,
+  "kind": "festival",
+  "tags": ["myanmar"],
   "sort": 30,
-  "occurrences": ["2027-04-13", "2028-04-13", "2029-04-14"],
+  "occurrences": ["2027-04-13", "2028-04-13", "2029-04-13"],
   "fallbackDate": { "month": 4, "day": 13 },
+  "durationDays": 4,
   "unit": "day",
   "look": {
-    "background": "#062848", "surface": "#0C375F", "outline": "#1E5A8C",
-    "muted": "#B6D0E8", "brand": "#FFC21A", "displayFont": "baloo-2"
+    "background": "#062848", "surface": "#0C375F", "surface2": "#124570",
+    "outline": "#1E5A8C", "nav": "#083054", "muted": "#B6D0E8",
+    "brand": "#FFC21A", "displayFont": "baloo-2"
   },
   "coverThemeId": "thingyan-water"
 }
 ```
 
-- **`occurrences`:** real festival dates per year. Thingyan and Thadingyut follow the Myanmar calendar, so a fixed month and day is wrong some years. The countdown uses the first occurrence on or after today, and falls back to `fallbackDate` when the list runs out.
-- **`unit`:** the countdown word, `"day"` or `"night"`.
-- **`look`:** the app colours used while browsing this festival (the "Match app to my theme" feature).
+| Field | Meaning |
+|---|---|
+| `kind` | `festival` (has a countdown) or `collection` (no date, shows "Any time") |
+| `tags` | Filter tags. `myanmar` puts it under the Themes "Myanmar" chip |
+| `comingSoon` | Optional, `true` = a tab with a "coming soon" message and no themes |
+| `sort` | Order where there's no date to sort by |
+| `occurrences` | Real first-day dates, in order. Required for Myanmar-calendar festivals, whose Gregorian date moves |
+| `fallbackDate` | Used for fixed-date festivals, and once `occurrences` runs out. 29 February is not allowed |
+| `durationDays` | How long it lasts (default 1). Every day of it shows "Happy Thingyan!" |
+| `unit` | Countdown word: `day` or `night` |
+| `look` | The app's colours while browsing this festival ("Match app to my theme"). `muted` must be at least 4.5:1 on `background` |
+| `coverThemeId` | Optional theme used as the festival's picture |
 
-### 4.2 Theme (full), matching `PhoneTheme`
+**Countdown rule.** The next run is the first occurrence whose *last* day is on or after today. When the list runs out, `fallbackDate` is used, but never in a year the list already covered. A dated festival needs at least one of `occurrences` and `fallbackDate`.
+
+### 4.3 Theme (full): `themes/<id>.<rev>.json`
 
 ```json
 {
-  "id": "halloween-night",
-  "rev": 4,
-  "festivalId": "halloween",
-  "name": { "en": "Halloween" },
-  "subtitle": null,
-  "style": "classic",
-  "tags": ["spooky", "moon", "bats"],
-  "isLive": true,
-  "publishedAt": "2026-09-20T00:00:00Z",
+  "id": "cozy-cabin",
+  "rev": 1,
+  "festivalId": "christmas",
+  "name": { "en": "Cozy Cabin" },
+  "style": "cozy",
+  "tags": ["cabin", "warm", "snow"],
+  "publishedAt": "2026-10-10T14:00:00Z",
+  "popularity": 2,
   "minAppVersion": "1.0.0",
-
-  "scene": {
-    "engine": "halloween",
-    "params": {}
-  },
-
+  "scene": { "engine": "layers", "params": { "layers": [ /* section 4.9 */ ] } },
   "palette": {
-    "background": "#160C24",
-    "deep": "#0D0717",
-    "surface": "#2A1840",
-    "text": "#F4E9C9",
-    "textMuted": "#CDBFA0"
+    "background": "#3A2318", "deep": "#F1E9DE", "surface": "#4A352A",
+    "text": "#F5F1EA", "textMuted": "#BDB3AB", "motif": "#7A4A2E"
   },
-
   "accents": [
-    { "id": "pumpkin", "name": { "en": "Pumpkin" }, "type": "solid", "colors": ["#FF8A2A"] },
-    { "id": "slime",   "name": { "en": "Slime" },   "type": "solid", "colors": ["#9BE15D"] },
-    { "id": "witch",   "name": { "en": "Witch" },   "type": "solid", "colors": ["#B57BFF"] },
-    { "id": "glow",    "name": { "en": "Pumpkin glow" }, "type": "gradient", "colors": ["#FFB547", "#FF4D2E"], "angle": 135 }
+    { "id": "amber", "name": { "en": "Amber" }, "type": "solid", "colors": ["#FFB547"] },
+    { "id": "frost", "name": { "en": "Frost" }, "type": "gradient", "colors": ["#F5F1EA", "#7CC6FF"], "angle": 180 }
   ],
-
   "variants": [
-    { "id": "night", "name": { "en": "Night" }, "palette": null },
-    { "id": "blood-moon", "name": { "en": "Blood moon" },
-      "palette": { "background": "#1A0A10", "deep": "#0D0508", "surface": "#3A1420" } }
+    { "id": "warm", "name": { "en": "Warm" }, "accentId": "amber" },
+    { "id": "snowed-in", "name": { "en": "Snowed in" },
+      "palette": { "background": "#2A3440", "deep": "#E9EFEC", "surface": "#3C4652", "motif": "#5A6B7E" },
+      "accentId": "snow" }
   ],
-
-  "fonts": { "display": "creepster", "body": "space-grotesk", "labels": "space-grotesk" },
-
-  "clock": { "useAccent": true },
-  "eventIcon": "nightlight_round",
-
-  "iconPack": { "style": "halloween" },
-
-  "wallpaperIds": ["harvest-moon"],
-  "previewImage": "assets/4b1e….webp"
+  "fonts": { "display": "caveat", "body": "dm-sans", "labels": "dm-sans" },
+  "clock": { "useAccent": false },
+  "eventIcon": "card_giftcard_rounded",
+  "iconPackId": "candy-cane",
+  "wallpaperIds": ["snowy-cabin"],
+  "downloadBytes": 786432
 }
 ```
 
 | Field | Meaning in the app |
 |---|---|
-| `rev` | Increases on every publish of this theme. The app re-downloads when it changes. |
-| `style` | Festival page filter: `classic`, `cozy`, `minimal`, `cute`. |
-| `isLive` | Has animation, which shows the LIVE badge. |
-| `scene.engine` | Which built-in scene painter draws the wallpaper (section 5). |
-| `palette` | Same five colours as `ThemePalette`. `accentOptions` moves to `accents`. |
-| `accents` | Solid or gradient accent choices. The first one is the default. |
-| `variants` | Colour variants of the same theme. A variant only lists the palette fields it changes. |
-| `fonts` | Font IDs from the font list (section 4.6). `labels` is the font for app names on wallp Home. |
-| `clock.useAccent` | Same as `accentClock`: draw the lock clock in the accent colour. |
-| `eventIcon` | A name from the app's built-in icon list (section 7.3). |
-| `iconPack.style` | Which themed icon style `ThemedIconPainter` uses. |
-| `previewImage` | Optional small WebP thumbnail. Lets old app versions show a theme they cannot draw. |
+| `rev` | Increases on every publish of this theme. The app re-downloads when it changes |
+| `style` | Festival page filter: `classic`, `cozy`, `minimal`, `cute` |
+| `publishedAt` | The **NEW** badge shows for 14 days after this |
+| `popularity` | Rank, 1 = most applied. 0 = no data yet, sorts last. Seed values until the Events API exists (section 6) |
+| `scene` | Which engine draws the wallpaper (section 5). Live = the scene animates; the app works this out from the scene |
+| `palette` | The five `ThemePalette` colours plus optional `motif`, the scene's main shape colour |
+| `accents` | Solid (1 colour) or gradient (2–3 colours, `angle` in CSS degrees: 90 = left to right, 180 = top to bottom). The first is the default. Where a gradient can't be drawn, the first colour is used |
+| `variants` | Colour variants. `palette` lists only the fields it changes; `accentId` is the accent it starts with and must exist in `accents` |
+| `fonts` | Font IDs (section 4.6). `labels` is the font for app names on wallp Home |
+| `clock.useAccent` | Draw the lock clock in the accent colour |
+| `eventIcon` | A name from the app's icon allowlist (section 7.3) |
+| `iconPackId` | The pack a whole-theme apply also applies (section 4.7) |
+| `wallpaperIds` | Related stand-alone wallpapers, shown on the detail page |
+| `downloadBytes` | Size of every file a whole-theme apply needs (below). Shown as "Apply · 0.8 MB" |
+| `previewImage` | Optional Asset: a small picture for app versions that can't draw `scene` |
 
-### 4.3 ThemeSummary (inside the catalog)
+**What a whole-theme apply downloads.** The scene's image layers, every picture of its icon pack, and every file of its display, body and labels fonts, each counted once. The publish step computes `downloadBytes` this way (`Catalog.assetsFor` in the models). The app downloads the same list, and applies nothing until all of it is on disk.
+
+### 4.4 ThemeSummary (inside the catalog)
+
+The full theme minus `accents`, `variants`, `fonts`, `clock`, `eventIcon` and `wallpaperIds`, plus:
 
 ```json
 {
-  "id": "halloween-night", "rev": 4, "festivalId": "halloween",
-  "name": { "en": "Halloween" }, "style": "classic", "tags": ["spooky", "moon"],
-  "isLive": true, "isNew": false, "popularity": 1,
-  "engine": "halloween",
-  "background": "#160C24", "accent": "#FF8A2A",
-  "displayFont": "creepster",
-  "variantSwatches": ["#160C24", "#1A0A10"],
-  "previewImage": "assets/4b1e….webp",
-  "minAppVersion": "1.0.0"
+  "accent": { "id": "amber", "name": { "en": "Amber" }, "type": "solid", "colors": ["#FFB547"] },
+  "displayFont": "caveat",
+  "variantSwatches": ["#3A2318", "#2A3440"]
 }
 ```
 
-That's enough to draw cards, badges, variant dots, countdowns and search results without downloading the full theme.
-
-### 4.4 Scene parameters
-
-`scene.params` is an object whose keys depend on the engine. It starts empty for today's three painters. In the future, each engine can expose tweaks, for example:
-
-```json
-{ "engine": "christmas", "params": { "snowAmount": 0.6, "treeCount": 3, "showStar": true } }
-```
-
-The dashboard reads the allowed params for each engine from the engines list (section 5).
+The summary includes `scene` and `palette`, so cards can draw the real scene, not just a colour, without downloading the full file. **The publish step builds the summary from the full theme** (`ThemeDetail.toSummary()`), so the two can never disagree.
 
 ### 4.5 Wallpaper
 
 ```json
 {
-  "id": "harvest-moon",
-  "festivalId": "halloween",
-  "name": { "en": "Harvest Moon" },
+  "id": "snowy-cabin",
+  "festivalId": "christmas",
+  "name": { "en": "Snowy Cabin" },
   "kind": "scene",
-  "scene": { "engine": "halloween", "params": {} },
-  "image": null,
-  "isLive": true,
-  "tags": ["moon", "bats"]
+  "scene": { "engine": "layers", "params": { "layers": [ /* literal colours only */ ] } },
+  "tags": ["cabin", "snow", "warm"],
+  "publishedAt": "2026-10-10T14:00:00Z",
+  "popularity": 3
 }
 ```
 
 `kind` is one of:
-- **`scene`:** drawn by a scene engine. 0 MB to download, can be a live wallpaper.
-- **`image`:** a still picture:
+- **`scene`:** drawn by a scene engine, and can be a live wallpaper. A wallpaper has no palette, so its layers use `#RRGGBB` colours, never `@tokens` (section 4.9).
+- **`image`:** a still picture in several sizes. The app picks the smallest size at least as wide as the screen:
 
 ```json
 "image": {
   "sizes": [
-    { "width": 1080, "height": 2340, "url": "assets/a1c3….webp", "bytes": 412330 },
-    { "width": 1440, "height": 3120, "url": "assets/77de….webp", "bytes": 690112 }
+    { "width": 1080, "height": 2340, "asset": { /* Asset */ } },
+    { "width": 1440, "height": 3120, "asset": { /* Asset */ } }
   ],
   "blurhash": "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
   "dominant": "#160C24"
 }
 ```
 
-The app picks the smallest size that is at least the screen's width. `blurhash` shows a blurred placeholder while the image downloads.
-
 ### 4.6 Font
 
 ```json
 {
-  "id": "creepster",
-  "family": "Creepster",
-  "kind": "display",
+  "id": "playfair-display",
+  "family": "Playfair Display",
+  "category": "display",
   "scripts": ["latin"],
+  "tags": ["christmas", "serif", "elegant"],
   "license": "OFL-1.1",
   "files": [
-    { "weight": 400, "style": "normal", "url": "assets/c0ffee….woff2", "format": "woff2", "bytes": 38200, "sha256": "c0ffee…" }
+    { "weight": 400, "maxWeight": 900, "style": "normal", "asset": { /* Asset, format ttf */ } }
   ],
   "fallbackFor": { "my": "padauk" }
 }
 ```
 
-- **Font files:** use `ttf` or `otf` for the app (Flutter's `FontLoader` reads those), and `woff2` for the dashboard's web preview.
-- **`fallbackFor`:** which font draws text in scripts this font doesn't support. Creepster has no Myanmar letters, so Burmese app names use Padauk.
-- **`license`:** must be a licence that allows redistribution (Google Fonts are OFL or Apache).
+- **`category`:** the Fonts screen filter: `display`, `handwritten`, `clean`, `myanmar`.
+- **`files`:** `ttf` or `otf` only, because Flutter's `FontLoader` reads those. A variable font is one file with `weight` and `maxWeight`.
+- **`fallbackFor`:** which font draws text in scripts this font lacks. Creepster has no Myanmar letters, so Burmese app names use Padauk.
+- **`license`:** `OFL-1.1` or `Apache-2.0`. Anything else is rejected.
+- **`sampleText`:** optional preview text; the default is the clock, "19:47".
 
-### 4.7 Banner (store home carousel)
+### 4.7 IconPack
 
 ```json
 {
-  "id": "xmas-2026",
-  "title": { "en": "Snowy Christmas" },
-  "subtitle": { "en": "6 new themes, 2 of them live." },
-  "tag": { "en": "NEW · 6 THEMES" },
-  "cta": { "en": "Explore" },
-  "action": { "type": "festival", "id": "christmas" },
-  "look": { "background": "#0F3D2E", "accent": "#F2B33D", "font": "playfair-display", "engine": "christmas" },
-  "startsAt": "2026-11-15T00:00:00Z",
-  "endsAt": "2026-12-26T00:00:00Z",
-  "sort": 10
+  "id": "candy-cane",
+  "festivalId": "christmas",
+  "name": { "en": "Candy Cane" },
+  "style": { "en": "Filled" },
+  "kind": "images",
+  "shape": "squircle",
+  "tile": "#F5F1EA", "glyph": "#B0182F", "ring": "#B0182F",
+  "glyphs": { "phone": { /* Asset, png */ }, "messages": { /* Asset */ }, "…": {} },
+  "publishedAt": "2026-10-11T14:00:00Z",
+  "popularity": 5
 }
 ```
 
-`action.type` is one of `festival`, `theme`, `wallpapers`, `fonts` or `url`. The app hides banners outside their `startsAt`/`endsAt` window, so they can be scheduled ahead.
+- **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`). `images` = one downloaded picture per glyph key. Packs made in the dashboard are always `images`.
+- **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it per pack.
+- **`tile`, `glyph`, `ring`:** the pack's colours, used for previews and for apps the pack has no picture for. No `tile` = icons sit straight on the wallpaper.
+- **Glyph keys:** `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). Apps with no key, or whose key the pack doesn't draw, keep their own icon, tinted.
+- **Pictures:** square PNG or WebP with a transparent background, 256 px or larger.
+
+### 4.8 Banner (store home carousel)
+
+```json
+{
+  "id": "christmas-2026",
+  "tag": { "en": "WALLPAPERS" },
+  "title": { "en": "Snowy Christmas" },
+  "subtitle": { "en": "Snowy pines, gold ornaments and cozy cabins." },
+  "cta": { "en": "Browse" },
+  "action": { "type": "wallpapers", "id": "christmas" },
+  "look": { "background": "#0F3D2E", "accent": "#F2B33D", "titleColor": "#F5F1EA", "font": "playfair-display", "artThemeId": "christmas-eve" },
+  "startsAt": "2026-10-10T00:00:00Z",
+  "endsAt": "2026-12-27T00:00:00Z",
+  "sort": 20
+}
+```
+
+- **`action.type`:** `festival` or `theme` (with `id`); `wallpapers`, `iconPacks` or `fonts` (optional festival `id` as a filter); or `url` (with an `https` `url`).
+- **`look.accent`** is the button colour. **`look.artThemeId`** (optional) draws that theme's scene as the banner picture.
+- The app hides banners outside their `startsAt`/`endsAt` window, so they can be scheduled ahead.
+
+### 4.9 Layers scene (`engine: "layers"`)
+
+The engine for every dashboard-made theme and wallpaper (section 5, level 2). `params.layers` is a list drawn back to front. Positions are fractions of the screen (0–1, from the top left). Sizes are fractions of the screen **width**, so circles stay round on any phone.
+
+```json
+{ "type": "gradient", "colors": ["@surface", "@background"], "angle": 180 }
+{ "type": "shape", "shape": "circle", "x": 0.7, "y": 0.28, "width": 0.5, "color": "@motif", "glow": true, "motion": "pulse" }
+{ "type": "shape", "shape": "polygon", "x": 0.5, "y": 0.6, "width": 0.62, "aspect": 1.15, "color": "@motif", "points": [[0.5, 0], [1, 1], [0, 1]] }
+{ "type": "image", "image": { /* Asset */ }, "fit": "width", "anchor": "bottom" }
+{ "type": "particles", "effect": "snow", "count": 70, "speed": 0.3, "size": 0.35, "color": "#FFFFFF", "opacity": 0.9 }
+```
+
+| Layer | Fields |
+|---|---|
+| `gradient` | `colors` (2 or more), `angle` (default 180) |
+| `shape` | `shape`: `circle`, `ellipse`, `rect`, `polygon`. `x`, `y`: centre. `width`; height = width × `aspect` (default 1). `points`: polygon corners inside the shape's box, 0–1, at least 3. `glow`. `motion`: `none`, `float`, `pulse`, `sway` |
+| `image` | `image`: an Asset. `fit`: `width` (default), `cover`, `contain`. `anchor`: `top`, `center`, `bottom` (default) |
+| `particles` | `effect`: `snow`, `rain`, `drops`, `bats`, `lanterns`, `petals`, `sparkles`, `stars`. `count`: 1–150. `speed`: 0–1 (0 = still). `size`: 0–1 |
+
+Every layer also takes `opacity` (0–1, default 1).
+
+**Colours** are `#RRGGBB` or a **palette token**: `@background`, `@deep`, `@surface`, `@text`, `@motif`, `@accent`. Tokens follow the theme's palette, the chosen variant and the user's accent, so one scene serves every variant. Only themes can use tokens; wallpapers have no palette.
+
+**Live** = at least one moving shape, or particles with `speed` above 0. Live themes get the LIVE badge and can be set as the live wallpaper.
+
+**Limits** keep a live wallpaper cheap to run for hours: at most 150 particles per layer, positions between -0.5 and 1.5, widths up to 3 screen widths.
+
+### 4.10 Broken data: what the app does
+
+The app never trusts the catalog to be perfect:
+
+- **One broken item is skipped**, not the whole catalog: a theme with a bad colour disappears, the rest still show. The app keeps a list of what it skipped (`Catalog.issues`) for logs.
+- **Hard references:** an item that points at something missing is dropped. Examples: a theme whose festival, icon pack or display font is gone; a banner whose theme is gone. This repeats until stable, so dropping a theme also drops the banner that opens it.
+- **Soft references** keep the item and use a fallback: a festival's `coverThemeId`, a banner's `artThemeId`, a font's `fallbackFor`.
+- **Unknown engines are hidden** (section 5), including `painted` icon packs whose painter this build lacks.
+
+The publish step must be stricter: the dashboard refuses to publish while `Catalog.validate()` reports anything, soft references included.
+
+### 4.11 The mock catalog
+
+Until the real API exists, the app reads a complete catalog bundled at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/), laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`.
+
+It contains 7 festivals (2 coming soon), 30 themes (3 built-in, 27 using the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), with 135 files totalling 4.7 MB.
+
+**To change it:** edit [tool/seed/seed_data.dart](../tool/seed/seed_data.dart), then run `dart run tool/seed/generate.dart`. The generator builds everything through the models above, fills in hashes, sizes and `downloadBytes`, and reads its own output back through the app's parser. If icon or scene art in [tool/seed/art.dart](../tool/seed/art.dart) changes, first run `flutter test tool/seed/render_art_test.dart`. Fonts are fetched once from Google Fonts (OFL / Apache) into `tool/seed/source/fonts/`, with their licences.
+
+[test/catalog/](../test/catalog/) checks the mock catalog the way the app's download code will: every hash, size and reference, no unused files, and each summary equal to its full theme.
+
+The generator also writes the **built-in catalog** at [assets/builtin/catalog/](../assets/builtin/catalog/), which the app keeps after the mock is removed. It holds the three painted themes, with every festival and banner and only the painted icon packs, so a first launch with no internet still has a working store. Its `catalogVersion` is `built-in`, so it never matches a published version and the first successful refresh always replaces it.
+
+**Dates in the mock catalog are placeholders.** The Thingyan and Thadingyut dates are not checked against the Myanmar calendar. "Published" dates are counted back from 15 October 2026, so NEW badges expire in real time; tests use a fixed clock.
 
 ---
 
@@ -336,17 +425,17 @@ That leaves three ways to make new themes:
 | **2. Generic layered engine** (recommended next step) | Add one new engine to the app, `layers`, that draws a scene from a JSON list of layers: a background image or gradient, shapes, and particle effects (snow, rain, bats, lanterns, petals) | 0.2–1 MB of images | Once, to add the engine |
 | **3. Animation files** | A `lottie` or `rive` engine that plays a downloaded animation file | 0.1–2 MB | Once, to add the engine |
 
-Example of a level 2 scene:
+Example of a level 2 scene (full layer reference in section 4.9):
 
 ```json
 {
   "engine": "layers",
   "params": {
     "layers": [
-      { "type": "gradient", "colors": ["#0B1A2E", "#173A5C"], "angle": 180 },
-      { "type": "image", "url": "assets/9a7….webp", "fit": "cover", "anchor": "bottom" },
-      { "type": "particles", "effect": "snow", "count": 80, "speed": 0.4, "color": "#FFFFFF" },
-      { "type": "shape", "shape": "circle", "x": 0.7, "y": 0.2, "size": 0.18, "color": "#F2B33D", "glow": true }
+      { "type": "gradient", "colors": ["@surface", "@background"], "angle": 180 },
+      { "type": "shape", "shape": "circle", "x": 0.7, "y": 0.2, "width": 0.18, "color": "@motif", "glow": true },
+      { "type": "image", "image": { "url": "assets/9a35….png", "sha256": "9a35…", "bytes": 15577, "format": "png" }, "fit": "width", "anchor": "bottom" },
+      { "type": "particles", "effect": "snow", "count": 80, "speed": 0.4, "color": "#FFFFFF" }
     ]
   }
 }
@@ -360,7 +449,7 @@ Example of a level 2 scene:
     { "id": "halloween", "sinceApp": "1.0.0", "params": [] },
     { "id": "christmas", "sinceApp": "1.0.0", "params": [] },
     { "id": "thingyan",  "sinceApp": "1.0.0", "params": [] },
-    { "id": "layers",    "sinceApp": "1.2.0", "params": ["layers"] }
+    { "id": "layers",    "sinceApp": "1.0.0", "params": ["layers"] }
   ]
 }
 ```

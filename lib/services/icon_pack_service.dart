@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../icons/app_glyphs.dart';
 import '../icons/themed_icon_painter.dart';
 import '../models/phone_theme.dart';
+import '../render/scene_assets.dart';
 import 'wallpaper_service.dart';
 
 /// An app installed on the phone that can get a themed icon.
@@ -24,6 +25,9 @@ class InstalledApp {
   final ui.Image? icon;
 
   IconData? get glyph => glyphFor(packageName, label);
+
+  /// Which picture a downloaded icon pack draws it with, if any.
+  String? get glyphKey => glyphKeyFor(packageName, label);
 }
 
 /// Adds themed app icons to the home screen as pinned shortcuts (Android 8+).
@@ -79,15 +83,27 @@ class IconPackService {
     required PhoneTheme theme,
     required InstalledApp app,
     required ui.Color accent,
+    SceneAssets? assets,
   }) async {
-    final png = await _renderIcon(
-      ThemedIconPainter(
-        style: theme.scene,
-        accent: accent,
-        glyph: app.glyph,
-        appIcon: app.icon,
-      ),
-    );
+    // A downloaded pack sends its picture as is (already a tile).
+    final picture = theme.imageIcons?.pictureFor(app.glyphKey);
+    final downloaded = picture == null
+        ? null
+        : await (assets ?? SceneAssets.shared).bytes(picture);
+    final style = theme.iconStyle;
+    if (downloaded == null && style == null) {
+      throw const WallpaperException("This theme has no icon for this app");
+    }
+    final png =
+        downloaded ??
+        await _renderIcon(
+          ThemedIconPainter(
+            style: style!,
+            accent: accent,
+            glyph: app.glyph,
+            appIcon: app.icon,
+          ),
+        );
     try {
       return await _channel.invokeMethod<bool>('pinShortcut', {
             'id': '${theme.id}-${app.packageName}',

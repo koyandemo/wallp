@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:wallp/core/app_theme.dart';
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/icons/app_glyphs.dart';
-import 'package:wallp/screens/icon_pack_screen.dart';
+import 'package:wallp/store/screens/pin_shortcuts_screen.dart';
+
+import 'look/fixtures.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -61,11 +62,11 @@ void main() {
           .setMockMethodCallHandler(channel, null),
     );
 
-    final halloween = ThemeCatalog.byId('halloween-night')!;
+    final halloween = builtInTheme('halloween-night');
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.dark(),
-        home: IconPackScreen(
+        home: PinShortcutsScreen(
           theme: halloween,
           accent: halloween.palette.accent,
         ),
@@ -129,11 +130,11 @@ void main() {
   }
 
   Future<void> pumpIconPack(WidgetTester tester) async {
-    final halloween = ThemeCatalog.byId('halloween-night')!;
+    final halloween = builtInTheme('halloween-night');
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.dark(),
-        home: IconPackScreen(
+        home: PinShortcutsScreen(
           theme: halloween,
           accent: halloween.palette.accent,
         ),
@@ -157,7 +158,7 @@ void main() {
     mockCannotPin(wallpIsHome: true);
     await pumpIconPack(tester);
 
-    expect(find.text('Your Halloween icons'), findsOneWidget);
+    expect(find.text('Your Haunted Moon icons'), findsOneWidget);
     expect(find.text('WhatsApp'), findsOneWidget);
     expect(find.text('Add'), findsNothing);
     expect(find.text('Not available on this phone'), findsNothing);

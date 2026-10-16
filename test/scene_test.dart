@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/scenes/scene_math.dart';
 import 'package:wallp/scenes/scene_view.dart';
+
+import 'look/fixtures.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -31,7 +32,7 @@ void main() {
   });
 
   testWidgets('every theme scene animates without errors', (tester) async {
-    for (final theme in ThemeCatalog.themes) {
+    for (final theme in builtInThemes()) {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

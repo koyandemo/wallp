@@ -1,0 +1,136 @@
+{
+  "id": "quiet-ink",
+  "rev": 1,
+  "festivalId": "minimal",
+  "name": {
+    "en": "Quiet Ink"
+  },
+  "style": "minimal",
+  "tags": [
+    "minimal",
+    "dark",
+    "simple"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-05-18T14:00:00.000Z",
+  "popularity": 1,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.7,
+          "y": 0.28,
+          "width": 0.5,
+          "color": "@motif",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.78,
+          "y": 0.25,
+          "width": 0.08,
+          "color": "@deep",
+          "opacity": 0.25
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#1A1720",
+    "deep": "#26222E",
+    "surface": "#2C2A32",
+    "text": "#F5F1EA",
+    "textMuted": "#B3B0AD",
+    "motif": "#332E3D"
+  },
+  "accents": [
+    {
+      "id": "snow",
+      "name": {
+        "en": "Snow"
+      },
+      "type": "solid",
+      "colors": [
+        "#F5F1EA"
+      ]
+    },
+    {
+      "id": "amber",
+      "name": {
+        "en": "Amber"
+      },
+      "type": "solid",
+      "colors": [
+        "#FFB547"
+      ]
+    },
+    {
+      "id": "steel",
+      "name": {
+        "en": "Steel"
+      },
+      "type": "solid",
+      "colors": [
+        "#9FB3C6"
+      ]
+    },
+    {
+      "id": "rose",
+      "name": {
+        "en": "Rose"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF8FC0"
+      ]
+    },
+    {
+      "id": "dusk",
+      "name": {
+        "en": "Dusk"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFB547",
+        "#A970FF"
+      ],
+      "angle": 135
+    }
+  ],
+  "fonts": {
+    "display": "bebas-neue",
+    "body": "space-grotesk",
+    "labels": "space-grotesk"
+  },
+  "clock": {
+    "useAccent": false
+  },
+  "eventIcon": "event",
+  "iconPackId": "quiet-line",
+  "wallpaperIds": [
+    "quiet-ink"
+  ],
+  "downloadBytes": 282652
+}

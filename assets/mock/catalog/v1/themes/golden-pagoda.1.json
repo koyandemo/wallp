@@ -1,0 +1,148 @@
+{
+  "id": "golden-pagoda",
+  "rev": 1,
+  "festivalId": "thingyan",
+  "name": {
+    "en": "Golden Pagoda"
+  },
+  "style": "classic",
+  "tags": [
+    "pagoda",
+    "gold",
+    "myanmar"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-10-09T14:00:00.000Z",
+  "popularity": 3,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.72,
+          "y": 0.24,
+          "width": 0.24,
+          "color": "@motif",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        },
+        {
+          "type": "image",
+          "image": {
+            "url": "assets/ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642.png",
+            "sha256": "ebd517bfa04ae487b5e15867503c9f3c8dc05b755a289974243ad81d9c80a642",
+            "bytes": 13561,
+            "format": "png"
+          },
+          "fit": "width",
+          "anchor": "bottom"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#1E3A5F",
+    "deep": "#0F2238",
+    "surface": "#304A6C",
+    "text": "#F5F1EA",
+    "textMuted": "#B5BAC0",
+    "motif": "#F2B33D"
+  },
+  "accents": [
+    {
+      "id": "gold",
+      "name": {
+        "en": "Gold"
+      },
+      "type": "solid",
+      "colors": [
+        "#F2B33D"
+      ]
+    },
+    {
+      "id": "sun",
+      "name": {
+        "en": "Sun"
+      },
+      "type": "solid",
+      "colors": [
+        "#FFC21A"
+      ]
+    },
+    {
+      "id": "sky",
+      "name": {
+        "en": "Sky"
+      },
+      "type": "solid",
+      "colors": [
+        "#7CC6FF"
+      ]
+    },
+    {
+      "id": "padauk-yellow",
+      "name": {
+        "en": "Padauk yellow"
+      },
+      "type": "solid",
+      "colors": [
+        "#FFD54A"
+      ]
+    },
+    {
+      "id": "lotus",
+      "name": {
+        "en": "Lotus"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF8FA3"
+      ]
+    },
+    {
+      "id": "splash",
+      "name": {
+        "en": "Splash"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFC21A",
+        "#7CC6FF"
+      ],
+      "angle": 135
+    }
+  ],
+  "fonts": {
+    "display": "padauk",
+    "body": "padauk",
+    "labels": "padauk"
+  },
+  "clock": {
+    "useAccent": true
+  },
+  "eventIcon": "water_drop_rounded",
+  "iconPackId": "padauk-flower",
+  "wallpaperIds": [
+    "golden-pagoda"
+  ],
+  "downloadBytes": 1190110
+}

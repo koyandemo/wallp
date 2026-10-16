@@ -6,12 +6,45 @@ class _Rule {
   const _Rule(this.icon, {this.packages = const [], this.labels = const []});
 
   final IconData icon;
+
+  /// The catalog glyph key (GlyphKeys) a downloaded icon pack draws this
+  /// app with; null = no picture in any pack (the app keeps its icon).
+  String? get key => _keys[icon.codePoint];
   final List<String> packages;
   final List<String> labels;
 
   bool matches(String package, String label) =>
       packages.any(package.contains) || labels.contains(label);
 }
+
+/// Glyph keys by symbol. Facebook and voice recorders have no key: no pack
+/// draws them yet.
+final _keys = <int, String?>{
+  Icons.forum_rounded.codePoint: 'messages',
+  Icons.phone_rounded.codePoint: 'phone',
+  Icons.chat_bubble_rounded.codePoint: 'messages',
+  Icons.camera_rounded.codePoint: 'camera',
+  Icons.photo_camera_rounded.codePoint: 'camera',
+  Icons.public_rounded.codePoint: 'browser',
+  Icons.photo_rounded.codePoint: 'photos',
+  Icons.map_rounded.codePoint: 'maps',
+  Icons.mail_rounded.codePoint: 'mail',
+  Icons.calendar_month_rounded.codePoint: 'calendar',
+  Icons.schedule_rounded.codePoint: 'clock',
+  Icons.play_arrow_rounded.codePoint: 'video',
+  Icons.music_video_rounded.codePoint: 'video',
+  Icons.music_note_rounded.codePoint: 'music',
+  Icons.shop_rounded.codePoint: 'store',
+  Icons.thumb_up_rounded.codePoint: null,
+  Icons.calculate_rounded.codePoint: 'calculator',
+  Icons.contacts_rounded.codePoint: 'contacts',
+  Icons.folder_rounded.codePoint: 'files',
+  Icons.cloud_rounded.codePoint: 'weather',
+  Icons.sticky_note_2_rounded.codePoint: 'notes',
+  Icons.mic_rounded.codePoint: null,
+  Icons.account_balance_wallet_rounded.codePoint: 'wallet',
+  Icons.settings_rounded.codePoint: 'settings',
+};
 
 /// First match wins, so more specific rules come first.
 const _rules = <_Rule>[
@@ -114,6 +147,16 @@ IconData? glyphFor(String packageName, String label) {
   final name = label.trim().toLowerCase();
   for (final rule in _rules) {
     if (rule.matches(package, name)) return rule.icon;
+  }
+  return null;
+}
+
+/// The catalog glyph key for the app (`phone`, `messages`…), or null.
+String? glyphKeyFor(String packageName, String label) {
+  final package = packageName.toLowerCase();
+  final name = label.trim().toLowerCase();
+  for (final rule in _rules) {
+    if (rule.matches(package, name)) return rule.key;
   }
   return null;
 }

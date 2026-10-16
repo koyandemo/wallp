@@ -3,14 +3,15 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/services/wallpaper_renderer.dart';
+
+import 'look/fixtures.dart';
 
 void main() {
   testWidgets('renders every theme to a PNG of the requested size', (
     tester,
   ) async {
-    for (final theme in ThemeCatalog.themes) {
+    for (final theme in builtInThemes()) {
       final png = await tester.runAsync(
         () => WallpaperRenderer.renderPng(
           theme: theme,

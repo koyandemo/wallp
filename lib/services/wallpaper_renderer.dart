@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import '../models/phone_theme.dart';
+import '../render/scene_assets.dart';
 import '../scenes/scene_painter.dart';
 import '../scenes/scene_view.dart';
 
@@ -16,9 +17,15 @@ class WallpaperRenderer {
     required PhoneTheme theme,
     required ui.Color accent,
     required ui.Size pixelSize,
+    SceneAssets? assets,
   }) async {
     final time = ValueNotifier<double>(kSceneStillTime);
-    final painter = scenePainterFor(theme, time, accent);
+    // A still image is drawn once: wait for a layered scene's pictures.
+    final layered = theme.layered;
+    final images = layered == null
+        ? const <String, ui.Image>{}
+        : await (assets ?? SceneAssets.shared).images(layered.images);
+    final painter = scenePainterFor(theme, time, accent, images: images);
     if (painter == null) {
       throw StateError('${theme.id} has no painted scene');
     }

@@ -1,0 +1,190 @@
+{
+  "id": "gold-ornaments",
+  "rev": 1,
+  "festivalId": "christmas",
+  "name": {
+    "en": "Gold Ornaments"
+  },
+  "style": "classic",
+  "tags": [
+    "gold",
+    "red",
+    "ornament"
+  ],
+  "isLive": true,
+  "publishedAt": "2026-08-16T14:00:00.000Z",
+  "popularity": 3,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.3,
+          "width": 0.012,
+          "aspect": 5.0,
+          "color": "@text"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "x": 0.5,
+          "y": 0.345,
+          "width": 0.1,
+          "aspect": 0.5,
+          "color": "@accent"
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.5,
+          "y": 0.46,
+          "width": 0.46,
+          "color": "@motif",
+          "glow": true,
+          "motion": "sway"
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        },
+        {
+          "type": "particles",
+          "effect": "snow",
+          "count": 70,
+          "color": "#FFFFFF",
+          "speed": 0.3,
+          "size": 0.35,
+          "opacity": 0.9
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#5A1420",
+    "deep": "#2A0E15",
+    "surface": "#672732",
+    "text": "#F5F1EA",
+    "textMuted": "#C7AFAD",
+    "motif": "#F2B33D"
+  },
+  "accents": [
+    {
+      "id": "gold",
+      "name": {
+        "en": "Gold"
+      },
+      "type": "solid",
+      "colors": [
+        "#F2B33D"
+      ]
+    },
+    {
+      "id": "berry-red",
+      "name": {
+        "en": "Berry red"
+      },
+      "type": "solid",
+      "colors": [
+        "#D7263D"
+      ]
+    },
+    {
+      "id": "snow",
+      "name": {
+        "en": "Snow"
+      },
+      "type": "solid",
+      "colors": [
+        "#F5F1EA"
+      ]
+    },
+    {
+      "id": "pine",
+      "name": {
+        "en": "Pine"
+      },
+      "type": "solid",
+      "colors": [
+        "#2C7A57"
+      ]
+    },
+    {
+      "id": "frost",
+      "name": {
+        "en": "Frost"
+      },
+      "type": "gradient",
+      "colors": [
+        "#F5F1EA",
+        "#7CC6FF"
+      ],
+      "angle": 180
+    }
+  ],
+  "variants": [
+    {
+      "id": "ruby",
+      "name": {
+        "en": "Ruby"
+      },
+      "accentId": "gold"
+    },
+    {
+      "id": "emerald",
+      "name": {
+        "en": "Emerald"
+      },
+      "palette": {
+        "background": "#0F3D2E",
+        "deep": "#082418",
+        "surface": "#224D3F",
+        "textMuted": "#B0BBB2"
+      },
+      "accentId": "gold"
+    },
+    {
+      "id": "navy",
+      "name": {
+        "en": "Navy"
+      },
+      "palette": {
+        "background": "#10223D",
+        "deep": "#081226",
+        "surface": "#23344D",
+        "textMuted": "#B0B3B6"
+      },
+      "accentId": "gold"
+    }
+  ],
+  "fonts": {
+    "display": "playfair-display",
+    "body": "dm-sans",
+    "labels": "dm-sans"
+  },
+  "clock": {
+    "useAccent": false
+  },
+  "eventIcon": "card_giftcard_rounded",
+  "iconPackId": "candy-cane",
+  "wallpaperIds": [
+    "ornaments"
+  ],
+  "downloadBytes": 672593
+}

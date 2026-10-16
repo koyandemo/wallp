@@ -4,11 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-import 'package:wallp/data/theme_catalog.dart';
 import 'package:wallp/live_wallpaper/live_wallpaper_app.dart';
+import 'package:wallp/look/applied_look.dart';
+import 'package:wallp/look/look_store.dart';
+import 'package:wallp/scenes/placeholder_scene.dart';
+import 'package:wallp/models/phone_theme.dart';
+import 'package:wallp/render/layers_painter.dart';
 import 'package:wallp/scenes/scene_view.dart';
 import 'package:wallp/services/theme_prefs.dart';
 import 'package:wallp/widgets/screen_overlays.dart';
+
+import 'look/fixtures.dart';
 
 void main() {
   setUp(() {
@@ -22,15 +28,21 @@ void main() {
   testWidgets('animates the applied theme at 30 fps and follows changes', (
     tester,
   ) async {
-    final halloween = ThemeCatalog.byId('halloween-night')!;
-    final thingyan = ThemeCatalog.byId('thingyan-water')!;
-    await ThemePrefs().save(halloween, halloween.palette.accentOptions[1]);
+    final halloween = builtInTheme('halloween-night');
+    final thingyan = builtInTheme('thingyan-water');
+    await applyBuiltIn('halloween-night', accent: 1);
 
     await tester.pumpWidget(const LiveWallpaperApp());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(scene(tester).theme, halloween);
+    // Drawn from the saved look: the same theme, colours and accent.
+    expect(scene(tester).theme.id, halloween.id);
+    expect(scene(tester).theme.scene, SceneKind.halloween);
+    expect(
+      scene(tester).theme.palette.background,
+      halloween.palette.background,
+    );
     expect(scene(tester).accent, halloween.palette.accentOptions[1]);
     expect(scene(tester).animate, isTrue);
     expect(scene(tester).maxFps, LiveWallpaperApp.fps);
@@ -39,16 +51,83 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await ThemePrefs().save(thingyan, thingyan.palette.accent);
+    await applyBuiltIn('thingyan-water');
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(scene(tester).theme, thingyan);
+    expect(scene(tester).theme.id, thingyan.id);
     expect(tester.takeException(), isNull);
 
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a partial apply: wallpaper and clock from other themes', (
+    tester,
+  ) async {
+    final catalog = mockCatalog();
+    final look =
+        AppliedLook.wholeTheme(catalog, mockTheme('cozy-cabin'), at: designDay)
+            .apply(
+              catalog,
+              mockTheme('halloween-night'),
+              ApplyOption.wallpaperOnly,
+              at: designDay,
+            )
+            .withClockFont(
+              catalog.font('pacifico')!,
+              at: designDay,
+              size: ClockSize.large,
+            );
+    await LookStore().save(look);
+
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(
+      LiveWallpaperApp.channel,
+      (call) async => call.method == 'showLockClock' ? true : null,
+    );
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(LiveWallpaperApp.channel, null),
+    );
+    await tester.pumpWidget(LiveWallpaperApp(clock: () => designDay));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Halloween's scene on the wallpaper...
+    expect(scene(tester).theme.id, 'halloween-night');
+    expect(scene(tester).theme.scene, SceneKind.halloween);
+    // ...Cozy Cabin's countdown, in the user's clock font and size.
+    final overlay = tester.widget<LockScreenOverlay>(
+      find.byType(LockScreenOverlay),
+    );
+    expect(overlay.theme.id, 'cozy-cabin');
+    expect(overlay.theme.displayFont, 'Pacifico');
+    expect(overlay.clockScale, 1.25);
+    expect(find.textContaining('until Christmas'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a dashboard theme draws with the layers engine', (tester) async {
+    await LookStore().save(
+      AppliedLook.wholeTheme(mockCatalog(), mockTheme('ember'), at: designDay),
+    );
+    await tester.pumpWidget(LiveWallpaperApp(clock: () => designDay));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(PlaceholderScene), findsNothing);
+    final paint = tester.widget<CustomPaint>(
+      find.descendant(
+        of: find.byType(SceneView),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    expect(paint.painter, isA<LayersPainter>());
+    expect(scene(tester).animate, isTrue, reason: 'Ember is live');
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -77,8 +156,7 @@ void main() {
     }
 
     Future<void> pumpWallpaper(WidgetTester tester) async {
-      final halloween = ThemeCatalog.byId('halloween-night')!;
-      await ThemePrefs().save(halloween, halloween.palette.accent);
+      await applyBuiltIn('halloween-night');
       await tester.pumpWidget(LiveWallpaperApp(clock: () => now));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));

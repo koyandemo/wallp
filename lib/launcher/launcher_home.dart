@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/date_format.dart';
+import '../look/accent_paint.dart';
+import '../look/applied_look.dart';
+import '../look/look_store.dart';
+import '../look/resolved_look.dart';
+import '../render/font_registry.dart';
 import '../models/phone_theme.dart';
 import '../services/icon_pack_service.dart';
 import '../services/launcher_service.dart';
-import '../services/my_themes.dart';
-import '../services/theme_prefs.dart';
+import '../store/state/user_store.dart';
 import '../services/wallpaper_service.dart';
 import '../widgets/live_now.dart';
 import 'add_apps_sheet.dart';
@@ -24,13 +28,15 @@ class LauncherHome extends StatefulWidget {
     super.key,
     this.appsService = const IconPackService(),
     this.launcher = const LauncherService(),
-    this.prefs,
+    this.looks,
     this.store,
   });
 
   final IconPackService appsService;
   final LauncherService launcher;
-  final ThemePrefs? prefs;
+
+  /// The applied look: what to draw, and a pending apply to finish.
+  final LookStore? looks;
   final HomeStore? store;
 
   @override
@@ -39,11 +45,11 @@ class LauncherHome extends StatefulWidget {
 
 class _LauncherHomeState extends State<LauncherHome>
     with WidgetsBindingObserver {
-  late final ThemePrefs _prefs = widget.prefs ?? ThemePrefs();
+  late final LookStore _looks = widget.looks ?? LookStore();
   late final HomeStore _store = widget.store ?? HomeStore();
   final _pages = PageController();
 
-  AppliedTheme? _applied;
+  ResolvedLook? _applied;
   List<InstalledApp>? _apps;
   Map<String, InstalledApp> _byPackage = const {};
   HomeArrangement? _arrangement;
@@ -83,21 +89,30 @@ class _LauncherHomeState extends State<LauncherHome>
 
   /// Finishes a theme apply that switching the home app to wallp cut short.
   /// Never throws: the home screen must load regardless.
-  Future<PhoneTheme?> _applyPending() async {
+  Future<AppliedLook?> _applyPending() async {
     try {
-      return await MyThemes(themePrefs: _prefs).applyPending();
+      final look = await _looks.takePending();
+      if (look == null) return null;
+      await _looks.save(look);
+      // Load first: recording into an empty store would drop the history.
+      final user = UserStore();
+      await user.load();
+      await user.recordApplied(look.theme.id, look.appliedAt);
+      return look;
     } on Object {
       return null;
     }
   }
 
   /// After the next frame, when the home screen's Scaffold exists.
-  void _announceApplied(PhoneTheme theme) {
+  void _announceApplied(AppliedLook look) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ScaffoldMessenger.maybeOf(context)
         ?..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('${theme.name} applied')));
+        ..showSnackBar(
+          SnackBar(content: Text('${look.theme.name.en} applied')),
+        );
     });
   }
 
@@ -110,7 +125,14 @@ class _LauncherHomeState extends State<LauncherHome>
 
   Future<void> _reload() async {
     final pending = await _applyPending();
-    final applied = await _prefs.load();
+    final now = DateTime.now();
+    final look = await _looks.load(now: now);
+    // Draw at once; redraw when this engine has loaded the downloaded
+    // fonts (a slow disk must never hold back the home screen).
+    FontRegistry.shared.ensureAll(look.fonts.values).then((_) {
+      if (mounted) setState(() {});
+    });
+    final applied = ResolvedLook.of(look, now);
     if (!mounted) return;
     setState(() => _applied = applied);
     if (pending != null) _announceApplied(pending);
@@ -230,7 +252,7 @@ class _LauncherHomeState extends State<LauncherHome>
         for (final app in _apps!)
           if (!arrangement.contains(app.packageName)) app,
       ],
-      theme: applied.theme,
+      theme: applied.homeTheme,
       accent: applied.accent,
     );
     if (picked == null || picked.isEmpty || !mounted) return;
@@ -279,7 +301,7 @@ class _LauncherHomeState extends State<LauncherHome>
       AppDrawer.route(
         AppDrawer(
           apps: apps,
-          theme: applied.theme,
+          theme: applied.homeTheme,
           accent: applied.accent,
           onLaunch: _launch,
           onLongPress: _showAppMenu,
@@ -307,7 +329,7 @@ class _LauncherHomeState extends State<LauncherHome>
               ListTile(
                 leading: LauncherIcon(
                   app: app,
-                  theme: applied.theme,
+                  theme: applied.homeTheme,
                   accent: applied.accent,
                   size: 44,
                 ),
@@ -385,7 +407,7 @@ class _LauncherHomeState extends State<LauncherHome>
   Widget build(BuildContext context) {
     final applied = _applied;
     if (applied == null) return const SizedBox.expand();
-    final theme = applied.theme;
+    final theme = applied.homeTheme;
     final accent = applied.accent;
     final arrangement = _arrangement;
 
@@ -415,7 +437,14 @@ class _LauncherHomeState extends State<LauncherHome>
             child: Column(
               children: [
                 const SizedBox(height: 28),
-                _ClockHeader(theme: theme, accent: accent),
+                _ClockHeader(
+                  theme: theme,
+                  accent: accent,
+                  clockColor: applied.clockColor,
+                  clockScale: applied.clockScale,
+                  clockGradient: applied.clockGradient,
+                  accentGradient: applied.accentGradient,
+                ),
                 const SizedBox(height: 16),
                 if (_editing)
                   Text(
@@ -803,10 +832,27 @@ class _EditBar extends StatelessWidget {
 }
 
 class _ClockHeader extends StatelessWidget {
-  const _ClockHeader({required this.theme, required this.accent});
+  const _ClockHeader({
+    required this.theme,
+    required this.accent,
+    this.clockColor,
+    this.clockScale = 1,
+    this.clockGradient,
+    this.accentGradient,
+  });
 
   final PhoneTheme theme;
   final Color accent;
+
+  /// Paints the clock when it's drawn in a gradient accent.
+  final Gradient? clockGradient;
+
+  /// Paints the countdown icon when the accent is a gradient.
+  final Gradient? accentGradient;
+
+  /// The applied clock style's colour; null = accent or white, by theme.
+  final Color? clockColor;
+  final double clockScale;
 
   @override
   Widget build(BuildContext context) {
@@ -814,50 +860,61 @@ class _ClockHeader extends StatelessWidget {
     return LiveNow(
       builder: (context, now) => Column(
         children: [
-          Text(
-            DateFormatX.clock(now, use24h: use24h),
-            style: theme.displayStyle(
-              TextStyle(
-                fontSize: 72,
-                fontWeight: FontWeight.w700,
-                height: 1,
-                color: theme.accentClock ? accent : Colors.white,
-                shadows: _textShadow,
+          GradientText(
+            gradient: clockGradient,
+            child: Text(
+              DateFormatX.clock(now, use24h: use24h),
+              style: theme.displayStyle(
+                TextStyle(
+                  fontSize: 72 * clockScale,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                  color:
+                      clockColor ?? (theme.accentClock ? accent : Colors.white),
+                  // A shadow would show through the gradient's mask.
+                  shadows: clockGradient == null ? _textShadow : null,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 6),
           Text(DateFormatX.longDate(now), style: _shadowed(theme, 16)),
-          const SizedBox(height: 12),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
-              color: theme.palette.background.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(theme.eventIcon, size: 16, color: accent),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    '${theme.event.countdownLabel(now)} · ${theme.event.name}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.bodyStyle(
-                      TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: theme.palette.text,
+          // Undated collections (Minimal) have no countdown.
+          if (theme.event case final event?) ...[
+            const SizedBox(height: 12),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: theme.palette.background.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GradientText(
+                    gradient: accentGradient,
+                    child: Icon(theme.eventIcon, size: 16, color: accent),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      '${event.countdownLabel(now)} · ${event.name}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyStyle(
+                        TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: theme.palette.text,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

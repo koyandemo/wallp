@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../look/look_store.dart';
+import '../look/resolved_look.dart';
+import '../render/font_registry.dart';
 import '../scenes/scene_view.dart';
 import '../services/theme_prefs.dart';
 import '../widgets/screen_overlays.dart';
@@ -12,9 +15,18 @@ import '../widgets/screen_overlays.dart';
 /// screen it also draws the theme's clock, since apps can't restyle the
 /// phone's own lock screen clock.
 class LiveWallpaperApp extends StatefulWidget {
-  const LiveWallpaperApp({super.key, this.prefs, this.clock = DateTime.now});
+  const LiveWallpaperApp({
+    super.key,
+    this.prefs,
+    this.looks,
+    this.clock = DateTime.now,
+  });
 
+  /// For the "themed lock screen clock" switch.
   final ThemePrefs? prefs;
+
+  /// The applied look: what to draw.
+  final LookStore? looks;
 
   /// The current time (fixed in tests).
   final DateTime Function() clock;
@@ -30,8 +42,9 @@ class LiveWallpaperApp extends StatefulWidget {
 
 class _LiveWallpaperAppState extends State<LiveWallpaperApp> {
   late final ThemePrefs _prefs = widget.prefs ?? ThemePrefs();
+  late final LookStore _looks = widget.looks ?? LookStore();
   late final AppLifecycleListener _lifecycle;
-  AppliedTheme? _applied;
+  ResolvedLook? _applied;
   bool _clockOn = true;
   bool _locked = false;
 
@@ -60,7 +73,15 @@ class _LiveWallpaperAppState extends State<LiveWallpaperApp> {
   }
 
   Future<void> _load() async {
-    final applied = await _prefs.load();
+    // From saved data only: this engine may start before any network,
+    // e.g. right after a reboot.
+    final now = widget.clock();
+    final look = await _looks.load(now: now);
+    // Draw at once; redraw in the downloaded fonts once loaded.
+    FontRegistry.shared.ensureAll(look.fonts.values).then((_) {
+      if (mounted) setState(() {});
+    });
+    final applied = ResolvedLook.of(look, now);
     final clockOn = await _prefs.loadLockClock();
     if (!mounted) return;
     setState(() {
@@ -116,16 +137,16 @@ class _LiveWallpaperAppState extends State<LiveWallpaperApp> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ColoredBox(
-        color: applied?.theme.palette.background ?? Colors.black,
+        color: applied?.wallpaperTheme.palette.background ?? Colors.black,
         child: applied == null
             ? const SizedBox.expand()
             : Stack(
                 fit: StackFit.expand,
                 children: [
                   SceneView(
-                    key: ValueKey(applied.theme.id),
-                    theme: applied.theme,
-                    accent: applied.accent,
+                    key: ValueKey(applied.wallpaperTheme.id),
+                    theme: applied.wallpaperTheme,
+                    accent: applied.wallpaperAccent,
                     animate: true,
                     maxFps: LiveWallpaperApp.fps,
                   ),
@@ -134,8 +155,13 @@ class _LiveWallpaperAppState extends State<LiveWallpaperApp> {
                       // Below the phone's own clock, above the scene's
                       // ground and the lock screen shortcuts.
                       builder: (context, size) => LockScreenOverlay(
-                        theme: applied.theme,
+                        theme: applied.lockTheme,
                         accent: applied.accent,
+                        clockColor: applied.clockColor,
+                        clockScale: applied.clockScale,
+                        clockGradient: applied.clockGradient,
+                        accentGradient: applied.accentGradient,
+                        onAccent: applied.onAccent,
                         now: widget.clock(),
                         top: size.maxHeight * 0.3,
                       ),

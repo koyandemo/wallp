@@ -4,23 +4,38 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'dart:ui' as ui;
+
 import '../models/phone_theme.dart';
+import '../render/layers_painter.dart';
+import '../render/scene_assets.dart';
 import 'christmas_scene.dart';
 import 'halloween_scene.dart';
 import 'placeholder_scene.dart';
 import 'scene_painter.dart';
 import 'thingyan_scene.dart';
 
-/// The painter that draws [theme]'s scene, or null if it has none yet.
+/// The painter that draws [theme]'s scene, or null if it has none.
+/// A layered scene's [images] are its decoded pictures (by sha256).
 ScenePainter? scenePainterFor(
   PhoneTheme theme,
   ValueListenable<double> time,
-  Color accent,
-) {
+  Color accent, {
+  Map<String, ui.Image> images = const {},
+}) {
+  if (theme.layered case final layered?) {
+    return LayersPainter(
+      time: time,
+      accent: accent,
+      scene: layered,
+      images: images,
+    );
+  }
   return switch (theme.scene) {
     SceneKind.halloween => HalloweenPainter(time: time, accent: accent),
     SceneKind.christmas => ChristmasPainter(time: time, accent: accent),
     SceneKind.thingyan => ThingyanPainter(time: time, accent: accent),
+    null => null,
   };
 }
 
@@ -124,14 +139,33 @@ class _SceneViewState extends State<SceneView>
     super.dispose();
   }
 
+  /// A layered scene's pictures, once loaded from the phone.
+  Map<String, ui.Image> _images = const {};
+  Object? _imagesFor;
+
+  void _loadImages() {
+    final layered = widget.theme.layered;
+    if (layered == null || identical(_imagesFor, layered)) return;
+    _imagesFor = layered;
+    final refs = layered.images.toList();
+    if (refs.isEmpty) return;
+    SceneAssets.of(context).images(refs).then((images) {
+      if (mounted && identical(_imagesFor, layered)) {
+        setState(() => _images = images);
+      }
+    });
+  }
+
   ScenePainter? _painter() => scenePainterFor(
     widget.theme,
     _time,
     widget.accent ?? widget.theme.palette.accent,
+    images: _images,
   );
 
   @override
   Widget build(BuildContext context) {
+    _loadImages();
     final painter = _painter();
     if (painter == null) return PlaceholderScene(theme: widget.theme);
     return RepaintBoundary(

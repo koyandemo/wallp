@@ -1,7 +1,12 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+
+import '../catalog/catalog.dart';
 
 import '../icons/themed_icon_painter.dart';
 import '../models/phone_theme.dart';
+import '../render/scene_assets.dart';
 import '../services/icon_pack_service.dart';
 
 /// An app's icon in the current theme's style (Halloween, Christmas or
@@ -22,15 +27,40 @@ class LauncherIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (theme.hasIconPack) {
+    final own = _OwnIcon(app: app, size: size);
+    // A downloaded pack: its picture for this app, else the app's own icon.
+    if (theme.imageIcons case final pack?) {
+      final picture = pack.pictureFor(app.glyphKey);
+      if (picture == null) return own;
+      return PackPictureIcon(
+        picture: picture,
+        shape: pack.shape,
+        size: size,
+        placeholder: own,
+      );
+    }
+    final style = theme.iconStyle;
+    if (theme.hasIconPack && style != null) {
       return ThemedIcon(
-        style: theme.scene,
+        style: style,
         accent: accent,
         glyph: app.glyph,
         appIcon: app.icon,
         size: size,
       );
     }
+    return own;
+  }
+}
+
+class _OwnIcon extends StatelessWidget {
+  const _OwnIcon({required this.app, required this.size});
+
+  final InstalledApp app;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
     final icon = app.icon;
     return SizedBox.square(
       dimension: size,
@@ -41,7 +71,73 @@ class LauncherIcon extends StatelessWidget {
   }
 }
 
-/// Icon with its label underneath, for the home grid and the app drawer.
+/// A downloaded icon-pack picture, clipped to the user's tile shape. Shows
+/// [placeholder] until the picture loads, or if it can't.
+class PackPictureIcon extends StatefulWidget {
+  const PackPictureIcon({
+    super.key,
+    required this.picture,
+    required this.shape,
+    required this.size,
+    required this.placeholder,
+  });
+
+  final AssetRef picture;
+  final IconShape shape;
+  final double size;
+  final Widget placeholder;
+
+  @override
+  State<PackPictureIcon> createState() => _PackPictureIconState();
+}
+
+class _PackPictureIconState extends State<PackPictureIcon> {
+  ui.Image? _image;
+  AssetRef? _loading;
+
+  void _load() {
+    if (_loading == widget.picture) return;
+    _loading = widget.picture;
+    _image = null;
+    final wanted = widget.picture;
+    SceneAssets.of(context).image(wanted).then((img) {
+      if (mounted && _loading == wanted) setState(() => _image = img);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _load();
+    final image = _image;
+    if (image == null) return widget.placeholder;
+    final s = widget.size;
+    final picture = SizedBox.square(
+      dimension: s,
+      child: RawImage(image: image, filterQuality: FilterQuality.medium),
+    );
+    return switch (widget.shape) {
+      IconShape.circle => ClipOval(child: picture),
+      IconShape.square => ClipRRect(
+        borderRadius: BorderRadius.circular(s * 0.12),
+        child: picture,
+      ),
+      IconShape.squircle => ClipRRect(
+        borderRadius: BorderRadius.circular(s * 0.3),
+        child: picture,
+      ),
+      IconShape.leaf => ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(s * 0.5),
+          topRight: Radius.circular(s * 0.5),
+          bottomRight: Radius.circular(s * 0.5),
+          bottomLeft: Radius.circular(s * 0.12),
+        ),
+        child: picture,
+      ),
+    };
+  }
+}
+
 class LauncherAppTile extends StatelessWidget {
   const LauncherAppTile({
     super.key,

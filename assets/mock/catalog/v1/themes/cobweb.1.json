@@ -1,0 +1,144 @@
+{
+  "id": "cobweb",
+  "rev": 1,
+  "festivalId": "halloween",
+  "name": {
+    "en": "Cobweb"
+  },
+  "style": "minimal",
+  "tags": [
+    "spider",
+    "web",
+    "grey"
+  ],
+  "isLive": false,
+  "publishedAt": "2026-03-29T14:00:00.000Z",
+  "popularity": 8,
+  "minAppVersion": "1.0.0",
+  "scene": {
+    "engine": "layers",
+    "params": {
+      "layers": [
+        {
+          "type": "gradient",
+          "colors": [
+            "@surface",
+            "@background"
+          ],
+          "angle": 180
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.7,
+          "y": 0.28,
+          "width": 0.5,
+          "color": "@motif",
+          "glow": true
+        },
+        {
+          "type": "shape",
+          "shape": "circle",
+          "x": 0.78,
+          "y": 0.25,
+          "width": 0.08,
+          "color": "@deep",
+          "opacity": 0.25
+        },
+        {
+          "type": "shape",
+          "shape": "ellipse",
+          "x": 0.5,
+          "y": 1.0,
+          "width": 1.8,
+          "aspect": 0.45,
+          "color": "@deep"
+        }
+      ]
+    }
+  },
+  "palette": {
+    "background": "#1C1A22",
+    "deep": "#0E0D12",
+    "surface": "#2E2C34",
+    "text": "#F5F1EA",
+    "textMuted": "#B4B1AE",
+    "motif": "#8A8496"
+  },
+  "accents": [
+    {
+      "id": "snow",
+      "name": {
+        "en": "Snow"
+      },
+      "type": "solid",
+      "colors": [
+        "#F5F1EA"
+      ]
+    },
+    {
+      "id": "pumpkin",
+      "name": {
+        "en": "Pumpkin"
+      },
+      "type": "solid",
+      "colors": [
+        "#FF7A1A"
+      ]
+    },
+    {
+      "id": "witch-purple",
+      "name": {
+        "en": "Witch purple"
+      },
+      "type": "solid",
+      "colors": [
+        "#A970FF"
+      ]
+    },
+    {
+      "id": "slime",
+      "name": {
+        "en": "Slime"
+      },
+      "type": "solid",
+      "colors": [
+        "#7BD44A"
+      ]
+    },
+    {
+      "id": "moon-cream",
+      "name": {
+        "en": "Moon cream"
+      },
+      "type": "solid",
+      "colors": [
+        "#F3E6C4"
+      ]
+    },
+    {
+      "id": "pumpkin-glow",
+      "name": {
+        "en": "Pumpkin glow"
+      },
+      "type": "gradient",
+      "colors": [
+        "#FFB547",
+        "#FF4D2E"
+      ],
+      "angle": 135
+    }
+  ],
+  "fonts": {
+    "display": "space-grotesk",
+    "body": "space-grotesk",
+    "labels": "space-grotesk"
+  },
+  "clock": {
+    "useAccent": true
+  },
+  "eventIcon": "nightlight_round",
+  "iconPackId": "moonlit",
+  "wallpaperIds": [],
+  "downloadBytes": 299687
+}
