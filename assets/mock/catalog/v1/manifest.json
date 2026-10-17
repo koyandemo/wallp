@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026-10-15.1-demo.10",
-  "catalog": "catalog.2026-10-15.1-demo.10.json",
-  "catalogSha256": "b72972e448f0f283125732ae6b97ae6281685772420d4a3b933d5056057c2401",
+  "catalogVersion": "2026-10-15.1-demo.11",
+  "catalog": "catalog.2026-10-15.1-demo.11.json",
+  "catalogSha256": "d6c1dd416b7332d4d192d3965ab7e548bf1c2b235aa20f6c0096523d02aa6e43",
   "minAppVersion": "1.0.0",
   "publishedAt": "2026-10-15T14:00:00.000Z"
 }

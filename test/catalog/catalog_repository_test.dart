@@ -66,7 +66,7 @@ void main() {
       await r.start(refresh: false);
       expect(await r.refresh(), RefreshOutcome.updated);
       expect(r.origin, CatalogOrigin.network);
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
       expect(r.catalogVersion, seedManifestJson()['catalogVersion']);
       expect(r.lastError, isNull);
       expect(store.files.keys, containsAll(['manifest.json', 'catalog.json']));
@@ -90,9 +90,9 @@ void main() {
       final r = repo();
       await r.start(refresh: false);
       expect(r.origin, CatalogOrigin.cache);
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
       expect(await r.refresh(), RefreshOutcome.failed);
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
     });
 
     test(
@@ -152,7 +152,7 @@ void main() {
         await r.start(refresh: false);
         expect(r.origin, CatalogOrigin.builtIn);
         expect(await r.refresh(), RefreshOutcome.updated);
-        expect(r.catalog.themes, hasLength(4));
+        expect(r.catalog.themes, hasLength(5));
         expect((await r.theme('spider-night')).id, 'spider-night');
         await r.forgetSaved();
       },
@@ -178,7 +178,7 @@ void main() {
         (r.lastError! as CatalogFetchException).failure,
         FetchFailure.integrity,
       );
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
     });
 
     test('a catalog file whose version disagrees with the manifest', () async {
@@ -206,7 +206,7 @@ void main() {
       source.files['manifest.json'] = _bytes(manifest);
 
       expect(await r.refresh(), RefreshOutcome.failed);
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
     });
 
     test('a manifest over the size limit', () async {
@@ -224,7 +224,7 @@ void main() {
       source.publish(seedCatalogJson(), '2027-01-01.1', schemaVersion: 2);
       expect(await r.refresh(), RefreshOutcome.unsupported);
       expect(r.updateRecommended, isTrue);
-      expect(r.catalog.themes, hasLength(4));
+      expect(r.catalog.themes, hasLength(5));
     });
   });
 
@@ -235,7 +235,7 @@ void main() {
       await r.start(refresh: false);
       await r.refresh();
       expect(r.updateRecommended, isTrue);
-      expect(r.catalog.themes, hasLength(4), reason: 'still usable');
+      expect(r.catalog.themes, hasLength(5), reason: 'still usable');
     });
 
     test('themes that need a newer app are hidden and counted', () async {

@@ -4,7 +4,7 @@
 //
 // * assets/mock/catalog/v1 — what the app shows and the tests check: the
 //   Halloween, Christmas and Thingyan themes with their wallpapers, plus the
-//   Spider Night kit.
+//   script-made kits (Spider Night, Neon Night).
 // * assets/builtin/catalog — the first-launch catalog with no internet.
 //
 //   dart run tool/seed/generate.dart
@@ -61,16 +61,16 @@ Future<void> main() async {
   });
 
   final fonts = buildFonts(asset);
-  final spider = buildSpiderNight(asset);
-  final drafts = [...buildThemes(), spider.theme];
+  final kits = [buildSpiderNight(asset), buildNeonNight(asset)];
+  final drafts = [...buildThemes(), for (final k in kits) k.theme];
   Catalog catalogOf(List<ThemeDetail> themes) => Catalog(
     catalogVersion: '$catalogVersion-demo.$demoRevision',
-    festivals: [...festivals, spider.festival],
+    festivals: [...festivals, for (final k in kits) k.festival],
     themes: [for (final t in themes) t.toSummary()],
-    wallpapers: [...buildWallpapers(), ...spider.wallpapers],
+    wallpapers: [...buildWallpapers(), for (final k in kits) ...k.wallpapers],
     fonts: fonts,
-    banners: [...banners, spider.banner],
-    iconPacks: [...buildIconPacks(), spider.iconPack],
+    banners: [...banners, for (final k in kits) k.banner],
+    iconPacks: [...buildIconPacks(), for (final k in kits) k.iconPack],
     accentPresets: accentPresets,
     searchSuggestions: searchSuggestions,
   );

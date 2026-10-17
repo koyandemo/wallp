@@ -15,13 +15,15 @@ import 'art.dart';
 import 'spider_night_art.dart';
 
 void main() {
-  test('render the Web Slinger tile', () async {
-    await _save(
-      backgroundPath(webSlinger.id),
-      iconPixels,
-      iconPixels,
-      (c) => _tile(c, webSlinger),
-    );
+  test('render the icon pack tiles', () async {
+    for (final pack in packArt) {
+      await _save(
+        backgroundPath(pack.id),
+        iconPixels,
+        iconPixels,
+        (c) => _tile(c, pack),
+      );
+    }
   });
 
   test('render scene layers', () async {
@@ -73,7 +75,55 @@ void _tile(ui.Canvas canvas, PackArt pack) {
   const s = iconPixels * 1.0;
   const tile = ui.Rect.fromLTWH(0, 0, s, s);
   canvas.drawRect(tile, ui.Paint()..color = _c(pack.tile));
-  _comicWeb(canvas, pack, tile);
+  switch (pack.look) {
+    case PackLook.comic:
+      _comicWeb(canvas, pack, tile);
+    case PackLook.neon:
+      _neonGrid(canvas, pack, tile);
+  }
+}
+
+/// A glow in from the edges and a perspective grid along the bottom, so the
+/// middle stays calm for the app's logo.
+void _neonGrid(ui.Canvas canvas, PackArt pack, ui.Rect tile) {
+  final s = tile.width;
+  canvas.drawRect(
+    tile,
+    ui.Paint()
+      ..shader = ui.Gradient.radial(
+        tile.center,
+        s * 0.72,
+        [_c(pack.ring, 0), _c(pack.ring, 0), _c(pack.ring, 0.45)],
+        [0, 0.55, 1],
+      ),
+  );
+  final horizon = s * 0.74;
+  final grid = ui.Path();
+  for (final y in [0.0, 0.05, 0.12, 0.21]) {
+    grid
+      ..moveTo(0, horizon + y * s)
+      ..lineTo(s, horizon + y * s);
+  }
+  for (var k = -6; k <= 6; k++) {
+    grid
+      ..moveTo(s / 2 + k * s * 0.03, horizon)
+      ..lineTo(s / 2 + k * s * 0.22, s);
+  }
+  ui.Paint line(double alpha, double width) => ui.Paint()
+    ..color = _c(pack.glyph, alpha)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = width;
+  canvas
+    ..save()
+    ..clipRect(tile)
+    // A soft glow under the sharp lines.
+    ..drawPath(
+      grid,
+      line(0.35, 5)
+        ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 4),
+    )
+    ..drawPath(grid, line(0.75, 1.6))
+    ..restore();
 }
 
 /// A web from the centre out past every edge.

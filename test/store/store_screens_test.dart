@@ -54,17 +54,17 @@ void main() {
       );
       // Store home: today's banners and the soonest festival first.
       expect(
-        find.bySemanticsLabel(RegExp('Spider Night, banner 1 of 5')),
+        find.bySemanticsLabel(RegExp('Spider Night, banner 1 of 6')),
         findsOneWidget,
       );
       expect(find.text('16 nights left · 1 theme'), findsOneWidget);
 
       await tapTab(tester, 'Themes');
-      expect(find.text('4 themes'), findsOneWidget);
+      expect(find.text('5 themes'), findsOneWidget);
       await tapTab(tester, 'Wallpapers');
-      expect(find.text('5 wallpapers'), findsOneWidget);
+      expect(find.text('6 wallpapers'), findsOneWidget);
       await tapTab(tester, 'Fonts');
-      expect(find.text('7 fonts for the lock and home clock'), findsOneWidget);
+      expect(find.text('8 fonts for the lock and home clock'), findsOneWidget);
       await tapTab(tester, 'Me');
       expect(find.text('Your look, favourites and settings'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
@@ -72,24 +72,26 @@ void main() {
   });
 
   group('the catalog', () {
-    testWidgets('one theme each for Halloween, Christmas, Thingyan, Heroes', (
-      tester,
-    ) async {
+    testWidgets('one theme each for Halloween, Christmas, Thingyan, Heroes, '
+        'Neon', (tester) async {
       await h.pump(tester);
+      // Tall enough for every theme card at once.
+      tester.view.physicalSize = const Size(1170, 6000);
       await tapTab(tester, 'Themes');
-      expect(find.text('4 themes'), findsOneWidget);
+      expect(find.text('5 themes'), findsOneWidget);
       for (final name in [
         'Haunted Moon',
         'Snowy Pines',
         'Water Splash',
         'Spider Night',
+        'Neon Night',
       ]) {
         expect(find.text(name), findsOneWidget, reason: name);
       }
       // No chip that would find nothing.
       expect(find.text('Minimal'), findsNothing);
       await tapChip(tester, 'Festivals');
-      expect(find.text('4 festivals'), findsOneWidget);
+      expect(find.text('5 festivals'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });
@@ -103,7 +105,7 @@ void main() {
       expect(find.text('Water Splash'), findsOneWidget);
 
       await tapChip(tester, 'Festivals');
-      expect(find.text('4 festivals'), findsOneWidget);
+      expect(find.text('5 festivals'), findsOneWidget);
       expect(
         find.bySemanticsLabel(RegExp(r'^Christmas, 71 days left, 1 theme')),
         findsOneWidget,

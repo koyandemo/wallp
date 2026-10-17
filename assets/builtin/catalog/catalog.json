@@ -407,6 +407,36 @@
       }
     },
     {
+      "id": "orbitron",
+      "family": "Orbitron",
+      "category": "display",
+      "scripts": [
+        "latin"
+      ],
+      "tags": [
+        "neon",
+        "futuristic",
+        "wide"
+      ],
+      "license": "OFL-1.1",
+      "files": [
+        {
+          "weight": 400,
+          "maxWeight": 900,
+          "style": "normal",
+          "asset": {
+            "url": "assets/f42db2dd16e642258e35782916eceb1dcdbea06fb958d77ad71dc5963587e8fd.ttf",
+            "sha256": "f42db2dd16e642258e35782916eceb1dcdbea06fb958d77ad71dc5963587e8fd",
+            "bytes": 38576,
+            "format": "ttf"
+          }
+        }
+      ],
+      "fallbackFor": {
+        "my": "padauk"
+      }
+    },
+    {
       "id": "space-grotesk",
       "family": "Space Grotesk",
       "category": "clean",
@@ -859,6 +889,7 @@
     "moon",
     "snow",
     "spider",
+    "neon",
     "live"
   ]
 }

@@ -31,10 +31,16 @@ void main() {
     );
   });
 
-  test('Halloween, Christmas, Thingyan and the Spider Night kit', () {
+  test('Halloween, Christmas, Thingyan and the two kits', () {
     expect(
       [for (final t in catalog.themes) t.id],
-      ['halloween-night', 'christmas-eve', 'thingyan-water', 'spider-night'],
+      [
+        'halloween-night',
+        'christmas-eve',
+        'thingyan-water',
+        'spider-night',
+        'neon-night',
+      ],
     );
     expect(
       [for (final w in catalog.wallpapers) w.id],
@@ -44,11 +50,12 @@ void main() {
         'water-splash',
         'red-moon-swing',
         'web-corner',
+        'neon-horizon',
       ],
     );
     expect(
       [for (final f in catalog.festivals) f.id],
-      ['halloween', 'christmas', 'thingyan', 'heroes'],
+      ['halloween', 'christmas', 'thingyan', 'heroes', 'neon'],
     );
   });
 
@@ -74,7 +81,7 @@ void main() {
     );
     await repo.start(refresh: false);
     expect(await repo.refresh(), RefreshOutcome.updated);
-    expect(repo.catalog.themes, hasLength(4));
+    expect(repo.catalog.themes, hasLength(5));
     expect((await repo.theme('thingyan-water')).subtitle?.en, 'သင်္ကြန်');
   });
 }

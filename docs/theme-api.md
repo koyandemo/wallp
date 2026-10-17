@@ -120,7 +120,7 @@ Every file except `manifest.json` has its version or hash in the name, so it nev
   "iconPacks":  [ /* IconPack, section 4.7 */ ],
   "banners":    [ /* Banner, section 4.8 */ ],
   "accentPresets": { "solids": [ /* Accent */ ], "gradients": [ /* Accent */ ] },
-  "searchSuggestions": ["Halloween", "moon", "snow", "Thingyan", "handwritten", "minimal", "live"]
+  "searchSuggestions": ["Halloween", "Christmas", "Thingyan", "moon", "snow", "spider", "neon", "live"]
 }
 ```
 
@@ -157,7 +157,7 @@ Every downloadable file (images, icon tiles, fonts) is an Asset object:
 
 ### 4.2 Festival
 
-A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
+A festival with dates (Halloween, Thingyan) or an undated collection (Heroes, Neon).
 
 ```json
 {
@@ -198,38 +198,39 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 
 ```json
 {
-  "id": "cozy-cabin",
+  "id": "neon-night",
   "rev": 1,
-  "festivalId": "christmas",
-  "name": { "en": "Cozy Cabin" },
-  "subtitle": { "en": "Warm lights on a snowy night" },
-  "style": "cozy",
-  "tags": ["cabin", "warm", "snow"],
-  "publishedAt": "2026-10-10T14:00:00Z",
-  "popularity": 2,
+  "festivalId": "neon",
+  "name": { "en": "Neon Night" },
+  "subtitle": { "en": "A synthwave sun on a glowing grid" },
+  "style": "minimal",
+  "tags": ["neon", "synthwave", "retro", "grid", "night"],
+  "publishedAt": "2026-10-14T14:00:00Z",
+  "popularity": 0,
   "minAppVersion": "1.0.0",
   "scene": { "engine": "layers", "params": { "layers": [ /* section 4.9 */ ] } },
   "palette": {
-    "background": "#3A2318", "deep": "#F1E9DE", "surface": "#4A352A",
-    "text": "#F5F1EA", "textMuted": "#BDB3AB", "motif": "#7A4A2E"
+    "background": "#120326", "deep": "#07010F", "surface": "#3A0B5C",
+    "text": "#F8F0FF", "textMuted": "#B3A9BE", "motif": "#FF3EA5"
   },
   "accents": [
-    { "id": "amber", "name": { "en": "Amber" }, "type": "solid", "colors": ["#FFB547"] },
-    { "id": "frost", "name": { "en": "Frost" }, "type": "gradient", "colors": ["#F5F1EA", "#7CC6FF"], "angle": 180 }
+    { "id": "neon-cyan", "name": { "en": "Neon cyan" }, "type": "solid", "colors": ["#22E4FF"] },
+    { "id": "hot-pink", "name": { "en": "Hot pink" }, "type": "solid", "colors": ["#FF3EA5"] },
+    { "id": "synthwave", "name": { "en": "Synthwave" }, "type": "gradient", "colors": ["#FF3EA5", "#22E4FF"], "angle": 90 }
   ],
   "variants": [
-    { "id": "warm", "name": { "en": "Warm" }, "accentId": "amber" },
-    { "id": "snowed-in", "name": { "en": "Snowed in" },
-      "palette": { "background": "#2A3440", "deep": "#E9EFEC", "surface": "#3C4652", "motif": "#5A6B7E" },
-      "accentId": "snow" }
+    { "id": "midnight", "name": { "en": "Midnight" } },
+    { "id": "sunset", "name": { "en": "Sunset" },
+      "palette": { "background": "#2A0A2E", "surface": "#6B1747", "motif": "#FF8A3D" },
+      "accentId": "hot-pink" }
   ],
-  "fonts": { "display": "caveat", "body": "dm-sans", "labels": "dm-sans" },
-  "clock": { "useAccent": false },
-  "labels": { "color": "#FFF4E0" },
-  "eventIcon": "card_giftcard_rounded",
-  "iconPackId": "candy-cane",
-  "wallpaperIds": ["snowy-cabin"],
-  "downloadBytes": 786432
+  "fonts": { "display": "orbitron", "body": "space-grotesk", "labels": "orbitron" },
+  "clock": { "useAccent": true },
+  "labels": { "color": "#F8F0FF" },
+  "eventIcon": "music_note_rounded",
+  "iconPackId": "neon-glow",
+  "wallpaperIds": ["neon-horizon"],
+  "downloadBytes": 213510
 }
 ```
 
@@ -262,9 +263,9 @@ The full theme minus `accents`, `variants`, `fonts`, `clock`, `labels`, `eventIc
 
 ```json
 {
-  "accent": { "id": "amber", "name": { "en": "Amber" }, "type": "solid", "colors": ["#FFB547"] },
-  "displayFont": "caveat",
-  "variantSwatches": ["#3A2318", "#2A3440"]
+  "accent": { "id": "neon-cyan", "name": { "en": "Neon cyan" }, "type": "solid", "colors": ["#22E4FF"] },
+  "displayFont": "orbitron",
+  "variantSwatches": ["#120326", "#2A0A2E"]
 }
 ```
 
@@ -416,11 +417,11 @@ The publish step must be stricter: the dashboard refuses to publish while `Catal
 
 Until the real API exists, the app reads a mock catalog laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`.
 
-**The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows and what the tests check: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their painted icon packs, fonts and banners, plus **Spider Night**, a theme made entirely from script (live `layers` scene, two wallpapers, a downloaded icon pack; see [tool/seed/spider_night.dart](../tool/seed/spider_night.dart) and run `tool/seed/spider_night.sh`). 4 festivals, 4 themes, 5 wallpapers, 7 fonts, 4 icon packs, 5 banners and 31 asset files (3.1 MB).
+**The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows and what the tests check: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their painted icon packs, fonts and banners, plus two themes made entirely from script, each with its own collection, wallpapers, icon pack and banner: **Spider Night** (live `layers` scene with picture layers; [tool/seed/spider_night.dart](../tool/seed/spider_night.dart)) and **Neon Night** (a scene drawn only from shapes and particles, two colour variants, a gradient accent and its own Orbitron font; [tool/seed/neon_night.dart](../tool/seed/neon_night.dart)). Run `tool/seed/spider_night.sh` to rebuild both. 5 festivals, 5 themes, 6 wallpapers, 8 fonts, 5 icon packs, 6 banners and 13 asset files (2.7 MB).
 
 **Versions in the demo catalog.** Installed apps only fetch a catalog whose `catalogVersion` is new, and only re-read a theme file whose `rev` is new (section 9). So every change to the demo data needs both bumps, or phones that already have it keep the old data:
-- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.10`).
-- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2, Spider Night 4).
+- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.11`).
+- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2, Spider Night 4, Neon Night 1).
 
 The `rev` comments in `seed_data.dart` say what each bump changed.
 
@@ -548,9 +549,11 @@ The API gives each theme its defaults; these choices are the user's and live onl
 | Choice | Where | Default from the API |
 |---|---|---|
 | Accent, remembered **per theme** | Theme page; "Gradients & custom" for any colour or gradient | The theme's first accent |
-| Tile shape | Icon pack page (the pack's real icon in each shape) | The pack's `shape` |
+| Tile shape | Icon pack page (one of the phone's own apps in each shape) | The pack's `shape` |
 | App name colour: Theme / Accent / White / Dark / Custom | Icon pack page, with a live preview | The theme's `labels.color`, else white |
 | App name font: Theme font / System font | Icon pack page | The theme's `fonts.labels` |
+
+The icon pack page has **no Apply button**: tapping a shape, name colour or font puts that pack on wallp Home with the choice at once. Its previews show the phone's own apps (each logo on the pack's tile), and the page downloads the pack's `background` as soon as it opens.
 | Clock font, size, and where it shows (lock clock, wallp Home clock, app labels) | Font page, with a lock and home preview that follows the switches | The theme's `fonts.display` |
 | Wallpaper: home, lock, both (a still picture) or the live wallpaper | The "Set wallpaper on" sheet when applying | — |
 
@@ -605,11 +608,11 @@ Not sent yet: the mock source makes no HTTP requests. The HTTP source should sen
 | Phase | Work | Status |
 |---|---|---|
 | **0. Size quick win** | Ship an App Bundle; add `--obfuscate --split-debug-info` | To do |
-| **1. Catalog format** | Models and parser for every object in section 4; fixtures and parsing tests; JSON Schema files for the dashboard | Done, except the JSON Schema files (the Dart models are the schema for now) |
+| **1. Catalog format** | Models and parser for every object in section 4; parsing tests over the mock catalog; JSON Schema files for the dashboard | Done, except the JSON Schema files (the Dart models are the schema for now) |
 | **2. Repository + cache** | `CatalogRepository`, `CatalogSource`, `AssetCache`, downloads, the look snapshot | Done on the mock source. **Next: the HTTP source for the real CDN** |
 | **3. Fonts** | `FontRegistry`; remove `google_fonts`; bundle Sora + Myanmar font | `FontRegistry` done; removing `google_fonts` to do |
 | **4. Dashboard v1** | Festivals, themes with existing engines, fonts, icon packs, banners, Publish | To do ([theme-dashboard.md](theme-dashboard.md)) |
-| **5. Layers engine** | `layers` engine in the app plus the scene editor in the dashboard | App side done (27 fixture themes use it); dashboard editor to do |
+| **5. Layers engine** | `layers` engine in the app plus the scene editor in the dashboard | App side done (Spider Night and Neon Night use it); dashboard editor to do |
 | **6. Popularity** | Events API + nightly job | To do; `popularity` is seed data |
 
 ---

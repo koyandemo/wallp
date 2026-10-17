@@ -53,7 +53,7 @@ The user can also change each part on its own: a different wallpaper, clock font
 
 | | Built-in | Dashboard-made |
 |---|---|---|
-| Examples | Halloween, Christmas, Thingyan | Spider Night |
+| Examples | Halloween, Christmas, Thingyan | Spider Night, Neon Night |
 | Scene drawn by | A Dart painter written for it | The generic `layers` engine, from JSON layers |
 | Icons | Painted by `ThemedIconPainter` | Each app's own logo on the pack's downloaded background tile |
 | Download | Nothing | Images and fonts, a few hundred KB to a few MB |
@@ -129,9 +129,9 @@ android/app/src/main/kotlin/com/example/wallp/
 
 assets/
 ├── builtin/catalog/          The catalog shipped for good: the 3 built-in themes
-└── mock/catalog/v1/          The mock Theme API (demo catalog), laid out like the CDN
+└── mock/catalog/v1/          The mock Theme API (5 themes), laid out like the CDN
 
-tool/seed/                    Generates both catalogs (and the test fixture) from Dart
+tool/seed/                    Generates both catalogs from Dart; one file per script-made kit
 docs/                         Theme API, dashboard, store plan + this guide
 test/                         Unit and widget tests, reading the mock catalog in assets/mock/
 ```
@@ -199,7 +199,7 @@ Two things worth knowing:
 - **Summary vs full theme.** The catalog lists a `ThemeSummary` per theme (enough for cards, filters and search). The full `ThemeDetail` (all accents, fonts, labels…) is a separate file, fetched when the user opens the theme.
 - **Broken data is skipped, not fatal.** One bad theme is dropped and logged in `Catalog.issues`; items pointing at something missing (a theme whose icon pack is gone) are dropped too.
 
-Countdowns live on `Festival`: `nextRun(now)` finds the next (or current) run from its list of real dates (`occurrences`, needed for Myanmar-calendar festivals) or its `fallbackDate`, and `countdown(now)` gives "16 nights left", "Happy Thingyan!" during its 4 days, or "Any time" for undated collections like Minimal.
+Countdowns live on `Festival`: `nextRun(now)` finds the next (or current) run from its list of real dates (`occurrences`, needed for Myanmar-calendar festivals) or its `fallbackDate`, and `countdown(now)` gives "16 nights left", "Happy Thingyan!" during its 4 days, or "Any time" for undated collections like Heroes and Neon.
 
 ### 5.2 The repository ([lib/data/catalog/](../lib/data/catalog/))
 
@@ -393,13 +393,13 @@ Pages are opened through [routes.dart](../lib/store/routes.dart) (`StoreRoutes.t
 | Screen | What it shows |
 |---|---|
 | [Store home](../lib/store/screens/store_home_screen.dart) | Banner carousel (scheduled banners only), one row per festival (soonest first), icon packs |
-| [Themes](../lib/store/screens/themes_screen.dart) | All themes; filters All / Festivals / Myanmar / Minimal / Favourites; Soonest or A–Z |
+| [Themes](../lib/store/screens/themes_screen.dart) | All themes; filters All / Festivals / Myanmar / Minimal (the undated collections) / Favourites, each shown only when it finds something; Soonest or A–Z |
 | [Festival](../lib/store/screens/festival_screen.dart) | One festival's themes: style chips, Popular / New / A–Z, a quick look |
-| [Theme detail](../lib/store/screens/theme_detail_screen.dart) | Lock and home previews, accents (+ "Gradients & custom"), what it includes (wallpaper, icons, clock font), Apply with download size |
+| [Theme detail](../lib/store/screens/theme_detail_screen.dart) | Lock and home previews, accents (+ "Gradients & custom"), what it includes (wallpaper, icons, clock font), Apply with download size. No colour-variant picker: a theme applies in its own palette |
 | [Accent picker](../lib/store/screens/accent_picker_screen.dart) | Solid, Gradient, Custom tabs; "My accents"; a readability check of the clock on the wallpaper |
 | [Wallpapers](../lib/store/screens/wallpapers_screen.dart) + [detail](../lib/store/screens/wallpaper_detail_screen.dart) | Stand-alone wallpapers, Live or by festival; full-screen preview, "Set wallpaper" |
 | [Fonts](../lib/store/screens/fonts_screen.dart) + [detail](../lib/store/screens/font_detail_screen.dart) | Clock fonts previewing the user's text; size, colour and where it shows, with a lock and home preview |
-| [Icon packs](../lib/store/screens/icon_pack_screens.dart) | Packs by New or festival; detail with searchable icons, tile shape, app name colour and font |
+| [Icon packs](../lib/store/screens/icon_pack_screens.dart) | Packs by New or festival; detail previewing the phone's own apps (searchable) with tile shape, app name colour and font. **No Apply button**: each tap puts the pack on wallp Home at once |
 | [Pin shortcuts](../lib/store/screens/pin_shortcuts_screen.dart) | For people who keep another launcher: add themed shortcuts to it |
 | [Search](../lib/store/screens/search_screen.dart) | Recent and popular searches; results in All / Themes / Wallpapers / Fonts |
 | [Me](../lib/store/screens/me_screen.dart) | Current look, favourites (with Undo), recently applied, downloads, wallp Home status, settings |
@@ -514,7 +514,7 @@ All handlers are in [NativeBridge.kt](../android/app/src/main/kotlin/com/example
 
 | Method | Kotlin does |
 |---|---|
-| `listApps` | All launchable apps → `{package, label, icon PNG}`, sorted by label. Icons are **cached** in `cacheDir/app_icons/<pkg>-<lastUpdateTime>.png` |
+| `listApps` | All launchable apps → `{package, label, icon PNG, logo PNG?}`, sorted by label. `logo` is an adaptive icon's foreground layer alone (the logo without the app's own background), which downloaded icon packs put on their tile; older, non-adaptive icons have none. Both are **cached** in `cacheDir/app_icons/` as `<pkg>-<lastUpdateTime>.png` and `.logo.png` (an empty logo file = no logo) |
 | `getApp {package}` | One app (used when an app is installed/updated) |
 | `canPinShortcuts` | Can the current launcher accept pinned shortcuts? |
 | `pinShortcut {id, package, label, icon}` | Creates a home-screen shortcut with the themed icon that opens the real app |
@@ -725,7 +725,7 @@ flutter test
 | `live_wallpaper_test.dart` | Live wallpaper widget from the snapshot alone |
 | `scene_test.dart`, `wallpaper_renderer_test.dart`, `themed_icon_test.dart`, `icon_pack_test.dart`, `dev_settings_test.dart` | Painters, PNG rendering, icons, Developer settings |
 
-The tests read the same mock catalog the app shows, in [assets/mock/catalog/v1/](../assets/mock/catalog/v1/). Where those four themes have no example of a feature (a still `layers` scene, an `@accent` layer, a variant on a `layers` theme), the test edits a copy of Spider Night's JSON to make one.
+The tests read the same mock catalog the app shows, in [assets/mock/catalog/v1/](../assets/mock/catalog/v1/). Neon Night covers variants and a gradient accent on a `layers` theme; where no theme has an example of a feature (a still `layers` theme, an `@accent` shape at a known spot), the test edits a copy of Spider Night's JSON to make one.
 
 Many classes accept fake dependencies in their constructors (e.g. `CatalogRepository(source: …, store: …, clock: …)`, `LookController(prepare: …, pin: …)`, `LiveWallpaperApp(clock: …)`). This is **dependency injection**, so tests can pass fakes instead of the network, the disk or Android.
 
@@ -735,13 +735,15 @@ Many classes accept fake dependencies in their constructors (e.g. `CatalogReposi
 
 ### 19.1 A theme on the `layers` engine (the normal way)
 
-No new Dart code. Later the dashboard does this; today:
+No new app code. Later the dashboard does this; today a theme is a **kit** made from script. [neon_night.dart](../tool/seed/neon_night.dart) is the one to copy: everything in one file.
 
-1. Add the theme (and if needed its festival, wallpaper, icon pack, fonts) to [tool/seed/seed_data.dart](../tool/seed/seed_data.dart). Look at an existing `_layersTheme(...)` for the shape.
-2. To show it in the app (not only the tests), add its ID to `demoThemes` in [tool/seed/generate.dart](../tool/seed/generate.dart).
-3. Bump `demoRevision` in `seed_data.dart` (and the theme's `rev` if you changed an existing one). Installed apps only fetch a new catalog version and a new `rev` ([theme-api.md](theme-api.md) section 4.11).
-4. Run `dart run tool/seed/generate.dart`. If you changed art in [art.dart](../tool/seed/art.dart), run `flutter test tool/seed/render_art_test.dart` first.
-5. Run `flutter test`: it checks every hash, reference and summary.
+1. Copy `neon_night.dart` to `tool/seed/<name>.dart` and add `part '<name>.dart';` to [seed_data.dart](../tool/seed/seed_data.dart). A kit (`SeedKit`) is a festival or collection, the theme, its wallpapers, its icon pack and a banner. The scene is a list of layers (gradient, shapes, particles, pictures; [theme-api.md](theme-api.md) section 4.9) on a 390 × 844 canvas.
+2. Add `build<Name>(asset)` to the `kits` list in [generate.dart](../tool/seed/generate.dart).
+3. **Icon pack tile:** add a `PackArt` to `packArt` in [art.dart](../tool/seed/art.dart) (a new `PackLook` if it needs its own drawing in [render_art_test.dart](../tool/seed/render_art_test.dart)). Pictures from an image generator go through the import step instead ([spiderman-script.md](spiderman-script.md)).
+4. **New font:** add a `FontSource` to `fontSources` in `seed_data.dart`; the generator fetches it once from Google Fonts with its licence.
+5. Bump `demoRevision` in `seed_data.dart` (and the theme's `rev` if you change an existing one). Installed apps only fetch a new catalog version and a new `rev` ([theme-api.md](theme-api.md) section 4.11).
+6. Run `tool/seed/spider_night.sh`: it draws the tiles, generates the catalog and reads it back through the app's own parser. That read-back stops on anything the app would skip (e.g. a polygon point outside 0–1), with the exact layer named.
+7. Run `flutter test`: it checks every hash, reference and summary, and that the new festival's store colours are readable. Counts in a few tests (themes, wallpapers, fonts) need the new numbers.
 
 ### 19.2 A new built-in painter (needs an app update)
 
@@ -751,7 +753,7 @@ Only when the `layers` engine can't draw what you need. Example: Kpop.
 2. **Engine ID:** add `kpop` to `EngineIds` and `EngineIds.builtIn` in [scene.dart](../lib/catalog/models/scene.dart) (the repository's `supportedEngines` picks it up), and to `SceneKind` in [phone_theme.dart](../lib/models/phone_theme.dart).
 3. **Register:** add `SceneKind.kpop => KpopPainter(...)` in `scenePainterFor()` in [scene_view.dart](../lib/scenes/scene_view.dart).
 4. **Icons:** add a painted style for `kpop` to `ThemedIconPainter`, or give the theme an `images` icon pack.
-5. **Catalog:** add the engine to `engines` and the theme to `_builtInThemes()` in `seed_data.dart`, then regenerate (19.1 steps 3–5). The built-in catalog in the APK gets it too.
+5. **Catalog:** add the engine to `engines` and the theme to `buildThemes()` in `seed_data.dart`, then regenerate (19.1 steps 5–7). The built-in catalog in the APK gets it too.
 
 Dart's `switch` on an enum must cover every value, so the compiler will point you to any place you forgot.
 
@@ -774,7 +776,9 @@ Dart's `switch` on an enum must cover every value, so the compiler will point yo
 | **Applied look** | The saved snapshot of everything on the phone (`AppliedLook`). |
 | **Pending look** | A look saved for wallp Home to finish, while Android switches the home app. |
 | **Engine (scene)** | What draws a scene: a built-in painter or `layers`. |
-| **Glyph key** | A string naming an app type (`phone`, `camera`); links apps to icon pictures. |
+| **Symbol** | A Material icon standing for a kind of app (phone, camera): painted packs draw it, and store previews show it for sample apps. |
+| **Logo** | An adaptive app icon's foreground layer: the app's mark without its own background. Downloaded icon packs put it on their tile. |
+| **Kit** | One script-made theme with its collection, wallpapers, icon pack and banner (`tool/seed/<name>.dart`). |
 | **CustomPainter** | Flutter class that draws on a `Canvas` with code. |
 | **Ticker** | Calls a function every display frame; drives animation. |
 | **ChangeNotifier / Provider** | Shared state that screens can watch. |

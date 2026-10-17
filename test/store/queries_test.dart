@@ -58,7 +58,7 @@ void main() {
     test('soonest first, collections last, coming soon left out', () {
       expect(
         [for (final f in festivalsBySoonest(catalog, now)) f.id],
-        ['halloween', 'christmas', 'thingyan', 'heroes'],
+        ['halloween', 'christmas', 'thingyan', 'heroes', 'neon'],
       );
     });
 
@@ -87,9 +87,9 @@ void main() {
       'All: every theme, soonest festival first, most popular first within',
       () {
         final all = tab(ThemesFilter.all);
-        expect(all, hasLength(4));
+        expect(all, hasLength(5));
         expect(all.first, 'halloween-night');
-        expect(all.last, 'spider-night', reason: 'Heroes has no date');
+        expect(all.last, 'neon-night', reason: 'Neon has no date');
       },
     );
 
@@ -105,7 +105,7 @@ void main() {
     });
 
     test('Minimal: the undated collections', () {
-      expect(tab(ThemesFilter.minimal), ['spider-night']);
+      expect(tab(ThemesFilter.minimal), ['spider-night', 'neon-night']);
     });
 
     test('Favourites: only the ones the user hearted', () {
@@ -193,7 +193,7 @@ void main() {
 
   group('wallpapers, fonts, icon packs', () {
     test('wallpaper chips: Live and per festival', () {
-      expect(wallpapersTab(catalog), hasLength(5));
+      expect(wallpapersTab(catalog), hasLength(6));
       expect(
         wallpapersTab(catalog, filter: 'live').every((w) => w.isLive),
         isTrue,
@@ -201,12 +201,12 @@ void main() {
       expect(wallpapersTab(catalog, filter: 'heroes'), hasLength(2));
       expect(
         [for (final f in wallpaperFestivals(catalog, now)) f.id],
-        ['halloween', 'christmas', 'thingyan', 'heroes'],
+        ['halloween', 'christmas', 'thingyan', 'heroes', 'neon'],
       );
     });
 
     test('font chips by category', () {
-      expect(fontsTab(catalog), hasLength(7));
+      expect(fontsTab(catalog), hasLength(8));
       expect(
         [
           for (final f in fontsTab(catalog, category: FontCategory.myanmar))
@@ -214,15 +214,15 @@ void main() {
         ],
         ['padauk'],
       );
-      expect(fontsTab(catalog, category: FontCategory.display), hasLength(4));
+      expect(fontsTab(catalog, category: FontCategory.display), hasLength(5));
       expect(fontsTab(catalog, category: FontCategory.handwritten), isEmpty);
     });
 
     test('icon pack chips: New and per festival', () {
-      expect(iconPacksTab(catalog, now: now), hasLength(4));
+      expect(iconPacksTab(catalog, now: now), hasLength(5));
       expect(
         [for (final p in iconPacksTab(catalog, filter: 'new', now: now)) p.id],
-        ['web-slinger'],
+        ['web-slinger', 'neon-glow'],
       );
       expect(
         iconPacksTab(catalog, filter: 'christmas', now: now),
@@ -251,7 +251,7 @@ void main() {
     });
 
     test('"display" finds fonts by category; "live" finds what moves', () {
-      expect(search(catalog, 'display').fonts, hasLength(4));
+      expect(search(catalog, 'display').fonts, hasLength(5));
       final live = search(catalog, 'live');
       expect(live.themes.every((t) => t.isLive), isTrue);
       expect(live.themes, isNotEmpty);

@@ -10,6 +10,7 @@ import 'package:wallp/catalog/catalog.dart';
 
 import 'art.dart';
 
+part 'neon_night.dart';
 part 'spider_night.dart';
 
 /// Every "published" date is relative to this, the date the design shows.
@@ -27,7 +28,8 @@ const catalogVersion = '2026-10-15.1';
 /// 8: pack pictures edge to edge, the app draws the shape's rim.
 /// 9: a readable brand red for the Heroes store look.
 /// 10: icon packs are only a tile; the 20 per-app pictures are gone.
-const demoRevision = 10;
+/// 11: the Neon Night kit and the Orbitron font.
+const demoRevision = 11;
 
 /// Turns a source file under tool/seed/source/ into a hashed asset.
 typedef AssetFor = AssetRef Function(String sourcePath, AssetFormat format);
@@ -228,6 +230,14 @@ final fontSources = <FontSource>[
     repoDir: 'ofl/bebasneue',
     files: [('BebasNeue-Regular.ttf', 400, null)],
     tags: ['bold', 'tall'],
+  ),
+  const FontSource(
+    id: 'orbitron',
+    family: 'Orbitron',
+    category: FontCategory.display,
+    repoDir: 'ofl/orbitron',
+    files: [('Orbitron[wght].ttf', 400, 900)],
+    tags: ['neon', 'futuristic', 'wide'],
   ),
   const FontSource(
     id: 'space-grotesk',
@@ -718,6 +728,7 @@ const searchSuggestions = [
   'moon',
   'snow',
   'spider',
+  'neon',
   'live',
 ];
 

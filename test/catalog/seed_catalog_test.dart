@@ -61,6 +61,7 @@ void main() {
       expect(count('christmas'), 1);
       expect(count('thingyan'), 1);
       expect(count('heroes'), 1);
+      expect(count('neon'), 1);
       expect(catalog.themes.where((t) => t.isBuiltIn), hasLength(3));
     });
 
@@ -85,6 +86,7 @@ void main() {
       expect(catalog.themes.where((t) => t.isLive), isNotEmpty);
       expect(catalog.themes.where((t) => t.isNew(now)).map((t) => t.id), [
         'spider-night',
+        'neon-night',
       ]);
     });
 

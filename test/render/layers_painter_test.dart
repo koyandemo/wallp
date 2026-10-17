@@ -124,14 +124,14 @@ void main() {
       for (final t in catalog.themes)
         if (!t.isBuiltIn) themeOf(mockTheme(t.id)),
     ];
-    expect(layered, hasLength(1));
+    expect(layered, hasLength(2));
     for (final theme in layered) {
       for (final t in [0.0, 1.2, 37.5]) {
         await _render(painterFor(theme, t: t));
       }
     }
     final wallpapers = catalog.wallpapers.where((w) => w.scene?.layers != null);
-    expect(wallpapers, hasLength(2));
+    expect(wallpapers, hasLength(3));
     for (final w in wallpapers) {
       final scene = LayeredScene(layers: w.scene!.layers!, tokens: const {});
       await _render(
@@ -145,27 +145,27 @@ void main() {
   });
 
   test('the sky is the palette\'s colours, following the variant', () async {
-    // Gradient @background → @surface → #3A1030, top to bottom.
-    final json = spiderJson()
-      ..['variants'] = [
-        {
-          'id': 'night',
-          'name': {'en': 'Night'},
-        },
-        {
-          'id': 'dusk',
-          'name': {'en': 'Dusk'},
-          'palette': {'background': '#402060'},
-        },
-      ];
-    final theme = parse(json);
-    final night = await _render(painterFor(themeOf(theme)));
-    final dusk = await _render(painterFor(themeOf(theme, variantId: 'dusk')));
+    // Neon Night's sky: @background at the top. Its Sunset variant swaps it.
+    final neon = mockTheme('neon-night');
+    final midnight = await _render(painterFor(themeOf(neon)));
+    final sunset = await _render(
+      painterFor(themeOf(neon, variantId: 'sunset')),
+    );
     expect(
-      _close(_pixel(night, 5, 1), Color(theme.palette.background.argb)),
+      _close(_pixel(midnight, 5, 1), Color(neon.palette.background.argb)),
       isTrue,
     );
-    expect(_close(_pixel(dusk, 5, 1), const Color(0xFF402060)), isTrue);
+    expect(
+      _close(
+        _pixel(sunset, 5, 1),
+        Color(neon.paletteFor('sunset').background.argb),
+      ),
+      isTrue,
+    );
+    expect(
+      neon.paletteFor('sunset').background,
+      isNot(neon.palette.background),
+    );
   });
 
   test('@accent shapes follow the user\'s accent', () async {

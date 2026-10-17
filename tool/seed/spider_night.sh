@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Builds the Spider Night kit (tool/seed/spider_night.dart) end to end:
+# Builds the script-made kits (tool/seed/spider_night.dart and
+# neon_night.dart) end to end:
 #
 #   1. --external only: imports generated pictures from
 #      tool/seed/incoming/spider-night/ (docs/spiderman-script.md)
-#   2. draws the pictures that weren't imported: Web Slinger icons, skyline
-#      and web layers
+#   2. draws the pictures that weren't imported: the icon pack tiles
+#      (Web Slinger, Neon Glow), skyline and web layers
 #   3. writes the catalogs, hashing the pictures into assets/mock/
 #   4. draws previews of the wallpaper and icons into build/spider-night-preview/
 #

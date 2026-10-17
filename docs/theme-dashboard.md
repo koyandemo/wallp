@@ -27,7 +27,7 @@ The dashboard, the API and the app must never disagree about what a theme is. Fo
 | **One schema** | The JSON Schema files for the catalog (from phase 1 of the API plan) live in one place, e.g. a `schema/` folder in the app repo. The dashboard validates against them on every save and publish; the app's parsing tests use the same files. |
 | **One engines list** | `engines.json` (API doc section 5) lists every scene engine, its params, and the app version that added it. The dashboard only offers engines in this list, and sets `minAppVersion` automatically. |
 | **Same painters for preview** | The preview is the app's own Flutter scene and icon painters, built for the web (section 5.4). What you see in the dashboard is what the phone draws. |
-| **Fixtures both ways** | Any theme can be exported as JSON. Exported themes become test fixtures in the app repo, and the app's built-in themes can be imported into the dashboard. |
+| **Fixtures both ways** | Any theme can be exported as JSON. An exported theme can go into the app repo's mock catalog ([assets/mock/catalog/v1/](../assets/mock/catalog/v1/)), which the app shows and its tests check, and the app's built-in themes can be imported into the dashboard. |
 
 ---
 
@@ -73,10 +73,10 @@ List columns: name, next date, countdown, number of themes (published / drafts),
 
 **Festival editor fields:**
 - Name per language, ID (fixed after the first publish).
-- **Kind:** festival (dates and a countdown) or collection (no date, "Any time", e.g. Minimal).
+- **Kind:** festival (dates and a countdown) or collection (no date, "Any time", e.g. Heroes or Neon).
 - **Tags**, e.g. `myanmar` to list it under the app's "Myanmar" chip.
 - Countdown unit: day or night.
-- **Dates per year**: a table of years and dates. A "Fill next 5 years" button for fixed-date festivals (Halloween, Christmas). Myanmar-calendar festivals (Thingyan, Thadingyut) are entered by hand. A warning shows when fewer than 2 future dates remain.
+- **Dates per year**: a table of years and dates. A "Fill next 5 years" button for fixed-date festivals (Halloween, Christmas). Myanmar-calendar festivals (Thingyan) are entered by hand. A warning shows when fewer than 2 future dates remain.
 - **Fallback date** (month and day, not 29 February) for after the table runs out, and **duration** in days (Thingyan: 4).
 - "Coming soon" switch.
 - **App look** while browsing this festival: background, cards, outline, muted text, brand colour, heading font. A contrast check runs live (section 6).
@@ -144,16 +144,18 @@ The "generate theme from dashboard" feature. It creates a **draft**, never a pub
 
 ### 4.7 Icon packs
 
-**List:** one card per pack with three of its real icons, its festival, kind and the themes that use it.
+An icon pack never replaces an app's icon: the app puts **every app's own logo** on the pack's tile picture ([theme-api.md](theme-api.md) section 4.7). So a pack is one picture and three colours, not a set of per-app pictures.
+
+**List:** one card per pack showing its tile under a few sample apps, its festival, kind and the themes that use it.
 
 **Icon pack editor fields:**
 - Name and style label per language, festival, ID.
 - **Kind:** `images` for every dashboard-made pack (`painted` packs are drawn by code built into the app and can only be imported).
-- **Pictures:** one per glyph key (`phone`, `messages`, `camera`, … 20 in all, [theme-api.md](theme-api.md) section 4.7). Drag a folder in and files are matched by name. Square PNG or WebP, transparent, at least 256 px, **drawn edge to edge**: the app clips each picture to the user's tile shape, and `circle` and `leaf` keep only about the middle 80%.
+- **Background tile** (`background`, required): one square PNG or WebP, at least 256 px, **drawn edge to edge with no border or rounded corners**. The app clips it to the user's tile shape and draws the border itself in `ring`. Keep the middle half calm and the tile dark or busy enough that white logos read on it. A few dozen KB is plenty: it's the pack's only download.
 - **Default shape:** squircle, circle, square or leaf. Users can change it in the app.
-- **Colours:** `tile` (empty = no tile, icons sit on the wallpaper), `glyph` and `ring`, used for previews and for apps the pack has no picture for.
+- **Colours:** `tile` (shown while the background downloads; empty = no tile, icons sit on the wallpaper), `glyph` (the sample apps' symbols in the store's previews) and `ring` (the border the app draws around every tile).
 
-**Preview:** the 20 icons on the theme's wallpaper, with a shape switcher showing all four shapes, so clipped corners are caught before publishing.
+**Preview:** the tile under real app logos (light, dark and colourful ones, e.g. WhatsApp, Gmail, a bank app) and under the store's sample symbols, on the theme's wallpaper, with a shape switcher showing all four shapes, so hard-to-read logos and clipped corners are caught before publishing.
 
 ### 4.8 Banners
 
@@ -284,7 +286,7 @@ This keeps the dashboard and the phone visually identical without writing the pa
 | Clock and text colour vs background and every variant's background: contrast ≥ 4.5:1 | Error |
 | Every accent colour (each gradient stop) vs background: ≥ 3:1 (large text and icons) | Error |
 | textMuted vs background: ≥ 4.5:1 | Warning |
-| Festival look: muted text vs background ≥ 4.5:1, brand colour vs background ≥ 3:1 | Error |
+| Festival look: muted text vs background ≥ 4.5:1, brand colour vs background ≥ 3:1, and button labels on the brand colour (light text on a dark brand, dark text on a light one) ≥ 4.5:1 | Error (bright reds and pinks often fail the last one: Heroes uses `#CB3131`, not the theme's `#E23636`) |
 | Fonts have a licence that allows redistribution | Error |
 | Myanmar text in names or subtitles, but the fonts have no Myanmar letters and no fallback | Error |
 | Every referenced asset exists and its sha256 matches | Error |
@@ -297,7 +299,7 @@ This keeps the dashboard and the phone visually identical without writing the pa
 | Banner's end time is not after its start time | Error |
 | Event icon isn't in the app's allowlist | Error (the app would show a plain calendar) |
 | A value outside its list (e.g. countdown unit, shape motion, image fit) | Error (the app falls back to the default without saying so) |
-| Scene layers outside the limits (particle count 1–150, positions -0.5–1.5, widths up to 3; [theme-api.md](theme-api.md) section 4.9) | Error |
+| Scene layers outside the limits (particle count 1–150, positions -0.5–1.5, widths up to 3, aspect up to 10, polygon points inside their box, 0–1; [theme-api.md](theme-api.md) section 4.9) | Error (the app skips the whole theme) |
 | A scene wallpaper uses `@tokens` | Error |
 | Variant names an accent the theme doesn't have, or two accents or variants share an ID | Error |
 | Theme has no preview image | Warning |
@@ -305,8 +307,9 @@ This keeps the dashboard and the phone visually identical without writing the pa
 | A theme file changed but its `rev` didn't increase, or the catalog reuses an old `catalogVersion` | Error (normally impossible: the release step sets both) |
 | App name colour (`labels.color`, or white) vs background and the wallpaper's main colours: ≥ 4.5:1 | Warning (names have a shadow, but should read without it) |
 | App name font has no Myanmar letters and no fallback | Error |
-| Icon pack is missing pictures for some of the 20 glyph keys | Warning (those apps keep their own icon) |
-| Icon picture isn't square, or is under 256 px | Error |
+| Image icon pack has no `background` tile | Error (the app skips the pack) |
+| Background tile isn't square, or is under 256 px | Error |
+| White logo on the background tile's middle: contrast below 3:1 | Warning (many app logos are white) |
 | A theme's display or app name font is unlisted | Info only (allowed: the theme still draws with it) |
 
 ---
@@ -354,11 +357,11 @@ Base URL: `https://api.<your-domain>/admin/v1`. Every request needs the login to
 
 | Phase | Work | Done when |
 |---|---|---|
-| **1. Foundations** | Shared JSON Schema; database tables; login and roles; Festivals and Themes editors for the 3 existing engines; JSON export/import | Today's three themes are re-created in the dashboard and export identical JSON to the app's demo catalog ([assets/mock/catalog/v1/](../assets/mock/catalog/v1/)) |
+| **1. Foundations** | Shared JSON Schema; database tables; login and roles; Festivals and Themes editors for the 3 existing engines; JSON export/import | The mock catalog's five themes (the three built-in ones, Spider Night and Neon Night) are re-created in the dashboard and export identical JSON to [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) |
 | **2. Preview** | `wallp_render` shared package; Flutter web preview in the editor; auto preview images | The editor preview matches a phone screenshot of the same theme |
 | **3. Publish** | Checks; release, staging, rollback; Fonts, Icon packs and Wallpapers libraries; Banners | A theme published from the dashboard appears in the app without an update; rollback works. Needs the app's HTTP catalog source ([theme-api.md](theme-api.md) section 10, phase 2) |
 | **4. Generator** | Palette and font generator, wizard, Shuffle; optional AI text helper | A designer makes a passing Christmas theme in under 5 minutes |
-| **5. Layers engine** | Layer editor for the `layers` engine (needs the app's `layers` engine, API doc phase 5) | A new scene made only in the dashboard |
+| **5. Layers engine** | Layer editor for the `layers` engine (the app already draws it; Spider Night and Neon Night were made by script with it) | A new scene made only in the dashboard |
 | **6. Statistics** | Events API data, popularity in publishes | The "Popular" sort in the app uses real data |
 
 ---
