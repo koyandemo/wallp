@@ -44,6 +44,19 @@ void main() {
       expect(glyphKeyFor('com.android.settings', 'Settings'), 'settings');
     });
 
+    test('calls, pay and device-care apps get a picture too', () {
+      expect(glyphKeyFor('com.google.android.apps.tachyon', 'Meet'), 'video');
+      expect(glyphKeyFor('com.example.unknown', 'NugPay'), 'wallet');
+      expect(
+        glyphKeyFor('com.coloros.phonemanager', 'Phone Manager'),
+        'settings',
+      );
+      expect(
+        glyphKeyFor('com.google.android.apps.safetyhub', 'Safety'),
+        'settings',
+      );
+    });
+
     test('apps no pack draws have no key, and keep their own icon', () {
       expect(glyphKeyFor('com.facebook.katana', 'Facebook'), isNull);
       expect(glyphKeyFor('com.example.game', 'Cool Game'), isNull);
@@ -145,11 +158,11 @@ void main() {
       await tester.pump();
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       await tester.pump();
-      expect(find.byType(ClipOval), findsOneWidget);
+      expect(find.byType(ClipRRect), findsOneWidget);
       expect(find.byType(RawImage), findsOneWidget);
     });
 
-    testWidgets('an app the pack doesn\'t draw keeps its own icon', (
+    testWidgets('an app the pack doesn\'t draw is framed in its tile', (
       tester,
     ) async {
       const game = InstalledApp(
@@ -166,6 +179,7 @@ void main() {
         ),
       );
       expect(find.byType(PackPictureIcon), findsNothing);
+      expect(find.byType(PackFallbackIcon), findsOneWidget);
       expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
     });
 
@@ -191,5 +205,33 @@ void main() {
       final picture = look.icons.pack.glyphs['messages']!;
       expect(sent, File('$mockDir/${picture.url}').readAsBytesSync());
     });
+
+    test(
+      'a pinned shortcut for an app with no picture is still themed',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        const channel = MethodChannel('wallp/icons');
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        Object? sent;
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          sent = (call.arguments as Map)['icon'];
+          return true;
+        });
+        addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+        final added = await const IconPackService().pin(
+          theme: home,
+          app: const InstalledApp(
+            packageName: 'com.shopee.mm',
+            label: 'Shopee',
+          ),
+          accent: Colors.orange,
+          assets: assets,
+        );
+        expect(added, isTrue);
+        expect(sent, isA<Uint8List>());
+      },
+    );
   });
 }

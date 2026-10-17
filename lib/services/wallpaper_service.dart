@@ -17,6 +17,18 @@ enum ApplyResult {
   savedToPhotos,
 }
 
+/// How the live wallpaper picker ended.
+enum LivePickerResult {
+  /// wallp's live wallpaper is on.
+  set,
+
+  /// The user left without setting it.
+  cancelled,
+
+  /// No picker could be shown on this phone.
+  unavailable,
+}
+
 /// Failure the UI can show as-is.
 class WallpaperException implements Exception {
   const WallpaperException(this.message);
@@ -79,11 +91,31 @@ class WallpaperService {
   }
 
   /// Opens Android's preview for wallp's live wallpaper; the user taps
-  /// "Set wallpaper" there. False if no picker could be opened.
-  Future<bool> openLiveWallpaper() async {
+  /// "Set wallpaper" there. Completes when the picker closes.
+  Future<LivePickerResult> openLiveWallpaper() async {
+    if (!canSetDirectly) return LivePickerResult.unavailable;
+    try {
+      final r = await _channel.invokeMethod<Object?>('openLiveWallpaper');
+      return switch (r) {
+        'set' => LivePickerResult.set,
+        'cancelled' => LivePickerResult.cancelled,
+        // Older native side: true = opened.
+        true => LivePickerResult.cancelled,
+        _ => LivePickerResult.unavailable,
+      };
+    } on PlatformException {
+      return LivePickerResult.unavailable;
+    } on MissingPluginException {
+      return LivePickerResult.unavailable;
+    }
+  }
+
+  /// Whether wallp's live wallpaper is the phone's wallpaper now.
+  Future<bool> isLiveWallpaperActive() async {
     if (!canSetDirectly) return false;
     try {
-      return await _channel.invokeMethod<bool>('openLiveWallpaper') ?? false;
+      return await _channel.invokeMethod<bool>('isLiveWallpaperActive') ??
+          false;
     } on PlatformException {
       return false;
     } on MissingPluginException {

@@ -1,6 +1,6 @@
 {
   "id": "halloween-night",
-  "rev": 1,
+  "rev": 3,
   "festivalId": "halloween",
   "name": {
     "en": "Haunted Moon"
@@ -92,10 +92,13 @@
   "fonts": {
     "display": "creepster",
     "body": "space-grotesk",
-    "labels": "space-grotesk"
+    "labels": "creepster"
   },
   "clock": {
     "useAccent": true
+  },
+  "labels": {
+    "color": "#FFD9A8"
   },
   "eventIcon": "nightlight_round",
   "iconPackId": "spooky-glow",

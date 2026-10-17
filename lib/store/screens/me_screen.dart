@@ -16,6 +16,7 @@ import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
 import '../state/user_store.dart';
+import '../state/live_wallpaper_status.dart';
 import '../widgets/common.dart';
 
 /// Me: what's applied, favourites, history, downloads and settings.
@@ -423,7 +424,7 @@ class _CurrentLook extends StatelessWidget {
                 theme: preview.wallpaperTheme,
                 radius: 14,
                 showClock: false,
-                animate: true,
+                animate: previewsAnimate(context),
               ),
             ),
             const SizedBox(width: 14),

@@ -320,6 +320,7 @@ class ThemeDetail extends ThemeBase {
     required this.fonts,
     this.variants = const [],
     this.accentClock = false,
+    this.labelColor,
     this.eventIcon = 'event',
     this.wallpaperIds = const [],
     super.subtitle,
@@ -360,6 +361,7 @@ class ThemeDetail extends ThemeBase {
       variants: variants,
       fonts: ThemeFonts.fromJson(r.object('fonts')),
       accentClock: r.object('clock').boolean('useAccent', orElse: false),
+      labelColor: r.optObject('labels')?.optColor('color'),
       eventIcon: r.optString('eventIcon') ?? 'event',
       iconPackId: r.id('iconPackId'),
       wallpaperIds: r.strings('wallpaperIds'),
@@ -375,6 +377,9 @@ class ThemeDetail extends ThemeBase {
 
   /// Draw the lock clock in the accent instead of the text colour.
   final bool accentClock;
+
+  /// App names on wallp Home; null = white (with a shadow), the default.
+  final HexColor? labelColor;
 
   /// A name from the app's icon allowlist, e.g. `nightlight_round`.
   final String eventIcon;
@@ -416,6 +421,7 @@ class ThemeDetail extends ThemeBase {
     variants: variants,
     fonts: fonts,
     accentClock: accentClock,
+    labelColor: labelColor,
     eventIcon: eventIcon,
     iconPackId: iconPackId,
     wallpaperIds: wallpaperIds,
@@ -466,6 +472,7 @@ class ThemeDetail extends ThemeBase {
         : [for (final v in variants) v.toJson()],
     'fonts': fonts.toJson(),
     'clock': {'useAccent': accentClock},
+    'labels': labelColor == null ? null : {'color': labelColor!.hex},
     'eventIcon': eventIcon,
     'iconPackId': iconPackId,
     'wallpaperIds': wallpaperIds,

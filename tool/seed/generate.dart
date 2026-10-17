@@ -28,9 +28,19 @@ const fullDir = 'test/fixtures/catalog/v1';
 const builtInDir = 'assets/builtin/catalog';
 
 /// The demo catalog's themes and wallpapers: one complete theme and one
-/// wallpaper per festival.
-const demoThemes = {'halloween-night', 'christmas-eve', 'thingyan-water'};
-const demoWallpapers = {'harvest-moon', 'silent-night', 'water-splash'};
+/// wallpaper per festival, plus the Spider Night kit.
+const demoThemes = {
+  'halloween-night',
+  'christmas-eve',
+  'thingyan-water',
+  spiderThemeId,
+};
+const demoWallpapers = {
+  'harvest-moon',
+  'silent-night',
+  'water-splash',
+  ...spiderWallpaperIds,
+};
 
 const _fontsRepo = 'https://raw.githubusercontent.com/google/fonts/main';
 const _json = JsonEncoder.withIndent('  ');
@@ -72,6 +82,9 @@ Future<void> main() async {
   final iconPacks = buildIconPacks(asset);
   final wallpapers = buildWallpapers(asset);
   final drafts = buildThemes(asset);
+  // Kits go in the demo only, so the full fixture keeps the counts the
+  // tests check.
+  final kits = [buildSpiderNight(asset)];
 
   // Download sizes need the fonts and packs, so fill them in last.
   final lookup = Catalog(
@@ -87,6 +100,20 @@ Future<void> main() async {
     for (final t in drafts)
       t.withDownloadBytes(
         lookup.assetsFor(t).fold(0, (sum, a) => sum + a.bytes),
+      ),
+  ];
+  final kitThemes = [
+    for (final k in kits)
+      k.theme.withDownloadBytes(
+        Catalog(
+          catalogVersion: catalogVersion,
+          festivals: [k.festival],
+          themes: [k.theme.toSummary()],
+          wallpapers: k.wallpapers,
+          fonts: fonts,
+          banners: const [],
+          iconPacks: [k.iconPack],
+        ).assetsFor(k.theme).fold(0, (sum, a) => sum + a.bytes),
       ),
   ];
 
@@ -108,12 +135,33 @@ Future<void> main() async {
     return;
   }
 
-  _writeCatalog(fullDir, full, themes, sources);
-  _writeCatalog(demoDir, _demo(full), themes, sources);
+  final withKits = Catalog(
+    catalogVersion: catalogVersion,
+    festivals: [...festivals, for (final k in kits) k.festival],
+    themes: [...full.themes, for (final t in kitThemes) t.toSummary()],
+    wallpapers: [...wallpapers, for (final k in kits) ...k.wallpapers],
+    fonts: fonts,
+    banners: [...banners, for (final k in kits) k.banner],
+    iconPacks: [...iconPacks, for (final k in kits) k.iconPack],
+    accentPresets: accentPresets,
+    searchSuggestions: searchSuggestions,
+  );
+  final kitProblems = withKits.validate();
+  if (kitProblems.isNotEmpty) {
+    stderr.writeln(
+      'Kits have broken references:\n  ${kitProblems.join('\n  ')}',
+    );
+    exitCode = 1;
+    return;
+  }
+
+  final allThemes = [...themes, ...kitThemes];
+  _writeCatalog(fullDir, full, allThemes, sources);
+  _writeCatalog(demoDir, _demo(withKits), allThemes, sources);
   _writeBuiltIn(full, themes);
 }
 
-/// The full catalog cut down to [demoThemes] and [demoWallpapers], with
+/// The full catalog (with kits) cut down to [demoThemes] and [demoWallpapers], with
 /// only the festivals, icon packs, fonts and banners they need.
 Catalog _demo(Catalog full) {
   final themes = [
@@ -134,7 +182,7 @@ Catalog _demo(Catalog full) {
     fontIds.addAll(_detailFonts[t.id] ?? const {});
   }
   final candidate = Catalog(
-    catalogVersion: '$catalogVersion-demo',
+    catalogVersion: '$catalogVersion-demo.$demoRevision',
     festivals: festivals,
     themes: themes,
     wallpapers: [
@@ -157,6 +205,7 @@ Catalog _demo(Catalog full) {
       'Thingyan',
       'moon',
       'snow',
+      'spider',
       'live',
     ],
   );
@@ -259,11 +308,19 @@ void _writeBuiltIn(Catalog full, List<ThemeDetail> themes) {
   if (dir.existsSync()) dir.deleteSync(recursive: true);
   Directory('$builtInDir/themes').createSync(recursive: true);
 
+  final builtInFestivals = {
+    for (final t in full.themes)
+      if (t.isBuiltIn) t.festivalId,
+  };
   final builtIn = Catalog(
     // Never equal to a published version, so the first refresh always
     // replaces it.
     catalogVersion: 'built-in',
-    festivals: full.festivals,
+    // Only festivals with a theme here: no empty festivals offline.
+    festivals: [
+      for (final f in full.festivals)
+        if (builtInFestivals.contains(f.id)) f,
+    ],
     themes: [
       for (final t in full.themes)
         if (t.isBuiltIn) t,

@@ -606,3 +606,17 @@ TextStyle headingStyle(BuildContext context, double size) {
           base.copyWith(fontSize: size * 1.1, fontWeight: FontWeight.w400),
         );
 }
+
+/// A segmented button's label: one line, shrunk to fit a narrow segment
+/// rather than wrapped ("Squir / cle").
+class SegmentLabel extends StatelessWidget {
+  const SegmentLabel(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(text, maxLines: 1, softWrap: false),
+  );
+}

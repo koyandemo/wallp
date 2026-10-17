@@ -73,6 +73,19 @@ class AppTheme {
                 TextStyle(fontSize: 24, color: p.text),
               ),
       ),
+      // Segmented buttons: a smaller label and tighter padding, so four
+      // options fit one phone-width row.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          textStyle: WidgetStatePropertyAll(
+            GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 6),
+          ),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
       // Off switches stay visible: an outlined track and a muted thumb.
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(

@@ -44,17 +44,12 @@ void main() {
     );
   });
 
-  test('every festival still shows, even those with no built-in theme', () {
-    expect(
-      catalog.festivals.map((f) => f.id),
-      containsAll([
-        'halloween',
-        'christmas',
-        'thingyan',
-        'thadingyut',
-        'minimal',
-      ]),
-    );
+  test('only festivals that have a theme: none empty offline', () {
+    expect(catalog.festivals.map((f) => f.id), [
+      'halloween',
+      'christmas',
+      'thingyan',
+    ]);
   });
 
   test('has a full theme file for each built-in theme', () {

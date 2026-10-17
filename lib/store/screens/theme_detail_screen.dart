@@ -15,6 +15,7 @@ import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
 import '../state/user_store.dart';
+import '../state/live_wallpaper_status.dart';
 import '../widgets/common.dart';
 
 /// One theme: a live preview of its lock and home screens, its colours and
@@ -50,10 +51,12 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
     final applied = look?.isApplied == true && look!.look!.theme.id == detail.id
         ? look.look
         : null;
-    _variant =
-        applied?.variantId ??
-        (detail.variants.isEmpty ? null : detail.variants.first.id);
-    _accent = applied?.accent;
+    // The applied look's colours, else the theme's own; and the accent
+    // last used or picked for this theme.
+    _variant = applied?.variantId;
+    _accent =
+        applied?.accent ??
+        (mounted ? context.read<UserStore>().accentFor(detail.id) : null);
     _refreshSize(detail);
     return detail;
   }
@@ -64,6 +67,12 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
       catalog.assetsFor(detail),
     );
     if (mounted) setState(() => _missingBytes = bytes);
+  }
+
+  /// Shows [a] and saves it as this theme's accent choice.
+  void _pick(ThemeDetail d, Accent a) {
+    setState(() => _accent = a);
+    context.read<UserStore>().rememberAccent(d.id, a);
   }
 
   Accent _accentFor(ThemeDetail d) =>
@@ -127,13 +136,18 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
     final user = context.watch<UserStore>();
     final looks = context.watch<LookController>();
     final accent = _accentFor(detail);
-    final preview = previewOf(
-      summary,
-      catalog,
-      now,
-      detail: detail,
-      variantId: _variant,
-      accent: accent,
+    // The icon shape and app names the user picked on the icon pack page.
+    final preview = withUserIcons(
+      previewOf(
+        summary,
+        catalog,
+        now,
+        detail: detail,
+        variantId: _variant,
+        accent: accent,
+      ),
+      looks.look,
+      accent.color,
     );
     final fav = user.isFavouriteTheme(detail.id);
     final isApplied = looks.isApplied && looks.look?.theme.id == detail.id;
@@ -177,8 +191,9 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                   theme: preview,
                   now: now,
                   screen: _screen,
-                  animate: true,
+                  animate: previewsAnimate(context),
                   accent: accent.color,
+                  accentGradient: accent.gradient,
                 ),
               ),
             ),
@@ -203,36 +218,6 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                 ),
             ],
           ),
-          if (detail.variants.length > 1) ...[
-            const SizedBox(height: 18),
-            Text(
-              'Colours',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: context.palette.text,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
-              children: [
-                for (final v in detail.variants)
-                  _Swatch(
-                    label: v.name.en,
-                    selected: _variant == v.id,
-                    fill: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(detail.paletteFor(v.id).background.argb),
-                    ),
-                    onTap: () => setState(() {
-                      _variant = v.id;
-                      _accent = null; // The variant's own accent.
-                    }),
-                  ),
-              ],
-            ),
-          ],
           const SizedBox(height: 18),
           Row(
             children: [
@@ -254,7 +239,7 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                     variantId: _variant,
                     current: accent,
                   );
-                  if (picked != null) setState(() => _accent = picked);
+                  if (picked != null) _pick(detail, picked);
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: context.palette.brand,
@@ -274,8 +259,9 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                   label: a.name.en,
                   selected: sameLook(a, accent),
                   fill: a.decoration(shape: BoxShape.circle),
-                  onTap: () => setState(() => _accent = a),
+                  onTap: () => _pick(detail, a),
                 ),
+              // A gradient or custom accent from "Gradients & custom".
               if (!detail.accents.any((a) => sameLook(a, accent)))
                 _Swatch(
                   label: accent.name.en,
@@ -322,7 +308,7 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                     subtitle: 'Every app on wallp Home',
                     onTap: () => StoreRoutes.iconPack(context, pack.id),
                   ),
-                if (font != null)
+                if (font != null && font.listed)
                   _IncludesRow(
                     icon: Icons.text_fields_rounded,
                     title: '${font.family} clock font',
@@ -488,9 +474,8 @@ class _ApplySheetState extends State<_ApplySheet> {
 
   @override
   Widget build(BuildContext context) {
-    final font =
-        catalogOf(context).font(widget.theme.fonts.display)?.family ??
-        'the clock font';
+    final clockFont = catalogOf(context).font(widget.theme.fonts.display);
+    final font = clockFont?.family ?? 'the clock font';
     final options = [
       (
         ApplyOption.wholeTheme,
@@ -498,11 +483,13 @@ class _ApplySheetState extends State<_ApplySheet> {
         'Wallpaper, icons and clock font',
       ),
       (ApplyOption.wallpaperOnly, 'Wallpaper only', 'Keep your icons and font'),
-      (
-        ApplyOption.clockFontOnly,
-        'Clock font only',
-        '$font on the lock and home clock',
-      ),
+      // A hidden font can't be picked on its own.
+      if (clockFont?.listed ?? true)
+        (
+          ApplyOption.clockFontOnly,
+          'Clock font only',
+          '$font on the lock and home clock',
+        ),
     ];
     return SafeArea(
       child: Padding(

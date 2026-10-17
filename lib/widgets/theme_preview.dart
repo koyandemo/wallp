@@ -27,6 +27,10 @@ class ThemePreview extends StatelessWidget {
     this.screen = PhoneScreen.lock,
     this.animate = false,
     this.accent,
+    this.accentGradient,
+    this.clockColor,
+    this.clockScale = 1,
+    this.clockGradient,
   });
 
   final PhoneTheme theme;
@@ -36,6 +40,15 @@ class ThemePreview extends StatelessWidget {
 
   /// Overrides the theme's default accent.
   final Color? accent;
+
+  /// The accent as a gradient (a gradient accent); null for a solid one.
+  final Gradient? accentGradient;
+
+  /// The lock clock exactly as the user set it (colour, size, gradient);
+  /// without [clockColor], the theme's default.
+  final Color? clockColor;
+  final double clockScale;
+  final Gradient? clockGradient;
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +67,24 @@ class ThemePreview extends StatelessWidget {
                 theme: theme,
                 accent: accent,
                 now: now,
+                clockColor: clockColor,
+                clockScale: clockScale,
+                clockGradient: clockColor != null
+                    ? clockGradient
+                    : theme.accentClock
+                    ? accentGradient
+                    : null,
+                accentGradient: accentGradient,
+                showShortcuts: true,
               ),
               PhoneScreen.home => HomeScreenOverlay(
                 theme: theme,
                 accent: accent,
                 now: now,
+                accentGradient: accentGradient,
+                clockColor: clockColor,
+                clockScale: clockScale,
+                clockGradient: clockGradient,
               ),
               PhoneScreen.live => Stack(
                 children: [LiveWallpaperOverlay(theme: theme, accent: accent)],

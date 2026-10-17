@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 import 'art.dart';
+import 'spider_night_art.dart';
 
 void main() {
   test('render icon packs', () async {
@@ -39,6 +40,10 @@ void main() {
             _pagoda(c, size);
           case LayerArt.lanternGarland:
             _lanternGarland(c, size);
+          case LayerArt.spiderSkyline:
+            spiderSkyline(c, size);
+          case LayerArt.spiderWeb:
+            spiderWeb(c, size);
         }
       });
     }
@@ -48,12 +53,18 @@ void main() {
 ui.Color _c(int rgb, [double alpha = 1]) =>
     ui.Color(0xFF000000 | rgb).withValues(alpha: alpha);
 
+/// Files imported from an image generator, which this leaves alone.
+final _external = File(externalArtList).existsSync()
+    ? File(externalArtList).readAsLinesSync().toSet()
+    : const <String>{};
+
 Future<void> _save(
   String path,
   int width,
   int height,
   void Function(ui.Canvas) draw,
 ) async {
+  if (_external.contains(path)) return;
   final recorder = ui.PictureRecorder();
   draw(ui.Canvas(recorder));
   final picture = recorder.endRecording();
@@ -105,6 +116,7 @@ void _icon(ui.Canvas canvas, PackArt pack, String glyphPath) {
   if (pack.tile case final tileColor?) {
     canvas.drawPath(shape, ui.Paint()..color = _c(tileColor));
   }
+  if (pack.look == PackLook.comic) _comicWeb(canvas, pack, shape, tile);
   if (pack.look == PackLook.outline || pack.look == PackLook.glow) {
     canvas.drawPath(
       shape,
@@ -118,20 +130,60 @@ void _icon(ui.Canvas canvas, PackArt pack, String glyphPath) {
   // The glyph fills half the tile (70% for line icons, which have no tile).
   final box = pack.look == PackLook.line ? s * 0.7 : s * 0.5;
   final scale = box / 24;
+  final glyph = parseSvgPathData(glyphPath);
+  ui.Paint stroke(int color, double width) => ui.Paint()
+    ..color = _c(color)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = width
+    ..strokeCap = ui.StrokeCap.round
+    ..strokeJoin = ui.StrokeJoin.round;
   canvas
     ..save()
     ..translate((s - box) / 2, (s - box) / 2)
-    ..scale(scale)
-    ..drawPath(
-      parseSvgPathData(glyphPath),
-      ui.Paint()
-        ..color = _c(pack.glyph)
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = pack.look == PackLook.line ? 1.6 : 2
-        ..strokeCap = ui.StrokeCap.round
-        ..strokeJoin = ui.StrokeJoin.round,
-    )
+    ..scale(scale);
+  // Comic glyphs are inked: a thick ring-coloured line under the glyph.
+  if (pack.look == PackLook.comic) canvas.drawPath(glyph, stroke(pack.ring, 4));
+  canvas
+    ..drawPath(glyph, stroke(pack.glyph, pack.look == PackLook.line ? 1.6 : 2))
     ..restore();
+}
+
+/// A web from the tile's centre, clipped to the tile, plus an inked rim.
+void _comicWeb(ui.Canvas canvas, PackArt pack, ui.Path shape, ui.Rect tile) {
+  final hub = tile.center;
+  final reach = tile.width * 0.75;
+  const spokes = 12;
+  ui.Offset at(double angle, double r) =>
+      hub + ui.Offset(math.cos(angle) * r, math.sin(angle) * r);
+  final web = ui.Paint()
+    ..color = _c(pack.ring, 0.35)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  canvas
+    ..save()
+    ..clipPath(shape);
+  for (var i = 0; i < spokes; i++) {
+    canvas.drawLine(hub, at(i * 2 * math.pi / spokes, reach), web);
+  }
+  for (final r in [0.2, 0.36, 0.54, 0.74]) {
+    final radius = tile.width * r;
+    final ring = ui.Path()..moveTo(at(0, radius).dx, at(0, radius).dy);
+    for (var i = 1; i <= spokes; i++) {
+      final mid = at((i - 0.5) * 2 * math.pi / spokes, radius * 0.88);
+      final end = at(i * 2 * math.pi / spokes, radius);
+      ring.quadraticBezierTo(mid.dx, mid.dy, end.dx, end.dy);
+    }
+    canvas.drawPath(ring, web);
+  }
+  canvas
+    ..restore()
+    ..drawPath(
+      shape,
+      ui.Paint()
+        ..color = _c(pack.ring)
+        ..style = ui.PaintingStyle.stroke
+        ..strokeWidth = tile.width * 0.035,
+    );
 }
 
 void _snowHills(ui.Canvas canvas, ui.Size size) {

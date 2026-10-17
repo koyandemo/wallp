@@ -84,104 +84,12 @@
         "displayFont": "baloo-2"
       },
       "coverThemeId": "thingyan-water"
-    },
-    {
-      "id": "thadingyut",
-      "name": {
-        "en": "Thadingyut",
-        "my": "သီတင်းကျွတ်"
-      },
-      "kind": "festival",
-      "tags": [
-        "myanmar"
-      ],
-      "sort": 40,
-      "occurrences": [
-        "2027-10-11",
-        "2028-09-29"
-      ],
-      "fallbackDate": {
-        "month": 10,
-        "day": 10
-      },
-      "durationDays": 3,
-      "unit": "day",
-      "look": {
-        "background": "#130C2A",
-        "surface": "#1E153D",
-        "surface2": "#2A1F52",
-        "outline": "#3B2E6B",
-        "nav": "#181033",
-        "muted": "#C1B8DC",
-        "brand": "#FFD27A",
-        "displayFont": "caveat"
-      },
-      "coverThemeId": "festival-of-lights"
-    },
-    {
-      "id": "minimal",
-      "name": {
-        "en": "Minimal"
-      },
-      "kind": "collection",
-      "sort": 90,
-      "look": {
-        "background": "#0E0C12",
-        "surface": "#1A1720",
-        "surface2": "#26222E",
-        "outline": "#332E3D",
-        "nav": "#15121B",
-        "muted": "#A39DAE",
-        "brand": "#FFB547",
-        "displayFont": "bebas-neue"
-      },
-      "coverThemeId": "quiet-ink"
-    },
-    {
-      "id": "kpop",
-      "name": {
-        "en": "Kpop"
-      },
-      "kind": "festival",
-      "comingSoon": true,
-      "sort": 100,
-      "unit": "day",
-      "look": {
-        "background": "#0E0C12",
-        "surface": "#1A1720",
-        "surface2": "#26222E",
-        "outline": "#332E3D",
-        "nav": "#15121B",
-        "muted": "#A39DAE",
-        "brand": "#FFB547",
-        "displayFont": "bebas-neue"
-      }
-    },
-    {
-      "id": "mid-autumn",
-      "name": {
-        "en": "Mid-Autumn"
-      },
-      "kind": "festival",
-      "comingSoon": true,
-      "sort": 110,
-      "unit": "day",
-      "look": {
-        "background": "#0E0C12",
-        "surface": "#1A1720",
-        "surface2": "#26222E",
-        "outline": "#332E3D",
-        "nav": "#15121B",
-        "muted": "#A39DAE",
-        "brand": "#FFB547",
-        "displayFont": "bebas-neue"
-      }
     }
   ],
   "themes": [
     {
       "id": "halloween-night",
-      "rev": 1,
+      "rev": 3,
       "festivalId": "halloween",
       "name": {
         "en": "Haunted Moon"
@@ -227,7 +135,7 @@
     },
     {
       "id": "christmas-eve",
-      "rev": 1,
+      "rev": 2,
       "festivalId": "christmas",
       "name": {
         "en": "Snowy Pines"
@@ -274,7 +182,7 @@
     },
     {
       "id": "thingyan-water",
-      "rev": 1,
+      "rev": 2,
       "festivalId": "thingyan",
       "name": {
         "en": "Water Splash"
@@ -687,7 +595,7 @@
         }
       ],
       "sampleText": {
-        "en": "သင်္ကြန် ၁၉:၄၇"
+        "en": "ကြိုဆိုပါတယ်"
       }
     }
   ],
@@ -858,35 +766,6 @@
         "artThemeId": "thingyan-water"
       },
       "sort": 40
-    },
-    {
-      "id": "thadingyut-2027",
-      "title": {
-        "en": "Festival of Lights"
-      },
-      "subtitle": {
-        "en": "Lanterns and candle glow for Thadingyut."
-      },
-      "tag": {
-        "en": "THEME"
-      },
-      "cta": {
-        "en": "Explore"
-      },
-      "action": {
-        "type": "festival",
-        "id": "thadingyut"
-      },
-      "look": {
-        "background": "#1E1440",
-        "accent": "#FFD27A",
-        "titleColor": "#FFD27A",
-        "font": "caveat",
-        "artThemeId": "festival-of-lights"
-      },
-      "startsAt": "2027-09-15T00:00:00.000Z",
-      "endsAt": "2027-10-15T00:00:00.000Z",
-      "sort": 50
     }
   ],
   "accentPresets": {

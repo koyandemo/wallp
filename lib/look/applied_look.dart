@@ -194,13 +194,21 @@ class AppliedLook {
     at: at,
   );
 
-  /// A different icon pack; [shape] defaults to the pack's own.
+  /// A different icon pack; [shape] defaults to the pack's own. The label
+  /// colour stays unless [labels] is given.
   AppliedLook withIconPack(
     IconPack pack, {
     required DateTime at,
     IconShape? shape,
+    LabelColor? labels,
+    LabelFont? labelFont,
   }) => _copy(
-    icons: IconChoice(pack, shape: shape),
+    icons: IconChoice(
+      pack,
+      shape: shape,
+      labels: labels ?? icons.labels,
+      labelFont: labelFont ?? icons.labelFont,
+    ),
     at: at,
   );
 
@@ -412,19 +420,76 @@ class ClockStyle {
   };
 }
 
-/// The icon pack on wallp Home, and the tile shape the user picked.
+/// The icon pack on wallp Home, the tile shape and the app name colour and
+/// font the user picked.
 class IconChoice {
-  IconChoice(this.pack, {IconShape? shape}) : shape = shape ?? pack.shape;
+  IconChoice(
+    this.pack, {
+    IconShape? shape,
+    this.labels = const LabelColor.theme(),
+    this.labelFont = LabelFont.theme,
+  }) : shape = shape ?? pack.shape;
 
   factory IconChoice.fromJson(JsonReader r) => IconChoice(
     IconPack.fromJson(r.object('pack')),
     shape: r.enumValue('shape', IconShape.values),
+    // Saved before label colours existed: the theme's.
+    labels: switch (r.optString('labels')) {
+      null => const LabelColor.theme(),
+      final v => LabelColor.fromJson(v, r.at('labels')),
+    },
+    labelFont: r.has('labelFont')
+        ? r.enumValue('labelFont', LabelFont.values)
+        : LabelFont.theme,
   );
 
   final IconPack pack;
   final IconShape shape;
+  final LabelColor labels;
+  final LabelFont labelFont;
 
-  Map<String, Object?> toJson() => {'pack': pack.toJson(), 'shape': shape.name};
+  Map<String, Object?> toJson() => {
+    'pack': pack.toJson(),
+    'shape': shape.name,
+    'labels': labels.toJson(),
+    'labelFont': labelFont.name,
+  };
+}
+
+/// App names in the theme's label font, or the phone's own.
+enum LabelFont { theme, system }
+
+/// The colour of app names on wallp Home: the theme's (its `labels.color`,
+/// else white), the accent, or one the user picked.
+class LabelColor {
+  const LabelColor.theme() : hex = null, _accent = false;
+  const LabelColor.accent() : hex = null, _accent = true;
+  const LabelColor.fixed(HexColor this.hex) : _accent = false;
+
+  factory LabelColor.fromJson(String value, String path) => switch (value) {
+    'theme' => const LabelColor.theme(),
+    'accent' => const LabelColor.accent(),
+    _ when HexColor.isValid(value) => LabelColor.fixed(HexColor(value)),
+    _ => throw CatalogFormatException(
+      path,
+      'expected theme, accent or "#RRGGBB"',
+    ),
+  };
+
+  final HexColor? hex;
+  final bool _accent;
+
+  bool get isTheme => hex == null && !_accent;
+  bool get isAccent => _accent;
+
+  String toJson() => hex?.hex ?? (_accent ? 'accent' : 'theme');
+
+  @override
+  bool operator ==(Object other) =>
+      other is LabelColor && other.toJson() == toJson();
+
+  @override
+  int get hashCode => toJson().hashCode;
 }
 
 /// What's on the wallpaper: the current theme's scene (the usual case),

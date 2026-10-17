@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../catalog/catalog.dart';
 import '../../core/store_palette.dart';
-import '../../core/date_format.dart';
 import '../../look/applied_look.dart';
 import '../../look/look_controller.dart';
+import '../../look/resolved_look.dart';
 import '../../render/font_registry.dart';
+import '../../widgets/theme_preview.dart';
 import '../apply_flow.dart';
 import '../widgets/common.dart';
 
-/// One clock font: size, colour, where it shows, and Apply.
+/// One clock font: a lock and home preview, size, where it shows, Apply.
 class FontDetailScreen extends StatefulWidget {
   const FontDetailScreen({
     super.key,
@@ -27,24 +27,29 @@ class FontDetailScreen extends StatefulWidget {
 
 class _FontDetailScreenState extends State<FontDetailScreen> {
   ClockSize _size = ClockSize.medium;
-  ClockColor _color = const ClockColor.accent();
   bool _lock = true, _home = true, _labels = false;
   bool _applying = false;
+  PhoneScreen _screen = PhoneScreen.lock;
 
-  static const _colours = [
-    ('Cream', HexColor('#F3E6C4')),
-    ('White', HexColor('#F5F1EA')),
-    ('Purple', HexColor('#A970FF')),
-  ];
+  void _redraw() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    FontRegistry.shared.removeListener(_redraw);
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    // Redraw in the font once it has loaded.
+    FontRegistry.shared.addListener(_redraw);
     // Start from the clock the user has now.
     final clock = context.read<LookController>().look?.clock;
     if (clock != null) {
       _size = clock.size;
-      _color = clock.color;
       _lock = clock.places.lockScreen;
       _home = clock.places.homeClock;
       _labels = clock.places.appLabels;
@@ -65,14 +70,22 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
       );
     }
     final look = context.watch<LookController>().look;
-    final accent = look == null
-        ? context.palette.brand
-        : Color(look.accent.primary.argb);
-    final clockColor = _color.isAccent
-        ? accent
-        : _color.isText
-        ? context.palette.text
-        : Color(_color.hex!.argb);
+    final now = nowOf(context);
+    // The user's look with this font where the switches put it: what Apply
+    // would give. With every switch off, the look as it is.
+    final candidate = look == null || !(_lock || _home || _labels)
+        ? look
+        : look.withClockFont(
+            font,
+            at: now,
+            size: _size,
+            places: ClockPlaces(
+              lockScreen: _lock,
+              homeClock: _home,
+              appLabels: _labels,
+            ),
+          );
+    final r = candidate == null ? null : ResolvedLook.of(candidate, now);
     final places = [
       if (_lock) 'lock screen clock',
       if (_home) 'wallp Home clock',
@@ -84,24 +97,51 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
         children: [
-          Container(
-            height: 200,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.palette.surface,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Text(
-              DateFormatX.clock(
-                nowOf(context),
-                use24h: MediaQuery.alwaysUse24HourFormatOf(context),
+          if (r != null) ...[
+            Center(
+              child: Container(
+                width: 236,
+                height: 440,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: context.palette.surface2, width: 6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: ThemePreview(
+                    theme: _screen == PhoneScreen.lock
+                        ? r.lockTheme
+                        : r.homeTheme,
+                    now: now,
+                    screen: _screen,
+                    accent: r.accent,
+                    accentGradient: r.accentGradient,
+                    clockColor: r.clockColor,
+                    clockScale: r.clockScale,
+                    clockGradient: r.clockGradient,
+                  ),
+                ),
               ),
-              style: FontRegistry.shared.style(
-                font.family,
-                TextStyle(fontSize: 96 * _size.scale, color: clockColor),
-              ),
             ),
-          ),
+            const SizedBox(height: 14),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              children: [
+                for (final (s, label, icon) in const [
+                  (PhoneScreen.lock, 'Lock screen', Icons.lock_outline_rounded),
+                  (PhoneScreen.home, 'Home screen', Icons.home_outlined),
+                ])
+                  ChoiceChip(
+                    avatar: Icon(icon, size: 18),
+                    label: Text(label),
+                    showCheckmark: false,
+                    selected: _screen == s,
+                    onSelected: (_) => setState(() => _screen = s),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           Text(
             'Size',
@@ -113,41 +153,28 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
           ),
           const SizedBox(height: 8),
           SegmentedButton<ClockSize>(
+            // The size shows on the lock clock.
+            // No tick on the selected option: its fill shows it.
+            showSelectedIcon: false,
             segments: const [
-              ButtonSegment(value: ClockSize.small, label: Text('Small')),
-              ButtonSegment(value: ClockSize.medium, label: Text('Medium')),
-              ButtonSegment(value: ClockSize.large, label: Text('Large')),
+              ButtonSegment(
+                value: ClockSize.small,
+                label: SegmentLabel('Small'),
+              ),
+              ButtonSegment(
+                value: ClockSize.medium,
+                label: SegmentLabel('Medium'),
+              ),
+              ButtonSegment(
+                value: ClockSize.large,
+                label: SegmentLabel('Large'),
+              ),
             ],
             selected: {_size},
-            onSelectionChanged: (s) => setState(() => _size = s.single),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Colour',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: context.palette.text,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 10,
-            children: [
-              _ColourDot(
-                label: 'Theme accent',
-                color: accent,
-                selected: _color.isAccent,
-                onTap: () => setState(() => _color = const ClockColor.accent()),
-              ),
-              for (final (name, hex) in _colours)
-                _ColourDot(
-                  label: name,
-                  color: Color(hex.argb),
-                  selected: _color.hex == hex,
-                  onTap: () => setState(() => _color = ClockColor.fixed(hex)),
-                ),
-            ],
+            onSelectionChanged: (s) => setState(() {
+              _size = s.single;
+              _screen = PhoneScreen.lock;
+            }),
           ),
           const SizedBox(height: 20),
           Text(
@@ -158,26 +185,39 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
               color: context.palette.text,
             ),
           ),
+          // Each switch shows its screen in the preview above.
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.lock_outline_rounded),
             title: const Text('Lock screen clock'),
             subtitle: const Text('With the live wallpaper on'),
             value: _lock,
-            onChanged: (v) => setState(() => _lock = v),
+            onChanged: (v) => setState(() {
+              _lock = v;
+              _screen = PhoneScreen.lock;
+            }),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.home_outlined),
             title: const Text('wallp Home clock'),
             subtitle: const Text('The clock above your icons'),
             value: _home,
-            onChanged: (v) => setState(() => _home = v),
+            onChanged: (v) => setState(() {
+              _home = v;
+              _screen = PhoneScreen.home;
+            }),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.label_outline_rounded),
             title: const Text('App labels'),
             subtitle: const Text('Names under icons on wallp Home'),
             value: _labels,
-            onChanged: (v) => setState(() => _labels = v),
+            onChanged: (v) => setState(() {
+              _labels = v;
+              _screen = PhoneScreen.home;
+            }),
           ),
           if (font.fallbackFor.containsKey('my'))
             Padding(
@@ -210,7 +250,6 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
                         context,
                         font,
                         size: _size,
-                        color: _color,
                         places: ClockPlaces(
                           lockScreen: _lock,
                           homeClock: _home,
@@ -232,46 +271,4 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
       ),
     );
   }
-}
-
-class _ColourDot extends StatelessWidget {
-  const _ColourDot({
-    required this.label,
-    required this.color,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final Color color;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: label,
-    inMutuallyExclusiveGroup: true,
-    checked: selected,
-    button: true,
-    excludeSemantics: true,
-    child: InkResponse(
-      onTap: onTap,
-      radius: 26,
-      child: Container(
-        width: 44,
-        height: 44,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: selected ? context.palette.text : Colors.transparent,
-            width: 3,
-          ),
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-      ),
-    ),
-  );
 }

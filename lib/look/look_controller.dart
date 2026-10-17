@@ -155,13 +155,26 @@ class LookController extends ChangeNotifier {
     );
   });
 
-  Future<AppliedLook> applyIconPack(String packId, {IconShape? shape}) =>
-      _change((current, catalog, at) async {
-        final pack =
-            catalog.iconPack(packId) ??
-            (throw NotInCatalogException('icon pack', packId));
-        return (current.withIconPack(pack, at: at, shape: shape), pack.name.en);
-      });
+  Future<AppliedLook> applyIconPack(
+    String packId, {
+    IconShape? shape,
+    LabelColor? labels,
+    LabelFont? labelFont,
+  }) => _change((current, catalog, at) async {
+    final pack =
+        catalog.iconPack(packId) ??
+        (throw NotInCatalogException('icon pack', packId));
+    return (
+      current.withIconPack(
+        pack,
+        at: at,
+        shape: shape,
+        labels: labels,
+        labelFont: labelFont,
+      ),
+      pack.name.en,
+    );
+  });
 
   Future<AppliedLook> setAccent(Accent accent) => _change(
     (current, _, at) async =>

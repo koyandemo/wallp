@@ -13,6 +13,7 @@ import 'look/look_controller.dart';
 import 'look/my_accents.dart';
 import 'render/font_registry.dart';
 import 'core/clock.dart';
+import 'store/state/live_wallpaper_status.dart';
 import 'store/state/user_store.dart';
 import 'store/store_shell.dart';
 import 'store/widgets/download_overlay.dart';
@@ -58,6 +59,8 @@ class WallpApp extends StatelessWidget {
         // on launch it re-pins (and if needed re-downloads) the applied
         // look's files.
         ChangeNotifierProvider(create: _looks, lazy: false),
+        // Previews animate only while wallp's live wallpaper is on.
+        ChangeNotifierProvider(create: (_) => LiveWallpaperStatus()),
       ],
       child: MaterialApp(
         title: 'Wallp Themes',

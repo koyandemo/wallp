@@ -12,7 +12,7 @@ import 'scene_assets.dart';
 ///
 /// Each engine (store, wallp Home, live wallpaper) has its own fonts, so
 /// each calls [ensureAll] for the look it draws.
-class FontRegistry {
+class FontRegistry extends ChangeNotifier {
   FontRegistry({this._assets});
 
   static final shared = FontRegistry();
@@ -69,6 +69,8 @@ class FontRegistry {
       }
       await loader.load();
       _loaded[font.family] = familyFor(font);
+      // Text drawn before this loaded can redraw in it now.
+      notifyListeners();
       return true;
     } on Object catch (e) {
       debugPrint('Font ${font.id} could not be loaded: $e');

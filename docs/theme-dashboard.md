@@ -1,12 +1,14 @@
 # wallp Theme Dashboard
 
-The web tool the wallp team uses to create, generate, preview and publish themes, wallpapers, fonts and store banners. What it publishes is exactly the catalog described in [theme-api.md](theme-api.md), which the app reads.
+The web tool the wallp team uses to create, generate, preview and publish themes, wallpapers, fonts, icon packs and store banners. What it publishes is exactly the catalog described in [theme-api.md](theme-api.md), which the app reads.
+
+**Status (17 Oct 2026):** not started. The app side is built and runs on a mock catalog in the same format ([theme-api.md](theme-api.md) section 7), so whatever this dashboard publishes, the app can already show. The mock catalog's generator ([tool/seed/](../tool/seed/)) is a small script version of section 4.9's release step and a good reference for it.
 
 ---
 
 ## 1. What the dashboard must do
 
-1. **Create** festivals, themes, wallpapers, fonts and store banners.
+1. **Create** festivals, themes, wallpapers, fonts, icon packs and store banners.
 2. **Generate** a new theme from a few choices (festival, mood, base colour), then let a person adjust it.
 3. **Preview** a theme exactly as the phone will draw it: lock screen, wallp Home with icons, and live wallpaper.
 4. **Check** it before publishing: readable colours, fonts with the right letters, file sizes, supported app versions.
@@ -38,7 +40,7 @@ The dashboard, the API and the app must never disagree about what a theme is. Fo
 | **Reviewer** | Approve or reject drafts, schedule publishing |
 | **Viewer** | Read only, see statistics |
 
-Login uses email + password with 2-step verification, or Google sign-in limited to the team's domain. Every change goes into the **audit log** (section 5.10).
+Login uses email + password with 2-step verification, or Google sign-in limited to the team's domain. Every change goes into the **audit log** (section 4.11).
 
 ---
 
@@ -51,10 +53,11 @@ Login
    ├─ Themes ─── Theme editor ── Generate theme (wizard)
    ├─ Wallpapers ─ Wallpaper editor
    ├─ Fonts ──── Font editor
+   ├─ Icon packs ─ Icon pack editor
    ├─ Banners ── Banner editor (store carousel)
    ├─ Publish ── Release history / Rollback
    ├─ Statistics
-   └─ Settings ─ Users, Engines, Audit log
+   └─ Settings ─ Store, Users, Engines, Audit log
 ```
 
 ### 4.1 Overview
@@ -70,8 +73,11 @@ List columns: name, next date, countdown, number of themes (published / drafts),
 
 **Festival editor fields:**
 - Name per language, ID (fixed after the first publish).
+- **Kind:** festival (dates and a countdown) or collection (no date, "Any time", e.g. Minimal).
+- **Tags**, e.g. `myanmar` to list it under the app's "Myanmar" chip.
 - Countdown unit: day or night.
 - **Dates per year**: a table of years and dates. A "Fill next 5 years" button for fixed-date festivals (Halloween, Christmas). Myanmar-calendar festivals (Thingyan, Thadingyut) are entered by hand. A warning shows when fewer than 2 future dates remain.
+- **Fallback date** (month and day, not 29 February) for after the table runs out, and **duration** in days (Thingyan: 4).
 - "Coming soon" switch.
 - **App look** while browsing this festival: background, cards, outline, muted text, brand colour, heading font. A contrast check runs live (section 6).
 - Cover theme.
@@ -86,18 +92,19 @@ List columns: name, next date, countdown, number of themes (published / drafts),
 |---|---|
 | **Basics** | Name and subtitle per language, festival, style (classic / cozy / minimal / cute), tags, ID |
 | **Scene** | Engine (from `engines.json`) and its params. For the `layers` engine: a layer list editor (add background, image, shape or particles; drag to reorder; tweak each layer) |
-| **Palette** | background, deep, surface, text, textMuted, each with a colour picker and hex field. Contrast results show next to each (section 6). |
-| **Accents** | A list of solid or gradient accents, the same builder as the app's accent picker: colours, direction, "set as default", reorder |
-| **Variants** | Add a variant: name plus only the palette colours it changes. The preview has a variant switcher. |
-| **Fonts** | Display, body and app-label fonts, chosen from the Fonts library. A warning appears if a font has no Myanmar letters and the theme has Myanmar text, and the Myanmar fallback font is shown. |
-| **Clock & countdown** | Clock uses accent (yes/no), event icon (from the app's icon list) |
-| **Icon pack** | Icon style (from the engines list) |
+| **Palette** | background, deep, surface, text, textMuted, and optional motif (the scene's main shape; empty = text colour), each with a colour picker and hex field. Contrast results show next to each (section 6). |
+| **Accents** | A list of solid or gradient accents, the same builder as the app's accent picker: colours, direction, "set as default", reorder. The first is the default; users pick from all of them on the theme page, and the phone remembers their pick per theme |
+| **Variants** | Optional. Name plus only the palette colours it changes. **The app's store doesn't offer variants at the moment**, so keep this collapsed and don't rely on it; the app still validates them |
+| **Fonts** | Display font (clock and headline), body font, and **app name font** (`fonts.labels`), all from the Fonts library. The app name font is what users get with **"Theme font"** on the icon pack page, so pick the theme's character font (Halloween: Creepster), not a plain sans. A warning appears if a font has no Myanmar letters and the theme has Myanmar text, and the Myanmar fallback font is shown |
+| **App names** | **Name colour** (`labels.color`): a colour picker, or empty for white. It's the "Theme" choice users see on the icon pack page, and colours names on the home grid, dock, app drawer and app lists. The preview draws it with the app's shadow; the contrast check is in section 6 |
+| **Clock & countdown** | Clock uses accent (yes/no), event icon (only the names in the app's allowlist, [theme-api.md](theme-api.md) section 7.3) |
+| **Icon pack** | The pack a whole-theme apply also applies, from the Icon packs library (section 4.7) |
 | **Wallpapers** | Attach wallpapers from the library |
 | **Preview image** | Generated automatically on save (section 5.4). You can upload a replacement. |
 
 **Phone preview** (390 × 844, the same size as the app's `kSceneSize`):
-- Tabs: **Lock screen** (clock, date, countdown card), **Home screen** (icon grid with sample apps and labels), **Live** (animated scene), **Card** (how it looks in the store grid and festival row).
-- Switchers: variant, accent, and the phone language (English / Myanmar).
+- Tabs: **Lock screen** (clock, date, countdown card), **Home screen** (clock, widget card, icon grid and dock with sample apps and their names), **Live** (animated scene), **Card** (how it looks in the store grid and festival row).
+- Switchers: accent, phone language (English / Myanmar), and the user's own choices from the app, to check the theme still works with them: **tile shape** (squircle / circle / square / leaf), **app name colour** (theme / accent / white / dark) and **app name font** (theme / system).
 - A **"Send to my phone"** button shows a QR code. Scanning it opens the theme in a test build of the app (section 8).
 
 **Bottom bar:** Save draft · Request review · Schedule · Publish now (admins) · Duplicate · Export JSON · Archive.
@@ -121,24 +128,40 @@ The "generate theme from dashboard" feature. It creates a **draft**, never a pub
 
 - **Upload** a PNG or JPG of at least 1440 × 3120. The dashboard makes WebP versions at 1080 and 1440 widths, a blurhash and the dominant colour automatically, and shows the file size of each.
 - **Or** create a scene wallpaper from an engine with params, no upload needed.
-- Fields: name, festival, tags, LIVE (for scene wallpapers), attached themes.
+- Fields: name, festival, tags, attached themes. LIVE isn't a field: it's worked out from the scene (moving shapes or particles). Scene wallpapers have no palette, so their layers take `#RRGGBB` colours only, never `@tokens`.
 - **Warnings:** an image over 1 MB after compression, or a picture that's too dark or bright for the white clock text.
 
 ### 4.6 Fonts
 
 - **Add from Google Fonts** by searching by name. The dashboard downloads the font files and records the licence automatically.
-- **Upload your own** TTF or OTF. A licence choice is required, and publishing is blocked without a licence that allows redistribution.
-- **Shown per font:** which scripts it supports (Latin, Myanmar, …), its weights, and a preview of "19:47", app names and Burmese sample text.
+- **Upload your own** TTF or OTF (the app can't load WOFF2). A licence choice is required: `OFL-1.1` or `Apache-2.0`, the only two the app accepts.
+- **Category** for the app's Fonts filter (display, handwritten, clean, myanmar), and tags.
+- **Shown per font:** which scripts it supports (Latin, Myanmar, …), its weights, and a preview of "Welcome" (the app's Fonts list default), the clock "19:47", app names and Burmese sample text.
+- **Preview text** (`sampleText`): optional, per language; empty = "Welcome". Set it for fonts that can't draw "Welcome", e.g. Padauk shows "ကြိုဆိုပါတယ်".
+- **Listed in store** (`listed`): on by default. Off hides the font from the app's Fonts tab, search and the "clock font" rows, while themes that use it keep drawing with it. Use it to pause a font without breaking themes.
 - **Fallback font** per script, e.g. Myanmar → Padauk.
 - **Subsetting** (optional): keep only the letters needed, e.g. digits and Latin for a clock-only display font, to make the file smaller.
 
-### 4.7 Banners
+### 4.7 Icon packs
 
-The store home carousel. Fields: title, subtitle, tag and button text per language; the action (open a festival, theme, Wallpapers, Fonts or a link); look (background, accent, font, engine); start and end time; order.
+**List:** one card per pack with three of its real icons, its festival, kind and the themes that use it.
+
+**Icon pack editor fields:**
+- Name and style label per language, festival, ID.
+- **Kind:** `images` for every dashboard-made pack (`painted` packs are drawn by code built into the app and can only be imported).
+- **Pictures:** one per glyph key (`phone`, `messages`, `camera`, … 20 in all, [theme-api.md](theme-api.md) section 4.7). Drag a folder in and files are matched by name. Square PNG or WebP, transparent, at least 256 px, **drawn edge to edge**: the app clips each picture to the user's tile shape, and `circle` and `leaf` keep only about the middle 80%.
+- **Default shape:** squircle, circle, square or leaf. Users can change it in the app.
+- **Colours:** `tile` (empty = no tile, icons sit on the wallpaper), `glyph` and `ring`, used for previews and for apps the pack has no picture for.
+
+**Preview:** the 20 icons on the theme's wallpaper, with a shape switcher showing all four shapes, so clipped corners are caught before publishing.
+
+### 4.8 Banners
+
+The store home carousel. Fields: title, subtitle, tag and button text per language (all required); the action (open a festival, a theme, the Wallpapers, Icon packs or Fonts list optionally filtered by festival, or an `https` link); look (background, button colour, title colour, title font, and an optional theme whose scene is the banner picture); optional start and end time; order.
 
 The preview shows the carousel at phone size with all banners that are active at a chosen date, so you can check "what users see on 20 December".
 
-### 4.8 Publish
+### 4.9 Publish
 
 **Release history:** version, time, who, what changed ("+2 themes, 1 banner edited"), and the status of each release.
 
@@ -147,7 +170,7 @@ The preview shows the carousel at phone size with all banners that are active at
 **1. Checks.** Everything in section 6 runs on the whole catalog. Any **error** blocks the publish; **warnings** need a tick to continue.
 
 **2. Release.** The dashboard does these in order:
-1. Builds the theme files (`themes/<id>.<rev>.json`) and `catalog.<version>.json` from published and scheduled-now items.
+1. Builds the theme files (`themes/<id>.<rev>.json`) and `catalog.<version>.json` from published and scheduled-now items. **Every release gets a new `catalogVersion`, and every theme whose file changed gets `rev + 1`, automatically.** Phones fetch only a catalog version and theme `rev` they don't have yet, so a change published under an old number never reaches them. Nobody types these numbers.
 2. Uploads new asset files (named by sha256, so unchanged files are skipped).
 3. Uploads the theme and catalog files.
 4. Uploads `manifest.json` **last**, so phones never see a catalog whose files are missing.
@@ -159,12 +182,13 @@ The preview shows the carousel at phone size with all banners that are active at
 
 **Release notes** are optional, for the team only.
 
-### 4.9 Statistics (when the Events API exists)
+### 4.10 Statistics (when the Events API exists)
 
 Applies and favourites per theme, per festival and per day, plus the popularity ranking that the next publish will use.
 
-### 4.10 Settings
+### 4.11 Settings
 
+- **Store:** the catalog-wide lists that belong to no item: the **accent presets** (the Solid and Gradient tabs every theme's accent picker offers after the theme's own accents) and the **popular searches** on the app's Search screen ([theme-api.md](theme-api.md) section 3.2).
 - **Users and roles.**
 - **Engines:** a read-only view of `engines.json` with the app version for each engine.
 - **Audit log:** who changed what and when, with the before and after JSON, filterable by item.
@@ -177,11 +201,13 @@ Applies and favourites per theme, per festival and per day, plus the popularity 
 
 | Table | Main fields |
 |---|---|
-| `festivals` | id, name (jsonb), unit, occurrences (date[]), fallback_date, look (jsonb), cover_theme_id, coming_soon, sort |
+| `festivals` | id, name (jsonb), kind, tags, unit, occurrences (date[]), fallback_date, duration_days, look (jsonb), cover_theme_id, coming_soon, sort |
 | `themes` | id, rev, festival_id, status, style, tags, data (jsonb: the full theme JSON from the API doc), generated_from (jsonb), created_by, updated_at |
 | `wallpapers` | id, festival_id, kind, data (jsonb), status |
-| `fonts` | id, family, license, scripts, data (jsonb), status |
+| `fonts` | id, family, license, scripts, category, listed, data (jsonb), status |
+| `icon_packs` | id, festival_id, kind, data (jsonb), status |
 | `banners` | id, data (jsonb), starts_at, ends_at, sort, status |
+| `store_settings` | accent_presets (jsonb), search_suggestions (text[]) |
 | `assets` | sha256, kind, bytes, mime, storage_path, created_at |
 | `releases` | version, manifest (jsonb), changes (jsonb), published_by, published_at, status |
 | `audit_log` | id, user_id, item_type, item_id, before (jsonb), after (jsonb), at |
@@ -202,6 +228,7 @@ The generator is deterministic code, not AI, so results are predictable and alwa
 | surface | same hue, lightness 0.28–0.34 |
 | text | hue +/- 30° (warm white or cool white), lightness 0.94–0.97, very low chroma |
 | textMuted | like text, lightness 0.80–0.85 |
+| motif | base hue, lightness 0.45–0.60, medium chroma (the moon or tree, between surface and text) |
 | accents | 3 solids: the complementary hue, an analogous hue and the base hue, each at lightness 0.70–0.82 and high chroma; plus 1 gradient between two of them |
 
 After building the palette, the generator runs the contrast checks (section 6). It nudges lightness until every check passes, and throws away the option if it can't.
@@ -266,8 +293,21 @@ This keeps the dashboard and the phone visually identical without writing the pa
 | Catalog over 1 MB | Warning; over 2 MB is an error |
 | Festival has fewer than 2 future dates | Warning |
 | Banner points to a missing or unpublished festival or theme | Error |
+| Any reference points at nothing (`Catalog.validate()`, soft references included: cover themes, banner art, font fallbacks) | Error (the app would silently drop or fall back) |
+| Banner's end time is not after its start time | Error |
+| Event icon isn't in the app's allowlist | Error (the app would show a plain calendar) |
+| A value outside its list (e.g. countdown unit, shape motion, image fit) | Error (the app falls back to the default without saying so) |
+| Scene layers outside the limits (particle count 1–150, positions -0.5–1.5, widths up to 3; [theme-api.md](theme-api.md) section 4.9) | Error |
+| A scene wallpaper uses `@tokens` | Error |
+| Variant names an accent the theme doesn't have, or two accents or variants share an ID | Error |
 | Theme has no preview image | Warning |
 | Theme ID was changed after it was published | Error (IDs are permanent) |
+| A theme file changed but its `rev` didn't increase, or the catalog reuses an old `catalogVersion` | Error (normally impossible: the release step sets both) |
+| App name colour (`labels.color`, or white) vs background and the wallpaper's main colours: ≥ 4.5:1 | Warning (names have a shadow, but should read without it) |
+| App name font has no Myanmar letters and no fallback | Error |
+| Icon pack is missing pictures for some of the 20 glyph keys | Warning (those apps keep their own icon) |
+| Icon picture isn't square, or is under 256 px | Error |
+| A theme's display or app name font is unlisted | Info only (allowed: the theme still draws with it) |
 
 ---
 
@@ -285,7 +325,8 @@ Base URL: `https://api.<your-domain>/admin/v1`. Every request needs the login to
 | POST | `/themes/generate` | Body: generator inputs + seed → returns 6 draft options (not saved until chosen) |
 | POST | `/themes/{id}/review` | Request review / approve / reject (`{ "action": "approve" }`) |
 | POST | `/themes/{id}/schedule` | `{ "at": "2026-11-15T00:00:00Z" }` |
-| GET / POST / PATCH | `/wallpapers`, `/fonts`, `/banners` | Same pattern as themes |
+| GET / POST / PATCH | `/wallpapers`, `/fonts`, `/icon-packs`, `/banners` | Same pattern as themes |
+| GET / PUT | `/store-settings` | Accent presets and popular searches |
 | POST | `/assets` | Upload (multipart) → `{ sha256, url, bytes, mime }`. Images also return WebP sizes and blurhash. |
 | POST | `/fonts/import` | `{ "googleFamily": "Creepster" }` → font record with files and licence |
 | POST | `/releases/check` | Runs every check in section 6 → `{ errors: [], warnings: [] }` |
@@ -313,9 +354,9 @@ Base URL: `https://api.<your-domain>/admin/v1`. Every request needs the login to
 
 | Phase | Work | Done when |
 |---|---|---|
-| **1. Foundations** | Shared JSON Schema; database tables; login and roles; Festivals and Themes editors for the 3 existing engines; JSON export/import | Today's three themes are re-created in the dashboard and export identical JSON to the app's built-in catalog |
+| **1. Foundations** | Shared JSON Schema; database tables; login and roles; Festivals and Themes editors for the 3 existing engines; JSON export/import | Today's three themes are re-created in the dashboard and export identical JSON to the app's demo catalog ([assets/mock/catalog/v1/](../assets/mock/catalog/v1/)) |
 | **2. Preview** | `wallp_render` shared package; Flutter web preview in the editor; auto preview images | The editor preview matches a phone screenshot of the same theme |
-| **3. Publish** | Checks; release, staging, rollback; Fonts and Wallpapers libraries; Banners | A theme published from the dashboard appears in the app without an update; rollback works |
+| **3. Publish** | Checks; release, staging, rollback; Fonts, Icon packs and Wallpapers libraries; Banners | A theme published from the dashboard appears in the app without an update; rollback works. Needs the app's HTTP catalog source ([theme-api.md](theme-api.md) section 10, phase 2) |
 | **4. Generator** | Palette and font generator, wizard, Shuffle; optional AI text helper | A designer makes a passing Christmas theme in under 5 minutes |
 | **5. Layers engine** | Layer editor for the `layers` engine (needs the app's `layers` engine, API doc phase 5) | A new scene made only in the dashboard |
 | **6. Statistics** | Events API data, popularity in publishes | The "Popular" sort in the app uses real data |

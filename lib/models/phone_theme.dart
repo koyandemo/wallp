@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../catalog/catalog.dart' show IconShape;
 import '../render/font_registry.dart';
 import '../render/image_icons.dart';
 import '../render/layered_scene.dart';
@@ -104,6 +105,10 @@ class PhoneTheme {
     this._iconStyle,
     this.layered,
     this.imageIcons,
+    this.iconShape = IconShape.squircle,
+    this.labelColor = Colors.white,
+    this.systemLabels = false,
+    this.labelFont,
   });
 
   final String id;
@@ -148,6 +153,44 @@ class PhoneTheme {
   /// A downloaded icon pack; drawn instead of [iconStyle] icons.
   final ImageIconPack? imageIcons;
 
+  /// The tile shape for painted icons (downloaded packs carry their own).
+  final IconShape iconShape;
+
+  /// App names under icons on wallp Home.
+  final Color labelColor;
+
+  /// App names in the phone's own font instead of [bodyFont].
+  final bool systemLabels;
+
+  /// Google Fonts family for app names; null = [bodyFont].
+  final String? labelFont;
+
+  /// For app names anywhere on wallp Home: in [labelColor] with
+  /// [labelShadows], in the label font. [style] sets size and weight.
+  TextStyle appNameStyle([TextStyle? style]) => labelStyle(
+    (style ?? const TextStyle()).copyWith(
+      color: labelColor,
+      shadows: labelShadows,
+    ),
+  );
+
+  /// For app names under icons.
+  TextStyle labelStyle(TextStyle style) => systemLabels
+      ? style
+      : FontRegistry.shared.style(labelFont ?? bodyFont, style);
+
+  /// Behind [labelColor] so names read on any wallpaper: dark behind light
+  /// names, light behind dark ones.
+  List<Shadow> get labelShadows => [
+    Shadow(
+      color: labelColor.computeLuminance() > 0.4
+          ? const Color(0xCC000000)
+          : const Color(0x99FFFFFF),
+      blurRadius: 6,
+      offset: const Offset(0, 1),
+    ),
+  ];
+
   /// In the downloaded font if this engine loaded it, else google_fonts.
   TextStyle displayStyle([TextStyle? style]) =>
       FontRegistry.shared.style(displayFont, style);
@@ -162,6 +205,10 @@ class PhoneTheme {
     bool? hasIconPack,
     SceneKind? iconStyle,
     ImageIconPack? imageIcons,
+    IconShape? iconShape,
+    Color? labelColor,
+    bool? systemLabels,
+    String? labelFont,
   }) => PhoneTheme(
     id: id,
     categoryId: categoryId,
@@ -178,5 +225,9 @@ class PhoneTheme {
     iconStyle: iconStyle ?? _iconStyle,
     layered: layered,
     imageIcons: imageIcons ?? this.imageIcons,
+    iconShape: iconShape ?? this.iconShape,
+    labelColor: labelColor ?? this.labelColor,
+    systemLabels: systemLabels ?? this.systemLabels,
+    labelFont: labelFont ?? this.labelFont,
   );
 }

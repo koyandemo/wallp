@@ -12,11 +12,12 @@ import 'harness.dart';
 void main() {
   final h = StoreHarness();
 
+  /// Tabs show icons only; each is found by its name (its tooltip).
   Future<void> tapTab(WidgetTester tester, String label) async {
     await tester.tap(
       find.descendant(
         of: find.byType(NavigationBar),
-        matching: find.text(label),
+        matching: find.byTooltip(label),
       ),
     );
     await settle(tester);
@@ -28,15 +29,29 @@ void main() {
     ) async {
       await h.pump(tester);
       await settle(tester);
+      final nav = find.byType(NavigationBar);
       for (final label in ['Store', 'Themes', 'Wallpapers', 'Fonts', 'Me']) {
+        // No visible label, but still named for screen readers.
+        expect(
+          find.descendant(of: nav, matching: find.byTooltip(label)),
+          findsOneWidget,
+        );
+        // Read out as e.g. "Store, Tab 1 of 5".
         expect(
           find.descendant(
-            of: find.byType(NavigationBar),
-            matching: find.text(label),
+            of: nav,
+            matching: find.bySemanticsLabel(RegExp('^$label')),
           ),
           findsOneWidget,
         );
       }
+      expect(
+        find.descendant(
+          of: nav,
+          matching: find.byIcon(Icons.font_download_outlined),
+        ),
+        findsOneWidget,
+      );
       // Store home: today's banners and the soonest festival first.
       expect(
         find.bySemanticsLabel(RegExp('Halloween Night, banner 1 of 4')),
@@ -52,6 +67,29 @@ void main() {
       expect(find.text('10 fonts for the lock and home clock'), findsOneWidget);
       await tapTab(tester, 'Me');
       expect(find.text('Your look, favourites and settings'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('the app\'s demo catalog', () {
+    testWidgets('one theme each for Halloween, Christmas, Thingyan, Heroes', (
+      tester,
+    ) async {
+      await h.pump(tester, demo: true);
+      await tapTab(tester, 'Themes');
+      expect(find.text('4 themes'), findsOneWidget);
+      for (final name in [
+        'Haunted Moon',
+        'Snowy Pines',
+        'Water Splash',
+        'Spider Night',
+      ]) {
+        expect(find.text(name), findsOneWidget, reason: name);
+      }
+      // No chip that would find nothing.
+      expect(find.text('Minimal'), findsNothing);
+      await tapChip(tester, 'Festivals');
+      expect(find.text('4 festivals'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });
@@ -77,15 +115,19 @@ void main() {
   });
 
   group('festival page', () {
-    testWidgets('style chips, sort, and the empty message', (tester) async {
+    testWidgets('only styles the festival has, and Live', (tester) async {
       await h.pump(
         tester,
         home: const FestivalScreen(festivalId: 'thadingyut'),
       );
       await settle(tester);
       expect(find.text('3 themes'), findsWidgets);
-      await tapChip(tester, 'Minimal');
-      expect(find.text('No minimal Thadingyut themes yet'), findsOneWidget);
+      // Thadingyut has classic, cozy and cute themes, no minimal ones.
+      expect(find.text('Minimal'), findsNothing);
+      expect(
+        find.text('Cozy'),
+        findsWidgets,
+      ); // the chip, and Candle Glow's card
       await tapChip(tester, 'Live');
       expect(find.text('2 themes'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
@@ -109,7 +151,7 @@ void main() {
   });
 
   group('theme detail', () {
-    testWidgets('shows the theme, its colours and what it includes', (
+    testWidgets('shows the theme and what it includes, no colour choice', (
       tester,
     ) async {
       await h.pump(
@@ -119,7 +161,8 @@ void main() {
       );
       await settle(tester);
       expect(find.text('Cozy Cabin'), findsOneWidget);
-      expect(find.bySemanticsLabel('Snowed in'), findsOneWidget);
+      expect(find.text('Colours'), findsNothing);
+      expect(find.bySemanticsLabel('Snowed in'), findsNothing);
       await scrollTo(tester, find.text('Caveat clock font'));
       expect(find.text('Wallpaper'), findsOneWidget);
       expect(find.text('Candy Cane icons'), findsOneWidget);
@@ -181,6 +224,8 @@ void main() {
       );
       await settle(tester);
       expect(find.text('Easy to read'), findsOneWidget);
+      // No tick on the selected tab or mode.
+      expect(find.byIcon(Icons.check), findsNothing);
       await tester.tap(find.text('Gradient'));
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('Witching hour'));
@@ -190,6 +235,7 @@ void main() {
       await settle(tester);
       expect(find.text('Start colour'), findsOneWidget);
       expect(find.text('Save to My accents'), findsOneWidget);
+      expect(find.byIcon(Icons.check), findsNothing);
       await tester.pumpWidget(const SizedBox());
     });
   });

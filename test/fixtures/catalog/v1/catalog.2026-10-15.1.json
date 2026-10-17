@@ -181,7 +181,7 @@
   "themes": [
     {
       "id": "halloween-night",
-      "rev": 1,
+      "rev": 3,
       "festivalId": "halloween",
       "name": {
         "en": "Haunted Moon"
@@ -227,7 +227,7 @@
     },
     {
       "id": "christmas-eve",
-      "rev": 1,
+      "rev": 2,
       "festivalId": "christmas",
       "name": {
         "en": "Snowy Pines"
@@ -274,7 +274,7 @@
     },
     {
       "id": "thingyan-water",
-      "rev": 1,
+      "rev": 2,
       "festivalId": "thingyan",
       "name": {
         "en": "Water Splash"
@@ -4007,7 +4007,7 @@
         }
       ],
       "sampleText": {
-        "en": "သင်္ကြန် ၁၉:၄၇"
+        "en": "ကြိုဆိုပါတယ်"
       }
     }
   ],

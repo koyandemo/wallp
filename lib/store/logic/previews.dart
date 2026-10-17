@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../catalog/catalog.dart';
 import '../../look/accent_paint.dart';
+import '../../look/applied_look.dart';
 import '../../look/event_icons.dart';
 import '../../look/resolved_look.dart';
 import '../../models/phone_theme.dart';
@@ -66,6 +67,23 @@ PhoneTheme previewOf(
             },
             accentGradient: a.gradient,
           ),
+  );
+}
+
+/// [preview] with the user's own wallp Home choices from [look]: icon
+/// shape, and app name colour and font. "Theme" colour means [preview]'s
+/// theme's; "Accent" means [accent], the accent being previewed.
+PhoneTheme withUserIcons(PhoneTheme preview, AppliedLook? look, Color accent) {
+  if (look == null) return preview;
+  final icons = look.icons;
+  return preview.copyWith(
+    iconShape: icons.shape,
+    labelColor: switch (icons.labels) {
+      final l when l.isAccent => accent,
+      final l when l.hex != null => Color(l.hex!.argb),
+      _ => preview.labelColor,
+    },
+    systemLabels: icons.labelFont == LabelFont.system,
   );
 }
 

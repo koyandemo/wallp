@@ -76,6 +76,11 @@ void main() {
 
     expect(find.text('WhatsApp'), findsOneWidget);
     expect(find.text('Cool Game'), findsOneWidget);
+    // Names in the theme's App name colour, as on wallp Home.
+    expect(
+      tester.widget<Text>(find.text('WhatsApp')).style!.color,
+      halloween.labelColor,
+    );
 
     await tester.tap(find.text('Add').first);
     // Rendering the icon PNG runs on the engine, outside the fake clock.

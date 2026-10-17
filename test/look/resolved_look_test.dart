@@ -23,7 +23,7 @@ void main() {
     expect(r.homeTheme.hasIconPack, isTrue);
     expect(r.homeTheme.iconStyle, SceneKind.halloween);
     expect(r.lockTheme.displayFont, 'Creepster');
-    expect(r.homeTheme.bodyFont, 'Space Grotesk');
+    expect(r.homeTheme.bodyFont, 'Creepster');
     expect(
       r.clockColor,
       r.accent,
@@ -67,7 +67,7 @@ void main() {
       );
       expect(r.lockTheme.displayFont, 'Pacifico');
       expect(r.homeTheme.displayFont, 'Creepster');
-      expect(r.homeTheme.bodyFont, 'Space Grotesk');
+      expect(r.homeTheme.bodyFont, 'Creepster');
     });
 
     test('app labels only', () {

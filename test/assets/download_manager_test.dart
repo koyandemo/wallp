@@ -67,9 +67,13 @@ void main() {
 
   int total(Iterable<AssetRef> refs) => refs.fold(0, (s, r) => s + r.bytes);
 
+  /// Half-downloaded files left behind. (The cache's own index.json.part
+  /// can exist for a moment while it saves the index: that's its safe
+  /// write, not a leftover download.)
   List<String> partFiles() => [
     for (final f in dir.listSync())
-      if (f.path.endsWith('.part')) f.path,
+      if (f.path.endsWith('.part') && !f.path.endsWith('index.json.part'))
+        f.path,
   ];
 
   test('downloads every file, with progress that adds up', () async {

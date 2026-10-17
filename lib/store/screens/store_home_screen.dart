@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart' hide Banner;
 import '../../catalog/catalog.dart' as cat show Banner;
 import '../../core/store_palette.dart';
+import '../../look/look_controller.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
 import '../store_shell.dart';
 import '../widgets/common.dart';
+import 'icon_pack_screens.dart';
 
 /// Store home: the banner carousel, then one row per festival (soonest
 /// first) and the icon packs.
@@ -137,9 +140,10 @@ class _PackChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tile = pack.tile == null
-        ? Colors.transparent
-        : Color(pack.tile!.argb);
+    // The real icons; for the pack in use, in the user's tile shape.
+    final looks = context.watch<LookController>();
+    final applied = looks.isApplied ? looks.look?.icons : null;
+    final shape = applied?.pack.id == pack.id ? applied!.shape : pack.shape;
     return Semantics(
       button: true,
       label: '${pack.name.en} icon pack',
@@ -159,32 +163,10 @@ class _PackChip extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  for (final icon in const [
-                    Icons.phone_rounded,
-                    Icons.chat_bubble_rounded,
-                    Icons.photo_camera_rounded,
-                  ])
-                    Container(
-                      margin: const EdgeInsets.only(right: 6),
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: tile,
-                        borderRadius: BorderRadius.circular(
-                          pack.shape == IconShape.circle ? 15 : 9,
-                        ),
-                        border: Border.all(
-                          color: Color(pack.ring.argb),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Icon(
-                        icon,
-                        size: 16,
-                        color: Color(pack.glyph.argb),
-                      ),
-                    ),
+                  for (final key in const ['phone', 'messages', 'camera'])
+                    PackIcon(pack: pack, glyphKey: key, shape: shape, size: 36),
                 ],
               ),
               const Spacer(),

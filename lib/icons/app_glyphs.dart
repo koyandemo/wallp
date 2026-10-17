@@ -32,6 +32,7 @@ final _keys = <int, String?>{
   Icons.calendar_month_rounded.codePoint: 'calendar',
   Icons.schedule_rounded.codePoint: 'clock',
   Icons.play_arrow_rounded.codePoint: 'video',
+  Icons.videocam_rounded.codePoint: 'video',
   Icons.music_video_rounded.codePoint: 'video',
   Icons.music_note_rounded.codePoint: 'music',
   Icons.shop_rounded.codePoint: 'store',
@@ -99,6 +100,11 @@ const _rules = <_Rule>[
     labels: ['clock'],
   ),
   _Rule(Icons.play_arrow_rounded, packages: ['youtube']),
+  _Rule(
+    Icons.videocam_rounded,
+    packages: ['android.apps.tachyon', 'apps.meetings', 'zoom.videomeetings'],
+    labels: ['meet', 'google meet', 'duo', 'zoom'],
+  ),
   _Rule(Icons.music_video_rounded, packages: ['tiktok', 'musically']),
   _Rule(
     Icons.music_note_rounded,
@@ -135,10 +141,30 @@ const _rules = <_Rule>[
   ),
   _Rule(
     Icons.account_balance_wallet_rounded,
-    packages: ['wallet'],
-    labels: ['wallet'],
+    packages: ['wallet', 'kbzpay', 'wavemoney', 'nugpay', 'ayapay'],
+    labels: [
+      'wallet',
+      'nugpay',
+      'kbzpay',
+      'wavepay',
+      'wave money',
+      'ayapay',
+      'cb pay',
+    ],
   ),
-  _Rule(Icons.settings_rounded, packages: ['settings'], labels: ['settings']),
+  // Device-care apps (OPPO/realme Phone Manager, Personal Safety) get the
+  // settings gear.
+  _Rule(
+    Icons.settings_rounded,
+    packages: [
+      'settings',
+      'phonemanager',
+      'safetyhub',
+      'safecenter',
+      'securitycenter',
+    ],
+    labels: ['settings', 'phone manager', 'safety', 'personal safety'],
+  ),
 ];
 
 /// Returns a themed symbol for the app, or null to use its own (tinted) icon.

@@ -1,12 +1,13 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show IconData;
+import 'package:flutter/widgets.dart' show CustomPainter, IconData;
 import 'package:flutter/services.dart';
 
 import '../icons/app_glyphs.dart';
 import '../icons/themed_icon_painter.dart';
 import '../models/phone_theme.dart';
+import '../render/image_icons.dart';
 import '../render/scene_assets.dart';
 import 'wallpaper_service.dart';
 
@@ -90,20 +91,8 @@ class IconPackService {
     final downloaded = picture == null
         ? null
         : await (assets ?? SceneAssets.shared).bytes(picture);
-    final style = theme.iconStyle;
-    if (downloaded == null && style == null) {
-      throw const WallpaperException("This theme has no icon for this app");
-    }
     final png =
-        downloaded ??
-        await _renderIcon(
-          ThemedIconPainter(
-            style: style!,
-            accent: accent,
-            glyph: app.glyph,
-            appIcon: app.icon,
-          ),
-        );
+        downloaded ?? await _renderIcon(_painterFor(theme, app, accent));
     try {
       return await _channel.invokeMethod<bool>('pinShortcut', {
             'id': '${theme.id}-${app.packageName}',
@@ -117,7 +106,34 @@ class IconPackService {
     }
   }
 
-  Future<Uint8List> _renderIcon(ThemedIconPainter painter) async {
+  /// How [app] is drawn when [theme]'s pack has no picture for it.
+  CustomPainter _painterFor(
+    PhoneTheme theme,
+    InstalledApp app,
+    ui.Color accent,
+  ) {
+    // A downloaded pack: the app's own icon framed in the pack's tile, small
+    // enough to stay inside the launcher's mask.
+    if (theme.imageIcons case final pack?) {
+      return PackFallbackPainter(
+        pack: pack,
+        appIcon: app.icon,
+        iconScale: 0.42,
+      );
+    }
+    final style = theme.iconStyle;
+    if (style == null) {
+      throw const WallpaperException("This theme has no icon for this app");
+    }
+    return ThemedIconPainter(
+      style: style,
+      accent: accent,
+      glyph: app.glyph,
+      appIcon: app.icon,
+    );
+  }
+
+  Future<Uint8List> _renderIcon(CustomPainter painter) async {
     final recorder = ui.PictureRecorder();
     const size = ui.Size.square(iconPixels + 0.0);
     painter.paint(ui.Canvas(recorder), size);

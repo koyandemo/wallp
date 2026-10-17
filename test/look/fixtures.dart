@@ -21,8 +21,10 @@ Catalog mockCatalog() {
 }
 
 /// A full theme file from the mock catalog.
-ThemeDetail mockTheme(String id) =>
-    ThemeDetail.fromJson(JsonReader.of(_read('themes/$id.1.json'), id));
+ThemeDetail mockTheme(String id) {
+  final rev = mockCatalog().theme(id)!.rev;
+  return ThemeDetail.fromJson(JsonReader.of(_read('themes/$id.$rev.json'), id));
+}
 
 /// 15 Oct 2026, the design's date: Halloween is 16 nights away.
 final designDay = DateTime(2026, 10, 15, 19, 47);

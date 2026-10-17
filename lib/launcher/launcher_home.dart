@@ -333,7 +333,12 @@ class _LauncherHomeState extends State<LauncherHome>
                   accent: applied.accent,
                   size: 44,
                 ),
-                title: Text(app.label),
+                title: Text(
+                  app.label,
+                  style: applied.homeTheme.appNameStyle(
+                    const TextStyle(fontSize: 16),
+                  ),
+                ),
               ),
               const Divider(),
               if (onHome)

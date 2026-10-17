@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Raw image generator output; the imported, resized copies under
+# tool/seed/source/ are what's committed (docs/spiderman-script.md).
+/tool/seed/incoming/

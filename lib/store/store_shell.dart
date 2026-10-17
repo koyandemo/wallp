@@ -28,7 +28,8 @@ enum StoreTab {
   store('Store', Icons.home_outlined, Icons.home_rounded),
   themes('Themes', Icons.grid_view_outlined, Icons.grid_view_rounded),
   wallpapers('Wallpapers', Icons.image_outlined, Icons.image_rounded),
-  fonts('Fonts', Icons.text_fields_outlined, Icons.text_fields_rounded),
+  // A square with an A, like the design's Fonts icon.
+  fonts('Fonts', Icons.font_download_outlined, Icons.font_download_rounded),
   me('Me', Icons.person_outline_rounded, Icons.person_rounded);
 
   const StoreTab(this.label, this.icon, this.selectedIcon);
@@ -100,6 +101,10 @@ class _StoreShellState extends State<StoreShell> {
               ),
       ),
       bottomNavigationBar: NavigationBar(
+        // Icons only. Each tab keeps its name for screen readers and as a
+        // long-press tooltip.
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+        height: 64,
         selectedIndex: _tab.index,
         onDestinationSelected: (i) => _select(StoreTab.values[i]),
         destinations: [

@@ -1,6 +1,6 @@
 {
   "id": "thingyan-water",
-  "rev": 1,
+  "rev": 2,
   "festivalId": "thingyan",
   "name": {
     "en": "Water Splash"
@@ -64,7 +64,7 @@
   "fonts": {
     "display": "baloo-2",
     "body": "padauk",
-    "labels": "padauk"
+    "labels": "baloo-2"
   },
   "clock": {
     "useAccent": true

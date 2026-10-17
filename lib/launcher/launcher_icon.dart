@@ -6,6 +6,8 @@ import '../catalog/catalog.dart';
 
 import '../icons/themed_icon_painter.dart';
 import '../models/phone_theme.dart';
+import '../render/icon_shape.dart';
+import '../render/image_icons.dart';
 import '../render/scene_assets.dart';
 import '../services/icon_pack_service.dart';
 
@@ -28,15 +30,17 @@ class LauncherIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final own = _OwnIcon(app: app, size: size);
-    // A downloaded pack: its picture for this app, else the app's own icon.
+    // A downloaded pack: its picture for this app, else the app's own icon
+    // framed in the pack's tile.
     if (theme.imageIcons case final pack?) {
+      final framed = PackFallbackIcon(pack: pack, app: app, size: size);
       final picture = pack.pictureFor(app.glyphKey);
-      if (picture == null) return own;
+      if (picture == null) return framed;
       return PackPictureIcon(
         picture: picture,
         shape: pack.shape,
         size: size,
-        placeholder: own,
+        placeholder: framed,
       );
     }
     final style = theme.iconStyle;
@@ -47,6 +51,7 @@ class LauncherIcon extends StatelessWidget {
         glyph: app.glyph,
         appIcon: app.icon,
         size: size,
+        shape: theme.iconShape,
       );
     }
     return own;
@@ -67,6 +72,45 @@ class _OwnIcon extends StatelessWidget {
       child: icon == null
           ? Icon(Icons.apps_rounded, size: size * 0.7, color: Colors.white)
           : RawImage(image: icon, filterQuality: FilterQuality.medium),
+    );
+  }
+}
+
+/// An app a downloaded pack has no picture for: its own icon on the pack's
+/// tile, clipped to the user's tile shape and ringed in the pack's colour.
+class PackFallbackIcon extends StatelessWidget {
+  const PackFallbackIcon({
+    super.key,
+    required this.pack,
+    required this.app,
+    required this.size,
+  });
+
+  final ImageIconPack pack;
+  final InstalledApp app;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = iconShapeRadius(pack.shape, size);
+    return SizedBox.square(
+      dimension: size,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          border: Border.all(color: pack.ring, width: size * 0.035),
+        ),
+        child: IconShapeClip(
+          shape: pack.shape,
+          size: size,
+          child: app.icon == null
+              ? Icon(Icons.apps_rounded, size: size * 0.55, color: Colors.white)
+              : CustomPaint(
+                  painter: PackFallbackPainter(pack: pack, appIcon: app.icon),
+                ),
+        ),
+      ),
     );
   }
 }
@@ -115,26 +159,7 @@ class _PackPictureIconState extends State<PackPictureIcon> {
       dimension: s,
       child: RawImage(image: image, filterQuality: FilterQuality.medium),
     );
-    return switch (widget.shape) {
-      IconShape.circle => ClipOval(child: picture),
-      IconShape.square => ClipRRect(
-        borderRadius: BorderRadius.circular(s * 0.12),
-        child: picture,
-      ),
-      IconShape.squircle => ClipRRect(
-        borderRadius: BorderRadius.circular(s * 0.3),
-        child: picture,
-      ),
-      IconShape.leaf => ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(s * 0.5),
-          topRight: Radius.circular(s * 0.5),
-          bottomRight: Radius.circular(s * 0.5),
-          bottomLeft: Radius.circular(s * 0.12),
-        ),
-        child: picture,
-      ),
-    };
+    return IconShapeClip(shape: widget.shape, size: s, child: picture);
   }
 }
 
@@ -157,10 +182,6 @@ class LauncherAppTile extends StatelessWidget {
   final VoidCallback onLongPress;
   final bool showLabel;
   final double iconSize;
-
-  static const _labelShadow = [
-    Shadow(color: Color(0xCC000000), blurRadius: 6, offset: Offset(0, 1)),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -188,13 +209,7 @@ class LauncherAppTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: theme.bodyStyle(
-                  const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    shadows: _labelShadow,
-                  ),
-                ),
+                style: theme.appNameStyle(const TextStyle(fontSize: 12)),
               ),
             ],
           ],

@@ -8,6 +8,9 @@ import '../routes.dart';
 import '../widgets/common.dart';
 
 /// The Fonts tab: every clock font, previewing text the user types.
+/// The fonts list's preview text until the user types their own.
+const defaultSample = 'Welcome';
+
 class FontsScreen extends StatefulWidget {
   const FontsScreen({super.key});
 
@@ -17,7 +20,7 @@ class FontsScreen extends StatefulWidget {
 
 class _FontsScreenState extends State<FontsScreen> {
   FontCategory? _category;
-  final _sample = TextEditingController(text: '19:47');
+  final _sample = TextEditingController(text: defaultSample);
 
   static const _filters = <(FontCategory?, String)>[
     (null, 'All'),
@@ -106,8 +109,9 @@ class _FontCard extends StatelessWidget {
     ];
     // Burmese fonts show Burmese until the user types something else.
     final text =
-        sample.trim().isEmpty || (sample == '19:47' && font.sampleText != null)
-        ? (font.sampleText?.en ?? '19:47')
+        sample.trim().isEmpty ||
+            (sample == defaultSample && font.sampleText != null)
+        ? (font.sampleText?.en ?? defaultSample)
         : sample;
     final tag = usedBy.isEmpty ? 'Free' : 'In ${usedBy.first}';
     return Semantics(

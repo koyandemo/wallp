@@ -40,6 +40,21 @@ class _ThemesScreenState extends State<ThemesScreen> {
       catalog,
       now,
     ).where((f) => catalog.themesIn(f.id).isNotEmpty).toList();
+    // Only filters that find something (All, Festivals and Favourites stay).
+    final filters = [
+      for (final f in _filters)
+        if (f.$1 == ThemesFilter.all ||
+            f.$1 == ThemesFilter.festivals ||
+            f.$1 == ThemesFilter.favourites ||
+            themesTab(
+              catalog,
+              filter: f.$1,
+              sort: _sort,
+              favourites: favourites,
+              now: now,
+            ).isNotEmpty)
+          f,
+    ];
     final themes = themesTab(
       catalog,
       filter: _filter,
@@ -82,7 +97,7 @@ class _ThemesScreenState extends State<ThemesScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: ChipRow(
-              options: _filters,
+              options: filters,
               value: _filter,
               label: 'Filter themes',
               onChanged: (f) => setState(() => _filter = f),

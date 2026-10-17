@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../catalog/catalog.dart';
 import '../logic/queries.dart';
 
 /// One entry of "Recently applied".
@@ -49,12 +50,17 @@ class UserStore extends ChangeNotifier {
   static const _favWallsKey = 'fav_wallpapers_v2';
   static const _historyKey = 'history_v2';
   static const _searchesKey = 'recent_searches';
+  static const _accentsKey = 'theme_accents_v1';
 
   final _favThemes = <String>[];
   final _favWalls = <String>[];
   final _history = <HistoryEntry>[];
   var _searches = <String>[];
   final _settings = <UserSetting, bool>{};
+
+  /// The accent the user last picked for each theme (solid, gradient or
+  /// custom), by theme ID.
+  final _accents = <String, Accent>{};
 
   /// Newest first.
   List<String> get favouriteThemes => List.unmodifiable(_favThemes);
@@ -65,6 +71,9 @@ class UserStore extends ChangeNotifier {
   bool isFavouriteTheme(String id) => _favThemes.contains(id);
   bool isFavouriteWallpaper(String id) => _favWalls.contains(id);
   bool setting(UserSetting s) => _settings[s] ?? s.defaultValue;
+
+  /// The accent the user last picked for [themeId], or null.
+  Accent? accentFor(String themeId) => _accents[themeId];
 
   Future<void> load() async {
     _favThemes
@@ -85,6 +94,18 @@ class UserStore extends ChangeNotifier {
       }
     } on Object catch (e) {
       debugPrint('Ignoring damaged history: $e');
+    }
+    _accents.clear();
+    try {
+      final raw = await _prefs.getString(_accentsKey);
+      if (raw != null) {
+        (jsonDecode(raw) as Map<String, dynamic>).forEach((id, a) {
+          _accents[id] = Accent.fromJson(JsonReader.of(a, 'accent.$id'));
+        });
+      }
+    } on Object catch (e) {
+      debugPrint('Ignoring damaged accent picks: $e');
+      _accents.clear();
     }
     for (final s in UserSetting.values) {
       final v = await _prefs.getBool(s.key);
@@ -148,6 +169,18 @@ class UserStore extends ChangeNotifier {
         for (final e in _history)
           {'id': e.themeId, 'at': e.at.toUtc().toIso8601String()},
       ]),
+    );
+  }
+
+  // --- accents ---
+
+  /// Remembers [accent] as [themeId]'s, so the theme opens with it next time.
+  Future<void> rememberAccent(String themeId, Accent accent) async {
+    _accents[themeId] = accent;
+    notifyListeners();
+    await _prefs.setString(
+      _accentsKey,
+      jsonEncode({for (final e in _accents.entries) e.key: e.value.toJson()}),
     );
   }
 

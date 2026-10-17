@@ -10,12 +10,21 @@ import 'package:wallp/catalog/catalog.dart';
 
 import 'art.dart';
 
+part 'spider_night.dart';
+
 /// Every "published" date is relative to this, the date the design shows.
 final seedDate = DateTime.utc(2026, 10, 15, 14);
 
 DateTime daysAgo(int days) => seedDate.subtract(Duration(days: days));
 
 const catalogVersion = '2026-10-15.1';
+
+/// The demo catalog's own publish number. Bump it whenever the demo data
+/// changes: installed apps only fetch a catalog whose version is new.
+/// 2: Halloween label colour, Creepster unlisted. 3: label fonts.
+/// 4: Creepster listed again. 5: Padauk's preview says welcome.
+/// 6: the Spider Night kit.
+const demoRevision = 6;
 
 /// Turns a source file under tool/seed/source/ into a hashed asset.
 typedef AssetFor = AssetRef Function(String sourcePath, AssetFormat format);
@@ -238,11 +247,13 @@ class FontSource {
     this.scripts = const ['latin'],
     this.tags = const [],
     this.sampleText,
+    this.listed = true,
   });
 
   final String id;
   final String family;
   final FontCategory category;
+  final bool listed;
 
   /// Folder in the google/fonts repo, e.g. `ofl/creepster`.
   final String repoDir;
@@ -346,7 +357,8 @@ final fontSources = <FontSource>[
     ],
     scripts: const ['myanmar', 'latin'],
     tags: const ['myanmar', 'burmese'],
-    sampleText: _t('သင်္ကြန် ၁၉:၄၇'),
+    // Welcome, like the other fonts' default preview.
+    sampleText: _t('ကြိုဆိုပါတယ်'),
   ),
 ];
 
@@ -362,6 +374,7 @@ List<CatalogFont> buildFonts(AssetFor asset) => [
       scripts: f.scripts,
       tags: f.tags,
       sampleText: f.sampleText,
+      listed: f.listed,
       // Latin-only fonts can't draw Burmese app names.
       fallbackFor: f.scripts.contains('myanmar')
           ? const {}
@@ -754,7 +767,7 @@ SceneSpec _scene({
 ImageLayer _image(LayerArt art, AssetFor asset) => ImageLayer(
   image: asset(layerPath(art), AssetFormat.png),
   fit: ImageFit.width,
-  anchor: art == LayerArt.lanternGarland ? ImageAnchor.top : ImageAnchor.bottom,
+  anchor: art.top ? ImageAnchor.top : ImageAnchor.bottom,
 );
 
 // ---------------------------------------------------------------------------
@@ -972,7 +985,8 @@ List<ThemeDetail> _builtInThemes() {
   return [
     ThemeDetail(
       id: 'halloween-night',
-      rev: 1,
+      // 2: labels.color. 3: labels font = the theme's font.
+      rev: 3,
       festivalId: 'halloween',
       name: _t('Haunted Moon'),
       style: ThemeStyle.classic,
@@ -1002,9 +1016,14 @@ List<ThemeDetail> _builtInThemes() {
       fonts: const ThemeFonts(
         display: 'creepster',
         body: 'space-grotesk',
-        labels: 'space-grotesk',
+        // App names in the theme's own font ("Theme font" on the icon
+        // pack page); the phone's font is the "System font" choice.
+        labels: 'creepster',
       ),
       accentClock: true,
+      // Warm candle-light names; the Christmas and Thingyan themes keep the
+      // default white, so both paths can be tried.
+      labelColor: _hex('#FFD9A8'),
       eventIcon: 'nightlight_round',
       iconPackId: 'spooky-glow',
       wallpaperIds: const ['harvest-moon'],
@@ -1012,7 +1031,8 @@ List<ThemeDetail> _builtInThemes() {
     ),
     ThemeDetail(
       id: 'christmas-eve',
-      rev: 1,
+      // 2: labels font = the theme's font.
+      rev: 2,
       festivalId: 'christmas',
       name: _t('Snowy Pines'),
       style: ThemeStyle.classic,
@@ -1051,7 +1071,7 @@ List<ThemeDetail> _builtInThemes() {
       fonts: const ThemeFonts(
         display: 'playfair-display',
         body: 'dm-sans',
-        labels: 'dm-sans',
+        labels: 'playfair-display',
       ),
       eventIcon: 'card_giftcard_rounded',
       iconPackId: 'gold-ornament',
@@ -1060,7 +1080,8 @@ List<ThemeDetail> _builtInThemes() {
     ),
     ThemeDetail(
       id: 'thingyan-water',
-      rev: 1,
+      // 2: labels font = the theme's font.
+      rev: 2,
       festivalId: 'thingyan',
       name: _t('Water Splash'),
       subtitle: _t('သင်္ကြန်'),
@@ -1078,7 +1099,8 @@ List<ThemeDetail> _builtInThemes() {
       fonts: const ThemeFonts(
         display: 'baloo-2',
         body: 'padauk',
-        labels: 'padauk',
+        // Burmese app names fall back to Padauk.
+        labels: 'baloo-2',
       ),
       accentClock: true,
       eventIcon: 'water_drop_rounded',

@@ -3,7 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../catalog/catalog.dart' show IconShape;
 import '../models/phone_theme.dart';
+import '../render/icon_shape.dart';
 
 /// An app icon in a festival's style, drawn as an Android adaptive icon: a
 /// 108×108 square whose launcher-masked middle (18..90) holds everything
@@ -315,7 +317,11 @@ class ThemedIcon extends StatelessWidget {
     this.glyph,
     this.appIcon,
     this.size = 56,
+    this.shape = IconShape.squircle,
   });
+
+  /// The tile shape the user picked for the pack.
+  final IconShape shape;
 
   final SceneKind style;
   final Color accent;
@@ -325,9 +331,11 @@ class ThemedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show the launcher-visible middle two-thirds of the adaptive square.
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(size * 0.28),
+    // Show the launcher-visible middle two-thirds of the adaptive square,
+    // in the tile shape.
+    return IconShapeClip(
+      shape: shape,
+      size: size,
       child: SizedBox.square(
         dimension: size,
         child: OverflowBox(

@@ -7,10 +7,11 @@ import '../../data/catalog/catalog_repository.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
+import '../state/live_wallpaper_status.dart';
 import '../widgets/common.dart';
 
 /// One festival's themes (the "Festival page: Christmas" design): style
-/// chips, Popular / New / A–Z, and a quick look with colour variants.
+/// chips, Popular / New / A–Z, and a quick look.
 class FestivalScreen extends StatefulWidget {
   const FestivalScreen({super.key, required this.festivalId});
 
@@ -60,7 +61,17 @@ class _FestivalScreenState extends State<FestivalScreen> {
       style: _style,
       sort: _sort,
     );
-    final selected = _styles.firstWhere((s) => _same(s.$1, _style));
+    // Only styles this festival has themes in.
+    final styles = [
+      for (final s in _styles)
+        if (s.$1 is AllStyles ||
+            festivalThemes(catalog, festival.id, style: s.$1).isNotEmpty)
+          s,
+    ];
+    final selected = styles.firstWhere(
+      (s) => _same(s.$1, _style),
+      orElse: () => styles.first,
+    );
     final countdown = festival.countdown(now);
 
     return Scaffold(
@@ -81,7 +92,7 @@ class _FestivalScreenState extends State<FestivalScreen> {
           ),
           SliverToBoxAdapter(
             child: ChipRow<StyleFilter>(
-              options: _styles,
+              options: styles,
               value: selected.$1,
               label: 'Filter by style',
               onChanged: (s) => setState(() => _style = s),
@@ -168,7 +179,7 @@ class _FestivalScreenState extends State<FestivalScreen> {
                         subtitle:
                             '${t.style.name[0].toUpperCase()}${t.style.name.substring(1)}'
                             '${t.isLive ? ' · Live' : ''}'
-                            '${t.variantSwatches.length > 1 ? ' · ${plural(t.variantSwatches.length, 'colour')}' : ''}',
+                            '',
                         onTap: () => StoreRoutes.theme(context, t.id),
                       ),
                       Positioned(
@@ -199,7 +210,7 @@ class _FestivalScreenState extends State<FestivalScreen> {
   }
 }
 
-/// A big preview of [start] with its colour variants, stepping through
+/// A big preview of [start], stepping through
 /// [list] with previous / next.
 Future<void> showQuickLook(
   BuildContext context,
@@ -309,50 +320,12 @@ class _QuickLookState extends State<_QuickLook> {
               SizedBox(
                 height: 360,
                 width: 200,
-                child: SceneThumb(theme: preview, animate: true),
+                child: SceneThumb(
+                  theme: preview,
+                  animate: previewsAnimate(context),
+                ),
               ),
               const SizedBox(height: 14),
-              if (detail != null && detail.variants.length > 1)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (final v in detail.variants)
-                      Semantics(
-                        inMutuallyExclusiveGroup: true,
-                        checked: (_variant ?? detail.variants.first.id) == v.id,
-                        label: v.name.en,
-                        child: InkResponse(
-                          onTap: () => setState(() => _variant = v.id),
-                          radius: 26,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            width: 44,
-                            height: 44,
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color:
-                                    (_variant ?? detail.variants.first.id) ==
-                                        v.id
-                                    ? context.palette.text
-                                    : Colors.transparent,
-                                width: 3,
-                              ),
-                            ),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(
-                                  detail.paletteFor(v.id).background.argb,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
               const SizedBox(height: 14),
               SizedBox(
                 width: double.infinity,

@@ -82,11 +82,24 @@ class ResolvedLook {
       homeTheme: theme.copyWith(
         displayFont: places.homeClock ? clockFamily : null,
         bodyFont: places.appLabels ? clockFamily : labelsFamily,
+        labelFont: places.appLabels ? clockFamily : labelsFamily,
         hasIconPack: iconStyle != null,
         iconStyle: iconStyle,
         imageIcons: pack.kind == IconPackKind.images
-            ? ImageIconPack(glyphs: pack.glyphs, shape: look.icons.shape)
+            ? ImageIconPack(
+                glyphs: pack.glyphs,
+                shape: look.icons.shape,
+                tile: pack.tile == null ? null : _color(pack.tile!),
+                ring: _color(pack.ring),
+              )
             : null,
+        iconShape: look.icons.shape,
+        labelColor: switch (look.icons.labels) {
+          final l when l.isAccent => accent,
+          final l when l.hex != null => _color(l.hex!),
+          _ => theme.labelColor,
+        },
+        systemLabels: look.icons.labelFont == LabelFont.system,
       ),
       wallpaperTheme: wallpaperTheme,
       accent: accent,
@@ -165,9 +178,13 @@ PhoneTheme phoneThemeOf(
     ),
     displayFont: family(theme.fonts.display),
     bodyFont: family(theme.fonts.body),
+    labelFont: family(theme.fonts.labels),
     event: eventOf(festival, now),
     eventIcon: eventIconFor(theme.eventIcon),
     accentClock: theme.accentClock,
+    labelColor: theme.labelColor == null
+        ? Colors.white
+        : _color(theme.labelColor!),
     hasIconPack: theme.isBuiltIn,
     layered: theme.scene.layers == null
         ? null

@@ -43,6 +43,10 @@ enum PackLook {
 
   /// No tile: the glyph alone, straight on the wallpaper.
   line,
+
+  /// Comic book: solid tile with a web drawn across it in the ring colour,
+  /// and the glyph inked with a ring-coloured outline.
+  comic,
 }
 
 /// How a downloadable icon pack is drawn. Colours are `0xRRGGBB`.
@@ -114,6 +118,15 @@ const packArt = <PackArt>[
     glyph: 0x241A12,
     ring: 0xFFB547,
   ),
+  // Spider Night kit (spider_night.dart).
+  PackArt(
+    id: 'web-slinger',
+    look: PackLook.comic,
+    shape: 'squircle',
+    tile: 0xD3202A,
+    glyph: 0xFFFFFF,
+    ring: 0x0A0A12,
+  ),
 ];
 
 /// Icon images are square, this many pixels.
@@ -128,17 +141,31 @@ enum LayerArt {
   pagoda('pagoda', 1080, 900),
 
   /// A string of paper lanterns across the top, for Thadingyut.
-  lanternGarland('lantern-garland', 1080, 520);
+  lanternGarland('lantern-garland', 1080, 520, top: true),
 
-  const LayerArt(this.file, this.width, this.height);
+  /// Night city skyline with lit windows, for Spider Night.
+  spiderSkyline('spider-skyline', 1080, 1240),
+
+  /// A spider web across the top-left corner, for Spider Night.
+  spiderWeb('spider-web', 1080, 1080, top: true);
+
+  const LayerArt(this.file, this.width, this.height, {this.top = false});
 
   final String file;
   final int width;
   final int height;
+
+  /// Drawn along the top of the scene instead of the bottom.
+  final bool top;
 }
 
 /// Where the rendered files go, relative to the project root.
 const sourceDir = 'tool/seed/source';
+
+/// Pictures imported from an outside image generator
+/// (import_spider_art_test.dart), one path per line. render_art_test.dart
+/// doesn't draw over them.
+const externalArtList = '$sourceDir/external-art.txt';
 
 String iconPath(String packId, String glyph) =>
     '$sourceDir/icons/$packId/$glyph.png';

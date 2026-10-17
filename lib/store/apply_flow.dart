@@ -14,6 +14,7 @@ import '../services/launcher_service.dart';
 import '../services/wallpaper_service.dart';
 import '../widgets/apply_sheet.dart';
 import '../widgets/default_home_dialog.dart';
+import 'state/live_wallpaper_status.dart';
 import 'state/user_store.dart';
 import 'widgets/common.dart';
 
@@ -134,9 +135,16 @@ class ApplyFlow {
     BuildContext context,
     IconPack pack, {
     IconShape? shape,
+    LabelColor? labels,
+    LabelFont? labelFont,
   }) async {
     try {
-      await context.read<LookController>().applyIconPack(pack.id, shape: shape);
+      await context.read<LookController>().applyIconPack(
+        pack.id,
+        shape: shape,
+        labels: labels,
+        labelFont: labelFont,
+      );
       if (context.mounted) {
         showToast(context, '${pack.name.en} icons applied to wallp Home');
       }
@@ -222,7 +230,12 @@ class ApplyFlow {
 
   /// Asks where, sets it, and returns what to tell the user (null if they
   /// closed the sheet).
+  ///
+  /// "Live wallpaper" goes straight to the live wallpaper: if it's already
+  /// on, it redraws with the new look by itself; if not, the system
+  /// preview opens at once.
   Future<String?> _setWallpaper(BuildContext context, AppliedLook look) async {
+    final status = context.read<LiveWallpaperStatus?>();
     final target = WallpaperService.canSetDirectly
         ? await showApplySheet(context)
         : WallpaperTarget.both;
@@ -230,11 +243,19 @@ class ApplyFlow {
     final now = context.read<Clock>().now();
     final resolved = ResolvedLook.of(look, now);
     if (target == WallpaperTarget.live) {
-      final opened = await wallpapers.openLiveWallpaper();
-      return opened
-          ? 'Tap "Set wallpaper" to make it live'
-          : "This phone didn't open the live wallpaper picker";
+      if (await wallpapers.isLiveWallpaperActive()) {
+        return 'Live wallpaper updated';
+      }
+      final outcome = await wallpapers.openLiveWallpaper();
+      status?.refresh();
+      return switch (outcome) {
+        LivePickerResult.set => 'Live wallpaper on',
+        LivePickerResult.cancelled => 'Live wallpaper not set',
+        LivePickerResult.unavailable =>
+          "This phone didn't open the live wallpaper picker",
+      };
     }
+    if (!context.mounted) return null;
     final pixels = View.of(context).physicalSize;
     try {
       final result = await wallpapers.apply(
@@ -243,6 +264,8 @@ class ApplyFlow {
         target: target,
         fallbackPixelSize: pixels,
       );
+      // A still picture replaces the live wallpaper.
+      status?.refresh();
       return switch (result) {
         ApplyResult.applied => 'Wallpaper set on ${target.label.toLowerCase()}',
         ApplyResult.savedToPhotos =>

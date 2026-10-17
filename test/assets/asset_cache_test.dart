@@ -36,7 +36,9 @@ void main() {
 
   List<String> partFiles() => [
     for (final f in dir.listSync())
-      if (f.path.endsWith('.part')) f.path,
+      // index.json.part is the index's own safe write, not a leftover.
+      if (f.path.endsWith('.part') && !f.path.endsWith('index.json.part'))
+        f.path,
   ];
 
   test('keeps a file only after its size and hash check out', () async {

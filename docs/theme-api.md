@@ -1,6 +1,8 @@
 # wallp Theme API
 
-How wallp gets its themes, wallpapers and fonts from a server instead of shipping them inside the app, and what has to change in the app to support it.
+How wallp gets its themes, wallpapers and fonts from a server instead of shipping them inside the app, and how the app uses them.
+
+**Status (17 Oct 2026):** the format is final for v1 and the app is built on it, running on a mock catalog until the CDN exists (section 7). What the user can change on the phone is in section 7.5.
 
 Companion document: [theme-dashboard.md](theme-dashboard.md), the web tool the team uses to create and publish themes into this API.
 
@@ -32,7 +34,7 @@ Measured from `build/app/outputs/flutter-apk/app-release.apk` (15 Oct 2026):
 | Publish an **App Bundle** (`flutter build appbundle`) instead of a universal APK. Google Play sends each phone only its own CPU's code. | ~78 MB → ~26 MB installed, about 10–12 MB to download | Small |
 | For direct APK sharing, build per CPU: `flutter build apk --split-per-abi` | One ~26 MB APK per CPU type | Small |
 | Shrink the Dart code (`libapp.so`, ~14 MB per CPU): `--obfuscate --split-debug-info=build/symbols`, remove unused packages, check with `flutter build apk --analyze-size --target-platform android-arm64` | A few MB | Medium |
-| Replace the `google_fonts` package with the API's font delivery (section 7.4). The package carries a large list of every Google font; check the size report to confirm how much. | Possibly several MB | Medium (part of this project) |
+| Replace the `google_fonts` package with the API's font delivery (section 7.7). The package carries a large list of every Google font; check the size report to confirm how much. | Possibly several MB | Medium (part of this project) |
 | **Theme API (this document)** | Stops future growth: images, Lottie animations and fonts for new themes never enter the APK | Large (this project) |
 
 Do the App Bundle step first; it is a one-line change and gives the biggest win.
@@ -103,7 +105,8 @@ Every file except `manifest.json` has its version or hash in the name, so it nev
 ```
 
 - **`schemaVersion`:** the JSON format version (section 9). The app ignores catalogs whose `schemaVersion` it doesn't know and keeps its cached catalog instead.
-- **`minAppVersion`:** if the app is older, show a soft "Update wallp to get new themes" banner, but keep working with the cached catalog.
+- **`catalog`** must be exactly `catalog.<catalogVersion>.json`, and that file's own `catalogVersion` must match. The app rejects the manifest or catalog otherwise, and also when the downloaded catalog's sha256 isn't `catalogSha256`.
+- **`minAppVersion`:** if the app is older, it keeps working with the new catalog and flags that an update is recommended. Today only Developer settings shows this; a soft "Update wallp to get new themes" banner for users is still to do.
 
 ### 3.2 `catalog.<version>.json`
 
@@ -182,14 +185,14 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 | `tags` | Filter tags. `myanmar` puts it under the Themes "Myanmar" chip |
 | `comingSoon` | Optional, `true` = a tab with a "coming soon" message and no themes |
 | `sort` | Order where there's no date to sort by |
-| `occurrences` | Real first-day dates, in order. Required for Myanmar-calendar festivals, whose Gregorian date moves |
-| `fallbackDate` | Used for fixed-date festivals, and once `occurrences` runs out. 29 February is not allowed |
-| `durationDays` | How long it lasts (default 1). Every day of it shows "Happy Thingyan!" |
-| `unit` | Countdown word: `day` or `night` |
-| `look` | The app's colours while browsing this festival ("Match app to my theme"). `muted` must be at least 4.5:1 on `background` |
+| `occurrences` | Real first-day dates, strictly in order with no repeats. Required for Myanmar-calendar festivals, whose Gregorian date moves |
+| `fallbackDate` | `{ "month", "day" }`. Used for fixed-date festivals, and once `occurrences` runs out. 29 February is not allowed |
+| `durationDays` | How long it lasts, at least 1 (default 1). Every day of it shows "Happy Thingyan!" |
+| `unit` | Countdown word: `day` (default) or `night` |
+| `look` | The app's colours while browsing this festival ("Match app to my theme"); all eight fields are required. `displayFont` is a font ID and must exist. `muted` must be at least 4.5:1 on `background` |
 | `coverThemeId` | Optional theme used as the festival's picture |
 
-**Countdown rule.** The next run is the first occurrence whose *last* day is on or after today. When the list runs out, `fallbackDate` is used, but never in a year the list already covered. A dated festival needs at least one of `occurrences` and `fallbackDate`.
+**Countdown rule.** The next run is the first occurrence whose *last* day is on or after today. When the list runs out, `fallbackDate` is used, but never in a year the list already covered. A dated festival needs at least one of `occurrences` and `fallbackDate`, unless it's `comingSoon` (no countdown).
 
 ### 4.3 Theme (full): `themes/<id>.<rev>.json`
 
@@ -199,6 +202,7 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
   "rev": 1,
   "festivalId": "christmas",
   "name": { "en": "Cozy Cabin" },
+  "subtitle": { "en": "Warm lights on a snowy night" },
   "style": "cozy",
   "tags": ["cabin", "warm", "snow"],
   "publishedAt": "2026-10-10T14:00:00Z",
@@ -221,6 +225,7 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
   ],
   "fonts": { "display": "caveat", "body": "dm-sans", "labels": "dm-sans" },
   "clock": { "useAccent": false },
+  "labels": { "color": "#FFF4E0" },
   "eventIcon": "card_giftcard_rounded",
   "iconPackId": "candy-cane",
   "wallpaperIds": ["snowy-cabin"],
@@ -230,17 +235,20 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 
 | Field | Meaning in the app |
 |---|---|
-| `rev` | Increases on every publish of this theme. The app re-downloads when it changes |
+| `rev` | Increases whenever **anything** in this file changes, even one colour. The app caches theme files by `rev` and never re-reads a `rev` it already has, so an edit published under the same `rev` never reaches phones that opened the theme before |
+| `subtitle` | Optional one-line description. Search matches it as well as the name and tags |
 | `style` | Festival page filter: `classic`, `cozy`, `minimal`, `cute` |
 | `publishedAt` | The **NEW** badge shows for 14 days after this |
 | `popularity` | Rank, 1 = most applied. 0 = no data yet, sorts last. Seed values until the Events API exists (section 6) |
+| `minAppVersion` | Optional, default `1.0.0`. Older apps hide the theme (section 5) |
 | `scene` | Which engine draws the wallpaper (section 5). Live = the scene animates; the app works this out from the scene |
 | `palette` | The five `ThemePalette` colours plus optional `motif`, the scene's main shape colour |
-| `accents` | Solid (1 colour) or gradient (2–3 colours, `angle` in CSS degrees: 90 = left to right, 180 = top to bottom). The first is the default. Where a gradient can't be drawn, the first colour is used |
-| `variants` | Colour variants. `palette` lists only the fields it changes; `accentId` is the accent it starts with and must exist in `accents` |
-| `fonts` | Font IDs (section 4.6). `labels` is the font for app names on wallp Home |
+| `accents` | At least one, IDs unique within the theme. Solid (1 colour, no `angle`) or gradient (2–3 colours, `angle` 0–359 in CSS degrees, default 90: 90 = left to right, 180 = top to bottom). The first is the default. Gradients are drawn as gradients on the lock clock, the countdown icon and the theme name; where one can't be (app names, icon rings), the first colour is used. The phone remembers the user's pick per theme (section 7.5) |
+| `variants` | Colour variants. `palette` lists only the fields it changes; `accentId` is the accent it starts with and must exist in `accents`. **The store doesn't offer variants at the moment** (the "Colours" row was removed for a simpler detail page): the app still parses and validates them, and draws the theme in its own palette. Keep them optional |
+| `fonts` | Font IDs (section 4.6). `display` is the clock and headline font. `labels` is the font for app names on wallp Home: the **"Theme font"** choice on the icon pack page (the other choice is "System font", the phone's own). Use the theme's own character font here (Halloween: Creepster) so "Theme font" looks themed; a font without Myanmar letters falls back to Padauk for Burmese names |
 | `clock.useAccent` | Draw the lock clock in the accent colour |
-| `eventIcon` | A name from the app's icon allowlist (section 7.3) |
+| `labels.color` | Optional. App names everywhere on wallp Home (home grid, dock, app drawer, app lists) and in the "Add icons to your home screen" list; omitted = white. The app adds a shadow (dark behind light names, light behind dark ones). It's the **"Theme"** choice on the icon pack page; the user can pick Accent, White, Dark or any custom colour instead |
+| `eventIcon` | Optional, default `event`. A name from the app's icon allowlist (section 7.3) |
 | `iconPackId` | The pack a whole-theme apply also applies (section 4.7) |
 | `wallpaperIds` | Related stand-alone wallpapers, shown on the detail page |
 | `downloadBytes` | Size of every file a whole-theme apply needs (below). Shown as "Apply · 0.8 MB" |
@@ -250,7 +258,7 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 
 ### 4.4 ThemeSummary (inside the catalog)
 
-The full theme minus `accents`, `variants`, `fonts`, `clock`, `eventIcon` and `wallpaperIds`, plus:
+The full theme minus `accents`, `variants`, `fonts`, `clock`, `labels`, `eventIcon` and `wallpaperIds`, plus:
 
 ```json
 {
@@ -276,6 +284,8 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
   "popularity": 3
 }
 ```
+
+`minAppVersion` is optional here too (default `1.0.0`); older apps hide the wallpaper. Wallpaper cards show IN USE or LIVE, never NEW; `publishedAt` only sorts them. (Icon packs do use it: "New ·" and the New filter, 14 days.)
 
 `kind` is one of:
 - **`scene`:** drawn by a scene engine, and can be a live wallpaper. A wallpaper has no palette, so its layers use `#RRGGBB` colours, never `@tokens` (section 4.9).
@@ -310,10 +320,12 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
 ```
 
 - **`category`:** the Fonts screen filter: `display`, `handwritten`, `clean`, `myanmar`.
-- **`files`:** `ttf` or `otf` only, because Flutter's `FontLoader` reads those. A variable font is one file with `weight` and `maxWeight`.
+- **`scripts`:** required: the scripts the font has letters for, `latin` and/or `myanmar`.
+- **`files`:** at least one, `ttf` or `otf` only, because Flutter's `FontLoader` reads those. `weight` is 100–900 (default 400), `style` is `normal` (default) or `italic`. A variable font is one file with `weight` and `maxWeight` (at least `weight`).
 - **`fallbackFor`:** which font draws text in scripts this font lacks. Creepster has no Myanmar letters, so Burmese app names use Padauk.
 - **`license`:** `OFL-1.1` or `Apache-2.0`. Anything else is rejected.
-- **`sampleText`:** optional preview text; the default is the clock, "19:47".
+- **`sampleText`:** optional preview text in the Fonts list; the default is "Welcome".
+- **`listed`:** optional, default `true`. `false` hides the font from the store (Fonts tab, search, a theme's "clock font" row and its "Clock font only" apply option) while themes that use it still draw with it.
 
 ### 4.7 IconPack
 
@@ -332,10 +344,10 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
 }
 ```
 
-- **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`). `images` = one downloaded picture per glyph key. Packs made in the dashboard are always `images`.
-- **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it per pack.
+- **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`; required for this kind). `images` = one downloaded picture per glyph key, at least one. Packs made in the dashboard are always `images`.
+- **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it on the icon pack page, where the picker shows the pack's own phone icon in each shape. Every icon follows the chosen shape: painted packs are drawn in it, and pictures are clipped to it. So **draw pictures edge to edge on a square canvas**, with the important part inside the middle 80%, which the `circle` and `leaf` shapes keep.
 - **`tile`, `glyph`, `ring`:** the pack's colours, used for previews and for apps the pack has no picture for. No `tile` = icons sit straight on the wallpaper.
-- **Glyph keys:** `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). Apps with no key, or whose key the pack doesn't draw, keep their own icon, tinted.
+- **Glyph keys** (an unknown key rejects the pack): `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). Apps with no key, or whose key the pack doesn't draw, keep their own icon, tinted.
 - **Pictures:** square PNG or WebP with a transparent background, 256 px or larger.
 
 ### 4.8 Banner (store home carousel)
@@ -355,9 +367,10 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
 }
 ```
 
-- **`action.type`:** `festival` or `theme` (with `id`); `wallpapers`, `iconPacks` or `fonts` (optional festival `id` as a filter); or `url` (with an `https` `url`).
-- **`look.accent`** is the button colour. **`look.artThemeId`** (optional) draws that theme's scene as the banner picture.
-- The app hides banners outside their `startsAt`/`endsAt` window, so they can be scheduled ahead.
+- **Required:** `id`, `title`, `subtitle`, `tag`, `cta`, `action`, `look` (all five colours and fonts below except `artThemeId`) and `sort` (lower first).
+- **`action.type`:** `festival` or `theme` (with `id`); `wallpapers`, `icon-packs` or `fonts` (optional festival `id` as a filter; it must exist); or `url` (with an `https` `url`). Note the spelling `icon-packs`: like every multi-word value in the format, it's kebab-case.
+- **`look.accent`** is the button colour. **`look.font`** is a font ID for the title. **`look.artThemeId`** (optional) draws that theme's scene as the banner picture.
+- **`startsAt` / `endsAt`** are both optional; `endsAt` must be after `startsAt`. The app hides banners outside the window, so they can be scheduled ahead.
 
 ### 4.9 Layers scene (`engine: "layers"`)
 
@@ -374,15 +387,15 @@ The engine for every dashboard-made theme and wallpaper (section 5, level 2). `p
 | Layer | Fields |
 |---|---|
 | `gradient` | `colors` (2 or more), `angle` (default 180) |
-| `shape` | `shape`: `circle`, `ellipse`, `rect`, `polygon`. `x`, `y`: centre. `width`; height = width × `aspect` (default 1). `points`: polygon corners inside the shape's box, 0–1, at least 3. `glow`. `motion`: `none`, `float`, `pulse`, `sway` |
+| `shape` | `shape`: `circle`, `ellipse`, `rect`, `polygon`. `x`, `y`: centre, -0.5–1.5. `width`: above 0, up to 3; height = width × `aspect` (above 0, up to 10, default 1). `color` (required). `points`: polygon corners inside the shape's box, each `[x, y]` in 0–1, at least 3. `glow` (default false). `motion`: `none` (default), `float`, `pulse`, `sway` |
 | `image` | `image`: an Asset. `fit`: `width` (default), `cover`, `contain`. `anchor`: `top`, `center`, `bottom` (default) |
-| `particles` | `effect`: `snow`, `rain`, `drops`, `bats`, `lanterns`, `petals`, `sparkles`, `stars`. `count`: 1–150. `speed`: 0–1 (0 = still). `size`: 0–1 |
+| `particles` | `effect`: `snow`, `rain`, `drops`, `bats`, `lanterns`, `petals`, `sparkles`, `stars`. `count`: 1–150. `color` (required). `speed`: 0–1, default 0.5 (0 = still). `size`: above 0, up to 1, default 0.5 |
 
 Every layer also takes `opacity` (0–1, default 1).
 
 **Colours** are `#RRGGBB` or a **palette token**: `@background`, `@deep`, `@surface`, `@text`, `@motif`, `@accent`. Tokens follow the theme's palette, the chosen variant and the user's accent, so one scene serves every variant. Only themes can use tokens; wallpapers have no palette.
 
-**Live** = at least one moving shape, or particles with `speed` above 0. Live themes get the LIVE badge and can be set as the live wallpaper.
+**Live** = at least one moving shape, or particles with `speed` above 0. Scenes on the built-in engines (`halloween`, `christmas`, `thingyan`) always count as live. Live themes get the LIVE badge and can be set as the live wallpaper.
 
 **Limits** keep a live wallpaper cheap to run for hours: at most 150 particles per layer, positions between -0.5 and 1.5, widths up to 3 screen widths.
 
@@ -391,9 +404,10 @@ Every layer also takes `opacity` (0–1, default 1).
 The app never trusts the catalog to be perfect:
 
 - **One broken item is skipped**, not the whole catalog: a theme with a bad colour disappears, the rest still show. The app keeps a list of what it skipped (`Catalog.issues`) for logs.
+- **Unknown values:** a required field with an unknown value (e.g. `style: "retro"`) breaks that item. An *optional* one with a default falls back to the default without a warning (e.g. `unit: "week"` reads as `day`, an unknown `motion` as `none`), so the publish checks must catch typos there.
 - **Hard references:** an item that points at something missing is dropped. Examples: a theme whose festival, icon pack or display font is gone; a banner whose theme is gone. This repeats until stable, so dropping a theme also drops the banner that opens it.
 - **Soft references** keep the item and use a fallback: a festival's `coverThemeId`, a banner's `artThemeId`, a font's `fallbackFor`.
-- **Unknown engines are hidden** (section 5), including `painted` icon packs whose painter this build lacks.
+- **Unknown engines are hidden** (section 5), including `painted` icon packs whose painter this build lacks. So are themes and wallpapers whose `minAppVersion` is above this app's version.
 
 The publish step must be stricter: the dashboard refuses to publish while `Catalog.validate()` reports anything, soft references included.
 
@@ -401,16 +415,22 @@ The publish step must be stricter: the dashboard refuses to publish while `Catal
 
 Until the real API exists, the app reads a mock catalog laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`. There are two:
 
-- **The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their icon packs, fonts and banners. Small on purpose, for testing the app step by step (2.3 MB).
-- **The full catalog** at [test/fixtures/catalog/v1/](../test/fixtures/catalog/v1/) is what the tests check every feature with: 7 festivals (2 coming soon), 30 themes (3 built-in, 27 on the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), 135 files. It isn't shipped in the app.
+- **The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their icon packs, fonts and banners, plus **Spider Night**, a theme made entirely from script (live `layers` scene, two wallpapers, a downloaded icon pack; see [tool/seed/spider_night.dart](../tool/seed/spider_night.dart) and run `tool/seed/spider_night.sh`). Small on purpose, for testing the app step by step (3.1 MB).
+- **The full catalog** at [test/fixtures/catalog/v1/](../test/fixtures/catalog/v1/) is what the tests check every feature with: 7 festivals (2 coming soon), 30 themes (3 built-in, 27 on the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), with 135 asset files. It isn't shipped in the app.
 
 To show more in the app, add IDs to `demoThemes` and `demoWallpapers` in [tool/seed/generate.dart](../tool/seed/generate.dart) and run it again.
+
+**Versions in the demo catalog.** Installed apps only fetch a catalog whose `catalogVersion` is new, and only re-read a theme file whose `rev` is new (section 9). So every change to the demo data needs both bumps, or phones that already have it keep the old data:
+- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.5`).
+- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2).
+
+The `rev` comments in `seed_data.dart` say what each bump changed.
 
 **To change it:** edit [tool/seed/seed_data.dart](../tool/seed/seed_data.dart), then run `dart run tool/seed/generate.dart`. The generator builds everything through the models above, fills in hashes, sizes and `downloadBytes`, and reads its own output back through the app's parser. If icon or scene art in [tool/seed/art.dart](../tool/seed/art.dart) changes, first run `flutter test tool/seed/render_art_test.dart`. Fonts are fetched once from Google Fonts (OFL / Apache) into `tool/seed/source/fonts/`, with their licences.
 
 [test/catalog/](../test/catalog/) checks the mock catalog the way the app's download code will: every hash, size and reference, no unused files, and each summary equal to its full theme.
 
-The generator also writes the **built-in catalog** at [assets/builtin/catalog/](../assets/builtin/catalog/), which the app keeps after the mock is removed. It holds the three painted themes, with every festival and banner and only the painted icon packs, so a first launch with no internet still has a working store. Its `catalogVersion` is `built-in`, so it never matches a published version and the first successful refresh always replaces it.
+The generator also writes the **built-in catalog** at [assets/builtin/catalog/](../assets/builtin/catalog/), which the app keeps after the mock is removed. It holds the three painted themes, the festivals they belong to, their banners and only the painted icon packs, so a first launch with no internet still has a working store. Its `catalogVersion` is `built-in`, so it never matches a published version and the first successful refresh always replaces it.
 
 **Dates in the mock catalog are placeholders.** The Thingyan and Thadingyut dates are not checked against the Myanmar calendar. "Published" dates are counted back from 15 October 2026, so NEW badges expire in real time; tests use a fixed clock.
 
@@ -458,7 +478,7 @@ Example of a level 2 scene (full layer reference in section 4.9):
 ```
 
 - **Dashboard:** uses the list to set each theme's `minAppVersion` automatically.
-- **App:** hides themes whose engine it doesn't know. If the theme has a `previewImage`, the app can show it as "Update wallp to use this theme" instead of hiding it.
+- **App:** hides themes whose engine it doesn't know, or whose `minAppVersion` is above its own (Developer settings shows how many were hidden). Not built yet: showing a theme's `previewImage` as "Update wallp to use this theme" instead of hiding it. The app parses `previewImage` but doesn't use it yet.
 
 ---
 
@@ -487,61 +507,75 @@ The app must work fully if this API is missing or failing.
 
 ---
 
-## 7. Changes in the wallp app
+## 7. The wallp app side (built)
 
-### 7.1 New classes
+This section started as a plan; it now describes what the app does. Phases 1–8 of [store-redesign-plan.md](store-redesign-plan.md) are done, and the app runs on the mock catalog (section 4.11) through the same code path the real API will use.
 
-| New | Replaces / wraps | Job |
+### 7.1 Where things are
+
+| Planned as | Built as | Job |
 |---|---|---|
-| `ThemeRepository` | Static `ThemeCatalog` | Gives the app festivals, themes, wallpapers and fonts. Uses the built-in catalog plus the cached remote catalog. |
-| `CatalogClient` | | Downloads `manifest.json` and the catalog with ETag; downloads a full theme on demand |
-| `AssetCache` | | Stores downloaded images, Lottie files and fonts on disk by sha256; checks hashes; LRU limit |
-| `FontRegistry` | `GoogleFonts.getFont` | Loads downloaded font files with `FontLoader` and returns a `TextStyle` by font ID |
-| `PhoneTheme.fromJson` / `ThemeCategory.fromJson` | `const` constructors | Parse API JSON into the existing models |
-| `SceneRegistry` | `switch (theme.scene)` in [scene_view.dart](../lib/scenes/scene_view.dart) | Maps an engine ID to a painter. Unknown engine means "not supported". |
-
-`PhoneTheme.scene` changes from the `SceneKind` enum to an engine ID string, plus `params`.
+| `ThemeRepository` | `CatalogRepository` ([lib/data/catalog/](../lib/data/catalog/)) | Festivals, themes, wallpapers, fonts, icon packs, banners. Cached catalog first, refresh in the background, full theme files on demand |
+| `CatalogClient` | `CatalogSource`: `MockCatalogSource` today (reads `assets/mock/catalog/v1/`, can pretend to be slow, offline or flaky from Developer settings); an HTTP source pointed at the CDN later. **Binding the real API = adding that one class** | Reads `manifest.json`, catalogs, theme files and assets |
+| | `CatalogStore` (file, memory) and `BuiltInCatalog` | The saved catalog on disk; the first-launch catalog in the APK |
+| `AssetCache` | `AssetCache` + `DownloadManager` ([lib/data/assets/](../lib/data/assets/)) | Files by sha256 with hash and size checks, atomic writes, 50 MB LRU, pins. 3 downloads at once, retries, cancel, progress card |
+| `FontRegistry` | `FontRegistry` ([lib/render/font_registry.dart](../lib/render/font_registry.dart)) | Loads downloaded `ttf`/`otf` as `wallp-<id>`, with Padauk for Burmese. Tells listeners when a font loads, so previews redraw in it. `google_fonts` is still the fallback (section 7.7) |
+| Snapshot in `ThemePrefs` | `AppliedLook` + `LookStore` + `LookController` ([lib/look/](../lib/look/)) | The applied look as one saved snapshot (section 7.4) |
+| `SceneRegistry` | `scenePainterFor` + `LayersPainter` ([lib/scenes/](../lib/scenes/), [lib/render/](../lib/render/)) | Built-in painters by engine ID, and the `layers` engine (section 4.9) |
+| | `ResolvedLook` | Turns a look into what each screen draws (lock screen, wallp Home, live wallpaper) |
 
 ### 7.2 Startup and offline behaviour
 
-1. **First launch:** use the **built-in catalog** (today's three themes, kept in the app), so the app works with no internet.
-2. **Every launch:** read the cached catalog from disk (instant), then fetch `manifest.json` in the background. If the catalog version changed, download the new catalog, check its sha256, save it, and refresh the UI.
-3. **Opening a theme:** download the theme file and its assets if they aren't cached yet. Show the summary (colours, preview image) while it loads.
-4. **Applying a theme:** first make sure **every** asset for that theme is on disk (scene images, fonts). Only then save it as applied. If the download fails, show "Couldn't download this theme. Check your connection." and keep the old theme.
-5. **The applied theme is pinned:** the cache never deletes its files. wallp Home and the live wallpaper run as separate engines, sometimes with no network (for example after a reboot), so they must be able to load the applied theme from disk alone.
-6. **Cache limit:** about 50 MB for everything except pinned files; the least recently used files are deleted first.
+As planned, and tested:
+1. **First launch:** the built-in catalog, so the store works with no internet.
+2. **Every launch:** the saved catalog at once, then `manifest.json` in the background; a new `catalogVersion` is downloaded, checked against `catalogSha256`, saved and shown.
+3. **Opening a theme:** its file is fetched if this `rev` isn't saved yet; the summary shows meanwhile.
+4. **Applying:** every file the look needs is downloaded first, with a progress card ("Apply · 0.8 MB"). Nothing changes until all of it is on disk; a failure keeps the old look and says why.
+5. **Pinned:** the applied look's files are never evicted. wallp Home and the live wallpaper run as separate engines and read the snapshot and files from disk only.
 
-### 7.3 Saving the applied theme
+### 7.3 Event icons
 
-Today `ThemePrefs` saves only the theme ID. Change it to also save a **snapshot** of the applied theme's full JSON (a few KB). Then:
-- wallp Home and the live wallpaper read the snapshot and never need the network.
-- If a theme is later removed from the catalog, the phone keeps working with the snapshot.
+`eventIcon` is a string from an allowlist ([lib/look/event_icons.dart](../lib/look/event_icons.dart)); unknown names show `Icons.event`. Flutter drops unused icons from the build, so the list is fixed in the app, and adding a name needs an app update:
 
-`eventIcon` becomes a string. The app keeps an **allowlist** mapping names to `IconData`, e.g. `nightlight_round → Icons.nightlight_round`. Unknown names fall back to `Icons.event`. (Flutter can't create an icon from an arbitrary string at runtime and still remove unused icons from the build.)
+`event`, `nightlight_round`, `card_giftcard_rounded`, `water_drop_rounded`, `light_mode_rounded`, `celebration_rounded`, `local_florist_rounded`, `ac_unit_rounded`, `star_rounded`, `favorite_rounded`, `music_note_rounded`.
 
-### 7.4 Fonts without `google_fonts`
+### 7.4 The applied look (one snapshot)
 
-- **Bundled fonts:** keep only the app's own UI font (Sora) and one Myanmar font (Padauk or Noto Sans Myanmar) inside the APK, a few hundred KB.
-- **Theme fonts:** download through `AssetCache` and register with `FontLoader('font-<id>')`.
-- **While a font downloads:** show the body font, then swap to the theme font when it's ready; never block the UI.
-- **Pinned:** fonts of the applied theme are pinned like other assets.
-- **Then remove the `google_fonts` package** and measure the size again (section 1.2).
+`AppliedLook` saves everything the phone shows, so the other engines and a removed theme keep working: the theme file, festival, accent, clock font with size and places, icon pack with the user's shape and app name colour and font, the wallpaper choice, and every font used. Older saves still load: fields added later read as their defaults.
 
-### 7.5 Request headers
+### 7.5 What the user chooses on the phone (not in the API)
 
-Every request sends:
-- `User-Agent: wallp/<version> (Android <sdk>)`
-- `X-Wallp-Engines: halloween,christmas,thingyan` (the engines this build has), so a dynamic API could filter later. The static catalog doesn't need it; the app filters by itself.
+The API gives each theme its defaults; these choices are the user's and live only on the phone:
 
-### 7.6 Tests to add
+| Choice | Where | Default from the API |
+|---|---|---|
+| Accent, remembered **per theme** | Theme page; "Gradients & custom" for any colour or gradient | The theme's first accent |
+| Tile shape | Icon pack page (the pack's real icon in each shape) | The pack's `shape` |
+| App name colour: Theme / Accent / White / Dark / Custom | Icon pack page, with a live preview | The theme's `labels.color`, else white |
+| App name font: Theme font / System font | Icon pack page | The theme's `fonts.labels` |
+| Clock font, size, and where it shows (lock clock, wallp Home clock, app labels) | Font page, with a lock and home preview that follows the switches | The theme's `fonts.display` |
+| Wallpaper: home, lock, both (a still picture) or the live wallpaper | The "Set wallpaper on" sheet when applying | — |
 
-- Parsing: each JSON example in this document parses into the right model. Keep the examples as test fixtures.
-- Offline first launch shows the built-in themes.
-- A catalog with an unknown `schemaVersion` is ignored.
-- A theme with an unknown engine is hidden, or shown as "needs update" when it has a preview image.
-- Applying a theme with a failed asset download keeps the old theme.
-- wallp Home and the live wallpaper start from the snapshot with the network turned off.
-- Countdown uses `occurrences` and falls back to `fallbackDate`.
+The theme page previews use these choices too (shape, name colour, name font), so a theme looks the way it will on this phone.
+
+### 7.6 Live wallpaper
+
+- One Android `WallpaperService` runs the `wallpaperMain` Flutter entry point and draws the applied look's scene at 30 fps, with the themed lock clock while the phone is locked. It pauses while hidden.
+- **Applying:** "Live wallpaper (animated)" in the sheet opens Android's preview for wallp's live wallpaper straight away. If wallp's live wallpaper is already on, nothing opens: it redraws with the new look by itself.
+- **realme UI / ColorOS:** the system preview closes itself at once when its app wasn't running yet, and the system list of live wallpapers doesn't show other apps' wallpapers. The app detects a picker that closes within 1.5 s and opens it once more. Seen on a realme RMX5253, Android 16.
+- **Previews animate only while wallp's live wallpaper is on** (`LiveWallpaperStatus`, checked on every return to the app). With a still wallpaper, the theme page, Me and festival previews are still.
+
+### 7.7 Fonts and `google_fonts`
+
+Theme fonts come from the catalog and load with `FontLoader`; their files are pinned with the applied look. `google_fonts` is still in the app as a fallback for fonts not downloaded yet (for example a font page opened before applying). Removing it, and bundling only the UI font and Padauk, is the remaining step of the plan's phase 3 (section 10).
+
+### 7.8 Request headers
+
+Not sent yet: the mock source makes no HTTP requests. The HTTP source should send `User-Agent: wallp/<version> (Android <sdk>)` and `X-Wallp-Engines: halloween,christmas,thingyan,layers`.
+
+### 7.9 Tests
+
+361 tests cover parsing of every example here, the mock catalog's hashes and references, offline first launch, unknown schemas and engines, failed downloads keeping the old look, the snapshot in the other engines, countdowns, and the store screens. Run `flutter test`.
 
 ---
 
@@ -559,6 +593,8 @@ Every request sends:
 
 | Change | What to do |
 |---|---|
+| **Any publish** | A new `catalogVersion` (and file name). Phones fetch the catalog only when the version in `manifest.json` differs from theirs, so re-uploading a changed catalog under the old version reaches no one who already has it |
+| **Edit a theme** | Increase its `rev`, for the same reason (section 4.3) |
 | Add an optional field | Same `schemaVersion`; old apps ignore it |
 | Add a new engine | Same `schemaVersion`; set the theme's `minAppVersion` to the version that added the engine |
 | Rename or remove a field, or change its meaning | New `schemaVersion` (2), publish both v1 and v2 catalogs side by side (`/catalog/v1/`, `/catalog/v2/`) until old app versions are rare |
@@ -568,15 +604,15 @@ Every request sends:
 
 ## 10. Build plan
 
-| Phase | Work | Done when |
+| Phase | Work | Status |
 |---|---|---|
-| **0. Size quick win** | Ship an App Bundle; add `--obfuscate --split-debug-info` | Play Console shows the download size; the 78 MB APK is no longer used |
-| **1. Catalog format** | Write the JSON Schema for every object in section 4; move today's three themes into `catalog.json`; add fixtures and parsing tests | The app runs from a local `catalog.json` with no behaviour change |
-| **2. Repository + cache** | `ThemeRepository`, `CatalogClient`, `AssetCache`, snapshot in `ThemePrefs` | The app loads the catalog from a test CDN; works offline after the first load |
-| **3. Fonts** | `FontRegistry`; remove `google_fonts`; bundle Sora + Myanmar font | All theme fonts come from the catalog; APK size re-measured |
-| **4. Dashboard v1** | Festivals, themes with existing engines, fonts, banners, Publish | A new theme published from the dashboard appears in the app without an update |
-| **5. Layers engine** | `layers` engine in the app plus the scene editor in the dashboard | A new Christmas scene made only in the dashboard |
-| **6. Popularity** | Events API + nightly job | The "Popular" sort uses real data |
+| **0. Size quick win** | Ship an App Bundle; add `--obfuscate --split-debug-info` | To do |
+| **1. Catalog format** | Models and parser for every object in section 4; fixtures and parsing tests; JSON Schema files for the dashboard | Done, except the JSON Schema files (the Dart models are the schema for now) |
+| **2. Repository + cache** | `CatalogRepository`, `CatalogSource`, `AssetCache`, downloads, the look snapshot | Done on the mock source. **Next: the HTTP source for the real CDN** |
+| **3. Fonts** | `FontRegistry`; remove `google_fonts`; bundle Sora + Myanmar font | `FontRegistry` done; removing `google_fonts` to do |
+| **4. Dashboard v1** | Festivals, themes with existing engines, fonts, icon packs, banners, Publish | To do ([theme-dashboard.md](theme-dashboard.md)) |
+| **5. Layers engine** | `layers` engine in the app plus the scene editor in the dashboard | App side done (27 fixture themes use it); dashboard editor to do |
+| **6. Popularity** | Events API + nightly job | To do; `popularity` is seed data |
 
 ---
 

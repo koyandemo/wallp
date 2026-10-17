@@ -182,7 +182,7 @@ List<Festival> wallpaperFestivals(Catalog catalog, DateTime now) {
 
 List<CatalogFont> fontsTab(Catalog catalog, {FontCategory? category}) => [
   for (final f in catalog.fonts)
-    if (category == null || f.category == category) f,
+    if (f.listed && (category == null || f.category == category)) f,
 ];
 
 /// "new", or a festival ID; null = all.
@@ -252,9 +252,10 @@ SearchResults search(Catalog catalog, String query) {
     ],
     fonts: [
       for (final f in catalog.fonts)
-        if (f.family.toLowerCase().contains(q) ||
-            tags(f.tags) ||
-            f.category.name == q)
+        if (f.listed &&
+            (f.family.toLowerCase().contains(q) ||
+                tags(f.tags) ||
+                f.category.name == q))
           f,
     ],
   );

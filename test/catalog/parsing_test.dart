@@ -17,9 +17,14 @@ Map<String, dynamic> _seedCatalog() {
       as Map<String, dynamic>;
 }
 
-Map<String, dynamic> _seedTheme(String id) =>
-    jsonDecode(File('$_dir/themes/$id.1.json').readAsStringSync())
-        as Map<String, dynamic>;
+/// The theme's file at whatever rev the seed is on.
+Map<String, dynamic> _seedTheme(String id) {
+  final file = Directory('$_dir/themes')
+      .listSync()
+      .whereType<File>()
+      .firstWhere((f) => RegExp('/$id\\.\\d+\\.json\$').hasMatch(f.path));
+  return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+}
 
 Catalog _parse(Map<String, dynamic> json) =>
     Catalog.fromJson(JsonReader(json, 'catalog'));

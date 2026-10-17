@@ -1,6 +1,6 @@
 {
   "id": "christmas-eve",
-  "rev": 1,
+  "rev": 2,
   "festivalId": "christmas",
   "name": {
     "en": "Snowy Pines"
@@ -92,7 +92,7 @@
   "fonts": {
     "display": "playfair-display",
     "body": "dm-sans",
-    "labels": "dm-sans"
+    "labels": "playfair-display"
   },
   "clock": {
     "useAccent": false

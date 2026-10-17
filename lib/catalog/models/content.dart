@@ -158,6 +158,7 @@ class CatalogFont {
     this.tags = const [],
     this.fallbackFor = const {},
     this.sampleText,
+    this.listed = true,
   });
 
   factory CatalogFont.fromJson(JsonReader r) {
@@ -193,6 +194,7 @@ class CatalogFont {
           key: fallback!.id(key),
       },
       sampleText: r.optText('sampleText'),
+      listed: r.boolean('listed', orElse: true),
     );
   }
 
@@ -211,8 +213,12 @@ class CatalogFont {
   /// Font IDs that draw text in scripts this font lacks: `{"my": "padauk"}`.
   final Map<String, String> fallbackFor;
 
-  /// Preview text; the app's default is the clock ("19:47").
+  /// Preview text; the app's default is "Welcome".
   final LocalizedText? sampleText;
+
+  /// False hides the font from the store (Fonts tab, search, "clock font"
+  /// links) while themes that use it keep drawing with it.
+  final bool listed;
 
   int get bytes => files.fold(0, (sum, f) => sum + f.asset.bytes);
 
@@ -226,6 +232,7 @@ class CatalogFont {
     'files': [for (final f in files) f.toJson()],
     'fallbackFor': fallbackFor.isEmpty ? null : fallbackFor,
     'sampleText': sampleText?.toJson(),
+    'listed': listed ? null : false,
   });
 }
 

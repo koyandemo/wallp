@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
-import '../icons/themed_icon_painter.dart';
+import '../launcher/launcher_icon.dart';
 import '../models/phone_theme.dart';
+import '../services/icon_pack_service.dart';
 
 /// "Set wallp as your home app?" — shown before applying a theme when wallp
 /// isn't the default home app yet. True = go ahead, false/null = cancel.
@@ -21,31 +22,17 @@ Future<bool?> showDefaultHomeDialog(
         icon: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            for (final glyph in const [
-              Icons.phone_rounded,
-              Icons.chat_bubble_rounded,
-              Icons.photo_camera_rounded,
-            ])
+            // The theme's real icons, as wallp Home will draw them
+            // (painted or downloaded, in the pack's tile shape).
+            for (final app in _samples)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                // Dashboard themes have downloaded icons, not painted ones.
-                child: theme.iconStyle == null
-                    ? Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: theme.palette.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: accent, width: 2),
-                        ),
-                        child: Icon(glyph, color: accent, size: 26),
-                      )
-                    : ThemedIcon(
-                        style: theme.iconStyle!,
-                        accent: accent,
-                        glyph: glyph,
-                        size: 52,
-                      ),
+                child: LauncherIcon(
+                  app: app,
+                  theme: theme,
+                  accent: accent,
+                  size: 52,
+                ),
               ),
           ],
         ),
@@ -83,3 +70,12 @@ Future<bool?> showDefaultHomeDialog(
     },
   );
 }
+
+const _samples = [
+  InstalledApp(packageName: 'com.google.android.dialer', label: 'Phone'),
+  InstalledApp(
+    packageName: 'com.google.android.apps.messaging',
+    label: 'Messages',
+  ),
+  InstalledApp(packageName: 'com.android.camera', label: 'Camera'),
+];

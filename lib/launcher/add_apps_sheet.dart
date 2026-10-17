@@ -106,6 +106,9 @@ class _AddAppsSheetState extends State<_AddAppsSheet> {
                           app.label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: widget.theme.appNameStyle(
+                            const TextStyle(fontSize: 16),
+                          ),
                         ),
                       );
                     },

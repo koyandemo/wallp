@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/date_format.dart';
+import '../launcher/launcher_icon.dart';
 import '../look/accent_paint.dart';
+import '../services/icon_pack_service.dart';
 import '../models/phone_theme.dart';
 
 /// Icon color that reads on top of [accent]: dark on light accents
@@ -24,6 +26,7 @@ class LockScreenOverlay extends StatelessWidget {
     this.clockGradient,
     this.accentGradient,
     this.onAccent,
+    this.showShortcuts = false,
   });
 
   final PhoneTheme theme;
@@ -44,6 +47,10 @@ class LockScreenOverlay extends StatelessWidget {
 
   /// The badge icon's colour; null works it out from [accent].
   final Color? onAccent;
+
+  /// Draws the flashlight and camera shortcuts a phone's lock screen has.
+  /// Previews only: on the phone, the system draws its own.
+  final bool showShortcuts;
 
   /// Distance from the top to the date line. The live wallpaper moves it
   /// down, below the phone's own lock screen clock.
@@ -149,40 +156,88 @@ class LockScreenOverlay extends StatelessWidget {
               ),
             ),
           ),
+        if (showShortcuts)
+          Positioned(
+            left: 36,
+            right: 36,
+            bottom: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final icon in const [
+                  Icons.flashlight_on_rounded,
+                  Icons.photo_camera_rounded,
+                ])
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: p.background.withValues(alpha: 0.7),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: p.text.withValues(alpha: 0.18)),
+                    ),
+                    child: GradientText(
+                      gradient: accentGradient,
+                      child: Icon(icon, size: 28, color: accent),
+                    ),
+                  ),
+              ],
+            ),
+          ),
       ],
     );
   }
 }
 
-/// Countdown widget, app grid and dock, like the design's home screen.
+/// Countdown widget, app grid and dock, like the design's home screen. The
+/// apps are drawn the way wallp Home draws them: the theme's own icons.
 class HomeScreenOverlay extends StatelessWidget {
   const HomeScreenOverlay({
     super.key,
     required this.theme,
     required this.accent,
     required this.now,
+    this.accentGradient,
+    this.clockColor,
+    this.clockScale = 1,
+    this.clockGradient,
   });
 
   final PhoneTheme theme;
   final Color accent;
   final DateTime now;
 
-  static const _apps = <(String, IconData)>[
-    ('Photos', Icons.photo_outlined),
-    ('Music', Icons.music_note_outlined),
-    ('Maps', Icons.map_outlined),
-    ('Weather', Icons.cloud_outlined),
-    ('Clock', Icons.schedule_outlined),
-    ('Mail', Icons.mail_outline_rounded),
-    ('Calendar', Icons.calendar_today_outlined),
-    ('Settings', Icons.tune_rounded),
+  /// Paints the theme name and countdown icon when the accent is a gradient.
+  final Gradient? accentGradient;
+
+  /// The wallp Home clock above the widget, as the user set it; without
+  /// [clockColor], the theme's default.
+  final Color? clockColor;
+  final double clockScale;
+  final Gradient? clockGradient;
+
+  static const _apps = [
+    InstalledApp(
+      packageName: 'com.google.android.apps.photos',
+      label: 'Photos',
+    ),
+    InstalledApp(packageName: 'com.spotify.music', label: 'Music'),
+    InstalledApp(packageName: 'com.google.android.apps.maps', label: 'Maps'),
+    InstalledApp(packageName: 'com.android.weather', label: 'Weather'),
+    InstalledApp(packageName: 'com.google.android.deskclock', label: 'Clock'),
+    InstalledApp(packageName: 'com.android.email', label: 'Mail'),
+    InstalledApp(packageName: 'com.google.android.calendar', label: 'Calendar'),
+    InstalledApp(packageName: 'com.android.settings', label: 'Settings'),
   ];
 
-  static const _dock = <IconData>[
-    Icons.phone_outlined,
-    Icons.chat_bubble_outline_rounded,
-    Icons.public_rounded,
-    Icons.camera_alt_outlined,
+  static const _dock = [
+    InstalledApp(packageName: 'com.google.android.dialer', label: 'Phone'),
+    InstalledApp(
+      packageName: 'com.google.android.apps.messaging',
+      label: 'Messages',
+    ),
+    InstalledApp(packageName: 'com.android.chrome', label: 'Chrome'),
+    InstalledApp(packageName: 'com.android.camera', label: 'Camera'),
   ];
 
   @override
@@ -190,27 +245,22 @@ class HomeScreenOverlay extends StatelessWidget {
     final p = theme.palette;
     final event = theme.event;
 
-    Widget appRow(Iterable<(String, IconData)> apps) => Row(
+    Widget appRow(Iterable<InstalledApp> apps) => Row(
       children: [
-        for (final (name, icon) in apps)
+        for (final app in apps)
           Expanded(
             child: Column(
               children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: p.surface,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: accent.withValues(alpha: 0.35)),
-                  ),
-                  child: Icon(icon, color: accent, size: 28),
-                ),
+                LauncherIcon(app: app, theme: theme, accent: accent, size: 62),
                 const SizedBox(height: 7),
                 Text(
-                  name,
-                  style: theme.bodyStyle(
-                    TextStyle(fontSize: 12, color: p.text),
+                  app.label,
+                  style: theme.labelStyle(
+                    TextStyle(
+                      fontSize: 12,
+                      color: theme.labelColor,
+                      shadows: theme.labelShadows,
+                    ),
                   ),
                 ),
               ],
@@ -222,9 +272,35 @@ class HomeScreenOverlay extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 64, 24, 0),
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
           child: Column(
             children: [
+              GradientText(
+                gradient: clockColor != null
+                    ? clockGradient
+                    : theme.accentClock
+                    ? accentGradient
+                    : null,
+                child: Text(
+                  DateFormatX.clock(
+                    now,
+                    use24h:
+                        MediaQuery.maybeAlwaysUse24HourFormatOf(context) ??
+                        false,
+                  ),
+                  style: theme.displayStyle(
+                    TextStyle(
+                      fontSize: 64 * clockScale,
+                      fontWeight: FontWeight.w700,
+                      height: 1.05,
+                      color:
+                          clockColor ??
+                          (theme.accentClock ? accent : Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Container(
                 height: 168,
                 padding: const EdgeInsets.symmetric(
@@ -243,10 +319,13 @@ class HomeScreenOverlay extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        theme.name,
-                        style: theme.displayStyle(
-                          TextStyle(fontSize: 46, height: 1, color: accent),
+                      child: GradientText(
+                        gradient: accentGradient,
+                        child: Text(
+                          theme.name,
+                          style: theme.displayStyle(
+                            TextStyle(fontSize: 46, height: 1, color: accent),
+                          ),
                         ),
                       ),
                     ),
@@ -282,7 +361,10 @@ class HomeScreenOverlay extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Icon(theme.eventIcon, color: accent, size: 48),
+                        GradientText(
+                          gradient: accentGradient,
+                          child: Icon(theme.eventIcon, color: accent, size: 48),
+                        ),
                       ],
                     ),
                   ],
@@ -310,19 +392,12 @@ class HomeScreenOverlay extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                for (final icon in _dock)
-                  Container(
-                    width: 62,
-                    height: 62,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: _onAccent(theme, accent),
-                      size: 28,
-                    ),
+                for (final app in _dock)
+                  LauncherIcon(
+                    app: app,
+                    theme: theme,
+                    accent: accent,
+                    size: 62,
                   ),
               ],
             ),
@@ -333,7 +408,6 @@ class HomeScreenOverlay extends StatelessWidget {
   }
 }
 
-/// "LIVE WALLPAPER" title over the animated scene, like the design's live board.
 class LiveWallpaperOverlay extends StatelessWidget {
   const LiveWallpaperOverlay({
     super.key,

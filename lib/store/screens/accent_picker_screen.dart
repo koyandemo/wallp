@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
@@ -11,6 +10,7 @@ import '../../look/accent_paint.dart';
 import '../../look/my_accents.dart';
 import '../../scenes/scene_view.dart';
 import '../logic/previews.dart';
+import '../widgets/colour_field.dart';
 import '../widgets/common.dart';
 
 /// Pick a theme's accent: solid colours, gradients, or one the user makes.
@@ -32,27 +32,6 @@ class AccentPickerScreen extends StatefulWidget {
 }
 
 enum _Tab { solid, gradient, custom }
-
-/// Colours offered for a custom accent (no colour wheel package: a picked
-/// palette plus a "#RRGGBB" field covers it).
-const _palette = [
-  '#FF7A1A',
-  '#FF4D2E',
-  '#D7263D',
-  '#E0245E',
-  '#FF5FA2',
-  '#FF8FC0',
-  '#A970FF',
-  '#7CC6FF',
-  '#2EC4B6',
-  '#7BD44A',
-  '#FFC21A',
-  '#F2B33D',
-  '#FFE08A',
-  '#F3E6C4',
-  '#F5F1EA',
-  '#9FB3C6',
-];
 
 class _AccentPickerScreenState extends State<AccentPickerScreen> {
   late _Tab _tab = widget.current?.type == AccentType.gradient
@@ -157,10 +136,15 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
           ),
           const SizedBox(height: 16),
           SegmentedButton<_Tab>(
+            // No tick on the selected option: its fill shows it.
+            showSelectedIcon: false,
             segments: const [
-              ButtonSegment(value: _Tab.solid, label: Text('Solid')),
-              ButtonSegment(value: _Tab.gradient, label: Text('Gradient')),
-              ButtonSegment(value: _Tab.custom, label: Text('Custom')),
+              ButtonSegment(value: _Tab.solid, label: SegmentLabel('Solid')),
+              ButtonSegment(
+                value: _Tab.gradient,
+                label: SegmentLabel('Gradient'),
+              ),
+              ButtonSegment(value: _Tab.custom, label: SegmentLabel('Custom')),
             ],
             selected: {_tab},
             onSelectionChanged: (s) => setState(() => _tab = s.single),
@@ -241,22 +225,24 @@ class _AccentPickerScreenState extends State<AccentPickerScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SegmentedButton<bool>(
+          // No tick on the selected option: its fill shows it.
+          showSelectedIcon: false,
           segments: const [
-            ButtonSegment(value: false, label: Text('One colour')),
-            ButtonSegment(value: true, label: Text('Gradient')),
+            ButtonSegment(value: false, label: SegmentLabel('One colour')),
+            ButtonSegment(value: true, label: SegmentLabel('Gradient')),
           ],
           selected: {_gradient},
           onSelectionChanged: (s) => setState(() => _gradient = s.single),
         ),
         const SizedBox(height: 16),
-        _ColourField(
+        ColourField(
           label: _gradient ? 'Start colour' : 'Colour',
           value: _start,
           onChanged: (c) => setState(() => _start = c),
         ),
         if (_gradient) ...[
           const SizedBox(height: 12),
-          _ColourField(
+          ColourField(
             label: 'End colour',
             value: _end,
             onChanged: (c) => setState(() => _end = c),
@@ -384,126 +370,6 @@ class _Grid extends StatelessWidget {
               ),
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _ColourField extends StatefulWidget {
-  const _ColourField({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final HexColor value;
-  final ValueChanged<HexColor> onChanged;
-
-  @override
-  State<_ColourField> createState() => _ColourFieldState();
-}
-
-class _ColourFieldState extends State<_ColourField> {
-  late final _text = TextEditingController(text: widget.value.hex);
-
-  @override
-  void didUpdateWidget(_ColourField old) {
-    super.didUpdateWidget(old);
-    if (old.value != widget.value &&
-        _text.text.toUpperCase() != widget.value.hex.toUpperCase()) {
-      _text.text = widget.value.hex;
-    }
-  }
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.palette.text,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 120,
-              child: TextField(
-                controller: _text,
-                decoration: InputDecoration(
-                  isDense: true,
-                  labelText: '${widget.label} hex',
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: Color(widget.value.argb),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp('[#0-9a-fA-F]')),
-                  LengthLimitingTextInputFormatter(7),
-                ],
-                onChanged: (v) {
-                  final hex = v.startsWith('#') ? v : '#$v';
-                  if (HexColor.isValid(hex)) {
-                    widget.onChanged(HexColor(hex.toUpperCase()));
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final hex in _palette)
-              Semantics(
-                label: hex,
-                button: true,
-                checked: widget.value.hex.toUpperCase() == hex,
-                excludeSemantics: true,
-                child: InkResponse(
-                  onTap: () => widget.onChanged(HexColor(hex)),
-                  radius: 22,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Color(HexColor(hex).argb),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: widget.value.hex.toUpperCase() == hex
-                            ? context.palette.text
-                            : Colors.transparent,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
       ],
     );
   }

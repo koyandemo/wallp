@@ -262,7 +262,8 @@ class _AppRow extends StatelessWidget {
         app.label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: text.titleMedium,
+        // The App name colour and font, as on wallp Home.
+        style: theme.appNameStyle(text.titleMedium),
       ),
       trailing: !canAdd
           ? null

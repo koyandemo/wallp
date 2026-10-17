@@ -45,11 +45,17 @@ class NativeBridge(private val activity: Activity) {
     /** Waiting for the "default home app" screen to close. */
     private var pendingHomeResult: MethodChannel.Result? = null
 
+    /** Waiting for the live wallpaper picker to close. */
+    private var pendingLiveResult: MethodChannel.Result? = null
+    private var liveOpenedAt = 0L
+    private var liveRetried = false
+
     fun register(messenger: BinaryMessenger) {
         MethodChannel(messenger, WALLPAPER_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "screenSize" -> result.success(screenSize())
-                "openLiveWallpaper" -> result.success(openLiveWallpaper())
+                "openLiveWallpaper" -> openLiveWallpaper(result)
+                "isLiveWallpaperActive" -> result.success(isLiveWallpaperActive())
                 "setWallpaper" -> {
                     val bytes = call.argument<ByteArray>("bytes")
                     val target = call.argument<String>("target")
@@ -195,25 +201,65 @@ class NativeBridge(private val activity: Activity) {
         return listOf(minOf(w, h), maxOf(w, h))
     }
 
+    /** True while wallp's live wallpaper is the phone's wallpaper. */
+    private fun isLiveWallpaperActive(): Boolean = try {
+        WallpaperManager.getInstance(activity).wallpaperInfo?.packageName == activity.packageName
+    } catch (e: Exception) {
+        false
+    }
+
     /**
      * Opens the system preview for wallp's live wallpaper ("Set wallpaper"
      * finishes it), or the general live wallpaper list if a launcher/skin
-     * doesn't support the direct preview.
+     * doesn't support the direct preview. Answers "set", "cancelled" or
+     * "unavailable" once the picker closes.
      */
-    private fun openLiveWallpaper(): Boolean {
+    private fun openLiveWallpaper(result: MethodChannel.Result) {
+        pendingLiveResult?.success("cancelled")
+        pendingLiveResult = result
+        liveRetried = false
+        if (!startLivePicker()) {
+            pendingLiveResult = null
+            result.success("unavailable")
+        }
+    }
+
+    private fun startLivePicker(): Boolean {
         val direct = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).putExtra(
             WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
             ComponentName(activity, LiveWallpaperService::class.java),
         )
         for (intent in listOf(direct, Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))) {
             try {
-                activity.startActivity(intent)
+                liveOpenedAt = System.currentTimeMillis()
+                activity.startActivityForResult(intent, REQUEST_LIVE_WALLPAPER)
                 return true
             } catch (e: ActivityNotFoundException) {
                 // Try the next one.
             }
         }
         return false
+    }
+
+    /**
+     * The picker closed. Some skins (realme UI, ColorOS) close it at once
+     * when its app was not running yet, before showing anything: open it
+     * once more, now that it's warm.
+     */
+    private fun onLivePickerClosed() {
+        val result = pendingLiveResult ?: return
+        if (isLiveWallpaperActive()) {
+            pendingLiveResult = null
+            result.success("set")
+            return
+        }
+        val closedAtOnce = System.currentTimeMillis() - liveOpenedAt < LIVE_PICKER_GLITCH_MS
+        if (closedAtOnce && !liveRetried) {
+            liveRetried = true
+            if (startLivePicker()) return
+        }
+        pendingLiveResult = null
+        result.success(if (closedAtOnce) "unavailable" else "cancelled")
     }
 
     /** [target] is "home", "lock" or "both" (Dart's WallpaperTarget names). */
@@ -464,6 +510,10 @@ class NativeBridge(private val activity: Activity) {
 
     /** Forwarded from the activity; true if it was our request. */
     fun onActivityResult(requestCode: Int): Boolean {
+        if (requestCode == REQUEST_LIVE_WALLPAPER) {
+            onLivePickerClosed()
+            return true
+        }
         if (requestCode != REQUEST_HOME_ROLE) return false
         pendingHomeResult?.success(isDefaultHome())
         pendingHomeResult = null
@@ -475,5 +525,9 @@ class NativeBridge(private val activity: Activity) {
         private const val ICONS_CHANNEL = "wallp/icons"
         private const val LAUNCHER_CHANNEL = "wallp/launcher"
         private const val REQUEST_HOME_ROLE = 4201
+        private const val REQUEST_LIVE_WALLPAPER = 4202
+
+        /** A picker that closes faster than this never showed. */
+        private const val LIVE_PICKER_GLITCH_MS = 1500L
     }
 }
