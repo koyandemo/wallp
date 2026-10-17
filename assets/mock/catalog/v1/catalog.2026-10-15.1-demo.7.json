@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2026-10-15.1-demo.6",
+  "catalogVersion": "2026-10-15.1-demo.7",
   "festivals": [
     {
       "id": "halloween",
@@ -246,7 +246,7 @@
     },
     {
       "id": "spider-night",
-      "rev": 1,
+      "rev": 2,
       "festivalId": "heroes",
       "name": {
         "en": "Spider Night"
@@ -856,7 +856,7 @@
       },
       "displayFont": "bebas-neue",
       "iconPackId": "web-slinger",
-      "downloadBytes": 958344
+      "downloadBytes": 981216
     }
   ],
   "wallpapers": [
@@ -2471,6 +2471,12 @@
           "bytes": 26489,
           "format": "png"
         }
+      },
+      "background": {
+        "url": "assets/d798721337c9a4aa1c24baaa6bed73259f867eb930f50112912e71ac81c625e3.png",
+        "sha256": "d798721337c9a4aa1c24baaa6bed73259f867eb930f50112912e71ac81c625e3",
+        "bytes": 22872,
+        "format": "png"
       },
       "publishedAt": "2026-10-14T14:00:00.000Z",
       "popularity": 0

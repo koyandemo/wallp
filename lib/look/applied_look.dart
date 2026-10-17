@@ -134,7 +134,7 @@ class AppliedLook {
   Set<AssetRef> get assets => {
     ...theme.scene.assets,
     ...wallpaper.assets,
-    ...icons.pack.glyphs.values,
+    ...icons.pack.assets,
     for (final f in fonts.values) ...f.files.map((f) => f.asset),
   };
 

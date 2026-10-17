@@ -26,6 +26,14 @@ void main() {
           (c) => _icon(c, pack, path),
         );
       }
+      if (pack.background) {
+        await _save(
+          backgroundPath(pack.id),
+          iconPixels,
+          iconPixels,
+          (c) => _icon(c, pack, null),
+        );
+      }
     }
   });
 
@@ -98,7 +106,8 @@ ui.Path _tileShape(String shape, ui.Rect r) {
   };
 }
 
-void _icon(ui.Canvas canvas, PackArt pack, String glyphPath) {
+/// A null [glyphPath] draws the empty tile.
+void _icon(ui.Canvas canvas, PackArt pack, String? glyphPath) {
   const s = iconPixels * 1.0;
   final tile = ui.Rect.fromLTWH(s * 0.06, s * 0.06, s * 0.88, s * 0.88);
   final shape = _tileShape(pack.shape, tile);
@@ -126,6 +135,8 @@ void _icon(ui.Canvas canvas, PackArt pack, String glyphPath) {
         ..strokeWidth = s * 0.035,
     );
   }
+
+  if (glyphPath == null) return;
 
   // The glyph fills half the tile (70% for line icons, which have no tile).
   final box = pack.look == PackLook.line ? s * 0.7 : s * 0.5;

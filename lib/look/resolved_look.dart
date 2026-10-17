@@ -88,6 +88,7 @@ class ResolvedLook {
         imageIcons: pack.kind == IconPackKind.images
             ? ImageIconPack(
                 glyphs: pack.glyphs,
+                background: pack.background,
                 shape: look.icons.shape,
                 tile: pack.tile == null ? null : _color(pack.tile!),
                 ring: _color(pack.ring),

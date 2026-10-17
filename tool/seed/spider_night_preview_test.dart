@@ -62,7 +62,7 @@ void main() {
     );
     for (final ref in {
       ...theme.scene.assets,
-      ...catalog.iconPack(theme.iconPackId)!.glyphs.values,
+      ...catalog.iconPack(theme.iconPackId)!.assets,
     }) {
       images[ref.sha256] = await _decode('$_dir/${ref.url}');
     }

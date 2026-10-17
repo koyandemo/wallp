@@ -59,6 +59,7 @@ void main() {
     final pack = catalog.iconPack(theme.iconPackId)!;
     expect(pack.kind, IconPackKind.images);
     expect(pack.glyphs.keys, unorderedEquals(GlyphKeys.all));
+    expect(pack.background, isNotNull, reason: 'apps without an icon');
     final still = catalog.wallpapers.firstWhere((w) => w.id == 'web-corner');
     expect(still.scene!.isLive, isFalse);
   });
@@ -91,7 +92,7 @@ void main() {
   test('every file is there, with the right hash, and nothing extra', () {
     final used = <AssetRef>{
       for (final f in catalog.fonts) ...f.files.map((f) => f.asset),
-      for (final p in catalog.iconPacks) ...p.glyphs.values,
+      for (final p in catalog.iconPacks) ...p.assets,
       for (final t in catalog.themes) ...t.scene.assets,
       for (final w in catalog.wallpapers) ...?w.scene?.assets,
     };

@@ -174,9 +174,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
   }
 
   Future<void> _refreshSize(IconPack pack) async {
-    final bytes = await context.read<AssetCache>().missingBytes(
-      pack.glyphs.values,
-    );
+    final bytes = await context.read<AssetCache>().missingBytes(pack.assets);
     if (mounted && bytes != _missing) setState(() => _missing = bytes);
   }
 

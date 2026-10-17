@@ -23,8 +23,8 @@ const catalogVersion = '2026-10-15.1';
 /// changes: installed apps only fetch a catalog whose version is new.
 /// 2: Halloween label colour, Creepster unlisted. 3: label fonts.
 /// 4: Creepster listed again. 5: Padauk's preview says welcome.
-/// 6: the Spider Night kit.
-const demoRevision = 6;
+/// 6: the Spider Night kit. 7: Web Slinger's background tile.
+const demoRevision = 7;
 
 /// Turns a source file under tool/seed/source/ into a hashed asset.
 typedef AssetFor = AssetRef Function(String sourcePath, AssetFormat format);

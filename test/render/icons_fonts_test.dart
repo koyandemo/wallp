@@ -10,6 +10,7 @@ import 'package:wallp/launcher/launcher_icon.dart';
 import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/resolved_look.dart';
 import 'package:wallp/render/font_registry.dart';
+import 'package:wallp/render/image_icons.dart';
 import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/services/icon_pack_service.dart';
 
@@ -181,6 +182,61 @@ void main() {
       expect(find.byType(PackPictureIcon), findsNothing);
       expect(find.byType(PackFallbackIcon), findsOneWidget);
       expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
+    });
+
+    testWidgets('a pack with a background puts the app on that picture', (
+      tester,
+    ) async {
+      // Any of the pack's pictures stands in for its empty tile.
+      final background = look.icons.pack.glyphs['phone']!;
+      final pack = home.imageIcons!;
+      final withBackground = home.copyWith(
+        imageIcons: ImageIconPack(
+          glyphs: pack.glyphs,
+          shape: pack.shape,
+          ring: pack.ring,
+          tile: pack.tile,
+          background: background,
+        ),
+      );
+      await tester.runAsync(() async {
+        await download([background]);
+        await assets.image(background);
+      });
+      const game = InstalledApp(
+        packageName: 'com.example.game',
+        label: 'Cool Game',
+      );
+      await tester.pumpWidget(
+        SceneAssetsScope(
+          assets: assets,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: LauncherIcon(
+              app: game,
+              theme: withBackground,
+              accent: Colors.orange,
+            ),
+          ),
+        ),
+      );
+      PackFallbackPainter painter() =>
+          tester
+                  .widget<CustomPaint>(
+                    find.descendant(
+                      of: find.byType(PackFallbackIcon),
+                      matching: find.byType(CustomPaint),
+                    ),
+                  )
+                  .painter!
+              as PackFallbackPainter;
+      // The plain tile until the picture loads, then the picture.
+      expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+      expect(find.byIcon(Icons.apps_rounded), findsNothing);
+      expect(painter().background, isNotNull);
     });
 
     test('a pinned shortcut sends the pack\'s picture as is', () async {

@@ -339,6 +339,7 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
   "shape": "squircle",
   "tile": "#F5F1EA", "glyph": "#B0182F", "ring": "#B0182F",
   "glyphs": { "phone": { /* Asset, png */ }, "messages": { /* Asset */ }, "…": {} },
+  "background": { /* Asset, png; optional */ },
   "publishedAt": "2026-10-11T14:00:00Z",
   "popularity": 5
 }
@@ -347,7 +348,8 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
 - **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`; required for this kind). `images` = one downloaded picture per glyph key, at least one. Packs made in the dashboard are always `images`.
 - **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it on the icon pack page, where the picker shows the pack's own phone icon in each shape. Every icon follows the chosen shape: painted packs are drawn in it, and pictures are clipped to it. So **draw pictures edge to edge on a square canvas**, with the important part inside the middle 80%, which the `circle` and `leaf` shapes keep.
 - **`tile`, `glyph`, `ring`:** the pack's colours, used for previews and for apps the pack has no picture for. No `tile` = icons sit straight on the wallpaper.
-- **Glyph keys** (an unknown key rejects the pack): `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). Apps with no key, or whose key the pack doesn't draw, keep their own icon, tinted.
+- **Glyph keys** (an unknown key rejects the pack): `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). Apps with no key, or whose key the pack doesn't draw, show their own icon on the pack's `background` (or `tile`).
+- **`background`:** optional, `images` packs only. The pack's empty tile: a picture drawn exactly like the others, without a glyph. Apps the pack has no picture for show their own icon in the middle of it, so they match the rest of the pack; without it they sit on a plain `tile` colour with a `ring` border. Downloaded with the pictures and counted in the pack's size.
 - **Pictures:** square PNG or WebP with a transparent background, 256 px or larger.
 
 ### 4.8 Banner (store home carousel)
@@ -421,8 +423,8 @@ Until the real API exists, the app reads a mock catalog laid out exactly like th
 To show more in the app, add IDs to `demoThemes` and `demoWallpapers` in [tool/seed/generate.dart](../tool/seed/generate.dart) and run it again.
 
 **Versions in the demo catalog.** Installed apps only fetch a catalog whose `catalogVersion` is new, and only re-read a theme file whose `rev` is new (section 9). So every change to the demo data needs both bumps, or phones that already have it keep the old data:
-- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.5`).
-- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2).
+- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.7`).
+- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2, Spider Night 2).
 
 The `rev` comments in `seed_data.dart` say what each bump changed.
 

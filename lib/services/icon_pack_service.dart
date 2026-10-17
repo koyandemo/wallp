@@ -87,12 +87,16 @@ class IconPackService {
     SceneAssets? assets,
   }) async {
     // A downloaded pack sends its picture as is (already a tile).
+    assets ??= SceneAssets.shared;
     final picture = theme.imageIcons?.pictureFor(app.glyphKey);
-    final downloaded = picture == null
-        ? null
-        : await (assets ?? SceneAssets.shared).bytes(picture);
+    final downloaded = picture == null ? null : await assets.bytes(picture);
+    final background = switch (theme.imageIcons?.background) {
+      final ref? when downloaded == null => await assets.image(ref),
+      _ => null,
+    };
     final png =
-        downloaded ?? await _renderIcon(_painterFor(theme, app, accent));
+        downloaded ??
+        await _renderIcon(_painterFor(theme, app, accent, background));
     try {
       return await _channel.invokeMethod<bool>('pinShortcut', {
             'id': '${theme.id}-${app.packageName}',
@@ -111,13 +115,16 @@ class IconPackService {
     PhoneTheme theme,
     InstalledApp app,
     ui.Color accent,
+    ui.Image? background,
   ) {
-    // A downloaded pack: the app's own icon framed in the pack's tile, small
-    // enough to stay inside the launcher's mask.
+    // A downloaded pack: the app's own icon framed in the pack's tile (or on
+    // its background picture), small enough to stay inside the launcher's
+    // mask.
     if (theme.imageIcons case final pack?) {
       return PackFallbackPainter(
         pack: pack,
         appIcon: app.icon,
+        background: background,
         iconScale: 0.42,
       );
     }

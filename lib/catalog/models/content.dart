@@ -467,6 +467,7 @@ class IconPack {
     required this.publishedAt,
     this.painter,
     this.glyphs = const {},
+    this.background,
     this.popularity = 0,
   });
 
@@ -480,6 +481,7 @@ class IconPack {
       }
       glyphs[key] = AssetRef.fromJson(rawGlyphs!.object(key));
     }
+    final rawBackground = r.optObject('background');
     final painter = r.optId('painter');
     if (kind == IconPackKind.painted && painter == null) {
       r.fail('painter', 'a painted pack names its painter style');
@@ -499,6 +501,9 @@ class IconPack {
       glyph: r.color('glyph'),
       ring: r.color('ring'),
       glyphs: glyphs,
+      background: rawBackground == null
+          ? null
+          : AssetRef.fromJson(rawBackground),
       publishedAt: r.time('publishedAt'),
       popularity: r.integer('popularity', orElse: 0),
     );
@@ -523,10 +528,18 @@ class IconPack {
   final HexColor glyph;
   final HexColor ring;
   final Map<String, AssetRef> glyphs;
+
+  /// [IconPackKind.images] only, optional: the pack's empty tile (its
+  /// pictures without a glyph). Apps the pack has no picture for show their
+  /// own icon on it; without one they sit on a plain [tile] colour.
+  final AssetRef? background;
   final DateTime publishedAt;
   final int popularity;
 
-  int get bytes => glyphs.values.fold(0, (sum, a) => sum + a.bytes);
+  /// Every picture the pack downloads.
+  Iterable<AssetRef> get assets => [...glyphs.values, ?background];
+
+  int get bytes => assets.fold(0, (sum, a) => sum + a.bytes);
 
   bool isNew(DateTime now) {
     final age = now.difference(publishedAt);
@@ -550,6 +563,7 @@ class IconPack {
             for (final key in GlyphKeys.all)
               if (glyphs[key] case final a?) key: a.toJson(),
           },
+    'background': background?.toJson(),
     'publishedAt': publishedAt.toIso8601String(),
     'popularity': popularity,
   });

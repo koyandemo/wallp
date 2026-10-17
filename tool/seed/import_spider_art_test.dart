@@ -2,6 +2,8 @@
 // (docs/spiderman-script.md) in place of the drawn ones:
 //
 //   tool/seed/incoming/spider-night/icons/<glyph>.png   20 app icons
+//   tool/seed/incoming/spider-night/icons/background.png  the empty tile,
+//                                         for apps without an icon
 //   tool/seed/incoming/spider-night/skyline.png         bottom scene layer
 //   tool/seed/incoming/spider-night/web.png             top scene layer
 //
@@ -34,10 +36,12 @@ void main() {
     }
     final imported = <String>[];
 
-    for (final glyph in glyphPaths.keys) {
-      final source = _find('$_incoming/icons/$glyph');
+    for (final glyph in [...glyphPaths.keys, null]) {
+      final source = _find('$_incoming/icons/${glyph ?? 'background'}');
       if (source == null) continue;
-      final out = iconPath('web-slinger', glyph);
+      final out = glyph == null
+          ? backgroundPath('web-slinger')
+          : iconPath('web-slinger', glyph);
       await _import(source, out, square: true);
       imported.add(out);
     }

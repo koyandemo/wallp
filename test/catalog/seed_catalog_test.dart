@@ -171,7 +171,7 @@ void main() {
         for (final d in details.values) ...catalog.assetsFor(d),
         for (final w in catalog.wallpapers) ...?w.scene?.assets,
         for (final f in catalog.fonts) ...f.files.map((f) => f.asset),
-        for (final p in catalog.iconPacks) ...p.glyphs.values,
+        for (final p in catalog.iconPacks) ...p.assets,
       }.toList();
     });
 

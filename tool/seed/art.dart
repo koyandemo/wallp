@@ -58,6 +58,7 @@ class PackArt {
     required this.glyph,
     required this.ring,
     this.tile,
+    this.background = false,
   });
 
   final String id;
@@ -68,6 +69,10 @@ class PackArt {
   final int? tile;
   final int glyph;
   final int ring;
+
+  /// Also draw an empty tile ([backgroundPath]) for apps the pack has no
+  /// picture for.
+  final bool background;
 }
 
 const packArt = <PackArt>[
@@ -126,6 +131,7 @@ const packArt = <PackArt>[
     tile: 0xD3202A,
     glyph: 0xFFFFFF,
     ring: 0x0A0A12,
+    background: true,
   ),
 ];
 
@@ -169,5 +175,9 @@ const externalArtList = '$sourceDir/external-art.txt';
 
 String iconPath(String packId, String glyph) =>
     '$sourceDir/icons/$packId/$glyph.png';
+
+/// A pack's empty tile: its pictures without a glyph.
+String backgroundPath(String packId) =>
+    '$sourceDir/icons/$packId/background.png';
 
 String layerPath(LayerArt art) => '$sourceDir/images/${art.file}.png';

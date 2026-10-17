@@ -77,8 +77,9 @@ class _OwnIcon extends StatelessWidget {
 }
 
 /// An app a downloaded pack has no picture for: its own icon on the pack's
-/// tile, clipped to the user's tile shape and ringed in the pack's colour.
-class PackFallbackIcon extends StatelessWidget {
+/// background picture, or, without one (or until it loads), on the pack's
+/// tile colour ringed in its ring colour. Clipped to the user's tile shape.
+class PackFallbackIcon extends StatefulWidget {
   const PackFallbackIcon({
     super.key,
     required this.pack,
@@ -91,25 +92,60 @@ class PackFallbackIcon extends StatelessWidget {
   final double size;
 
   @override
+  State<PackFallbackIcon> createState() => _PackFallbackIconState();
+}
+
+class _PackFallbackIconState extends State<PackFallbackIcon> {
+  ui.Image? _background;
+  AssetRef? _loading;
+
+  void _load() {
+    final wanted = widget.pack.background;
+    if (_loading == wanted) return;
+    _loading = wanted;
+    _background = null;
+    if (wanted == null) return;
+    SceneAssets.of(context).image(wanted).then((img) {
+      if (mounted && _loading == wanted) setState(() => _background = img);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final radius = iconShapeRadius(pack.shape, size);
+    _load();
+    final pack = widget.pack;
+    final size = widget.size;
+    final background = _background;
+    final icon = widget.app.icon;
+    final tile = IconShapeClip(
+      shape: pack.shape,
+      size: size,
+      child: icon == null && background == null
+          ? Icon(Icons.apps_rounded, size: size * 0.55, color: Colors.white)
+          : CustomPaint(
+              size: Size.square(size),
+              painter: PackFallbackPainter(
+                pack: pack,
+                appIcon: icon,
+                background: background,
+                // The size of the pack's own glyphs, so its art shows around.
+                iconScale: background == null ? 0.6 : 0.5,
+              ),
+            ),
+    );
+    // The background picture has its own rim.
+    if (background != null) {
+      return SizedBox.square(dimension: size, child: tile);
+    }
     return SizedBox.square(
       dimension: size,
       child: DecoratedBox(
         position: DecorationPosition.foreground,
         decoration: BoxDecoration(
-          borderRadius: radius,
+          borderRadius: iconShapeRadius(pack.shape, size),
           border: Border.all(color: pack.ring, width: size * 0.035),
         ),
-        child: IconShapeClip(
-          shape: pack.shape,
-          size: size,
-          child: app.icon == null
-              ? Icon(Icons.apps_rounded, size: size * 0.55, color: Colors.white)
-              : CustomPaint(
-                  painter: PackFallbackPainter(pack: pack, appIcon: app.icon),
-                ),
-        ),
+        child: tile,
       ),
     );
   }

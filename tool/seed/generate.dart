@@ -261,7 +261,7 @@ void _writeCatalog(
     for (final t in details) ...catalog.assetsFor(t),
     for (final w in catalog.wallpapers) ...?w.scene?.assets,
     for (final f in catalog.fonts) ...f.files.map((f) => f.asset),
-    for (final p in catalog.iconPacks) ...p.glyphs.values,
+    for (final p in catalog.iconPacks) ...p.assets,
   };
   for (final ref in used) {
     File(sources[ref.sha256]!).copySync('$dir/${ref.url}');

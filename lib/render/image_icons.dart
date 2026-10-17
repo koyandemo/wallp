@@ -12,10 +12,15 @@ class ImageIconPack {
     required this.shape,
     required this.ring,
     this.tile,
+    this.background,
   });
 
   final Map<String, AssetRef> glyphs;
   final IconShape shape;
+
+  /// The pack's empty tile picture, drawn under apps it has no picture for.
+  /// Null = they get a plain [tile] instead.
+  final AssetRef? background;
 
   /// The pack's tile and ring colours, for apps it has no picture for.
   /// Null [tile] = no tile (line icons straight on the wallpaper).
@@ -36,11 +41,16 @@ class PackFallbackPainter extends CustomPainter {
   const PackFallbackPainter({
     required this.pack,
     required this.appIcon,
+    this.background,
     this.iconScale = 0.6,
   });
 
   final ImageIconPack pack;
   final ui.Image? appIcon;
+
+  /// The pack's loaded [ImageIconPack.background], drawn edge to edge like
+  /// its pictures. Null = a gradient of the pack's tile colour.
+  final ui.Image? background;
 
   /// The app icon's width as a share of the tile.
   final double iconScale;
@@ -48,7 +58,14 @@ class PackFallbackPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final full = Offset.zero & size;
-    if (pack.tile case final tile?) {
+    if (background case final bg?) {
+      canvas.drawImageRect(
+        bg,
+        Offset.zero & Size(bg.width.toDouble(), bg.height.toDouble()),
+        full,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+    } else if (pack.tile case final tile?) {
       // Lighter in the middle, like the pack's pictures.
       canvas.drawRect(
         full,
@@ -86,5 +103,8 @@ class PackFallbackPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(PackFallbackPainter old) =>
-      old.pack != pack || old.appIcon != appIcon || old.iconScale != iconScale;
+      old.pack != pack ||
+      old.appIcon != appIcon ||
+      old.background != background ||
+      old.iconScale != iconScale;
 }

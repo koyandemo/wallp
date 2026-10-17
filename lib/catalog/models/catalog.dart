@@ -366,7 +366,7 @@ class Catalog {
   /// Throws [StateError] if the theme points at a font or pack that's gone.
   List<AssetRef> assetsFor(ThemeDetail theme) => {
     ...theme.scene.assets,
-    ...iconPackFor(theme).glyphs.values,
+    ...iconPackFor(theme).assets,
     for (final id in theme.fonts.ids) ...fontFor(id).files.map((f) => f.asset),
   }.toList();
 
