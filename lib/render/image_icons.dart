@@ -1,36 +1,41 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../catalog/catalog.dart';
 
-/// A downloaded icon pack as wallp Home draws it: one picture per glyph
-/// key, clipped to the tile shape the user picked.
+/// A downloaded icon pack as wallp Home draws it: every app's own logo on
+/// the pack's background tile, clipped to the tile shape the user picked.
 class ImageIconPack {
   const ImageIconPack({
-    required this.glyphs,
     required this.shape,
     required this.ring,
+    required this.glyph,
     this.tile,
     this.background,
   });
 
-  final Map<String, AssetRef> glyphs;
+  /// [pack] in the user's [shape].
+  factory ImageIconPack.of(IconPack pack, IconShape shape) => ImageIconPack(
+    shape: shape,
+    ring: Color(pack.ring.argb),
+    glyph: Color(pack.glyph.argb),
+    tile: pack.tile == null ? null : Color(pack.tile!.argb),
+    background: pack.background,
+  );
+
   final IconShape shape;
 
-  /// The pack's empty tile picture, drawn under apps it has no picture for.
-  /// Null = they get a plain [tile] instead.
+  /// The pack's tile picture, drawn under every app. Null, or until it
+  /// loads: a plain [tile] instead.
   final AssetRef? background;
 
-  /// The pack's tile and ring colours, for apps it has no picture for.
-  /// Null [tile] = no tile (line icons straight on the wallpaper).
+  /// The pack's colours. Null [tile] = no tile.
   final Color? tile;
   final Color ring;
 
-  /// The picture for [glyphKey]: previews only, whose sample apps have no
-  /// icon. Real apps keep their own logo, on the pack's tile.
-  AssetRef? pictureFor(String? glyphKey) =>
-      glyphKey == null ? null : glyphs[glyphKey];
+  /// For the symbols of sample apps in previews, which have no logo.
+  final Color glyph;
 }
 
 /// An app under a downloaded pack: its own logo on the pack's tile, so
@@ -39,17 +44,21 @@ class ImageIconPack {
 ///
 /// Fills the whole canvas; callers clip it to the tile shape (or let the
 /// launcher mask it, for a pinned shortcut).
-class PackFallbackPainter extends CustomPainter {
-  const PackFallbackPainter({
+class PackTilePainter extends CustomPainter {
+  const PackTilePainter({
     required this.pack,
     required this.appIcon,
     this.logo,
+    this.symbol,
     this.background,
     this.iconScale = 0.6,
   });
 
   final ImageIconPack pack;
   final ui.Image? appIcon;
+
+  /// Drawn when there's no [logo] or [appIcon]: a sample app in a preview.
+  final IconData? symbol;
 
   /// [InstalledApp.logo]: drawn instead of [appIcon] when there is one, so
   /// the app's own background makes way for the pack's.
@@ -97,7 +106,10 @@ class PackFallbackPainter extends CustomPainter {
       return;
     }
     final icon = appIcon;
-    if (icon == null) return;
+    if (icon == null) {
+      if (symbol case final symbol?) _paintSymbol(canvas, symbol, full, side);
+      return;
+    }
     final dst = Rect.fromCenter(center: full.center, width: side, height: side);
     // A soft shadow lifts the app's icon off the tile.
     canvas.drawRRect(
@@ -115,6 +127,27 @@ class PackFallbackPainter extends CustomPainter {
       dst,
       Paint()..filterQuality = FilterQuality.medium,
     );
+  }
+
+  void _paintSymbol(Canvas canvas, IconData symbol, Rect full, double side) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(symbol.codePoint),
+        style: TextStyle(
+          fontFamily: symbol.fontFamily,
+          package: symbol.fontPackage,
+          fontSize: side,
+          color: pack.glyph,
+          shadows: const [Shadow(color: Color(0x66000000), blurRadius: 3)],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(
+      canvas,
+      full.center - Offset(painter.width / 2, painter.height / 2),
+    );
+    painter.dispose();
   }
 
   /// [logo] over a soft shadow in its own shape.
@@ -143,10 +176,11 @@ class PackFallbackPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(PackFallbackPainter old) =>
+  bool shouldRepaint(PackTilePainter old) =>
       old.pack != pack ||
       old.appIcon != appIcon ||
       old.logo != logo ||
+      old.symbol != symbol ||
       old.background != background ||
       old.iconScale != iconScale;
 }

@@ -36,16 +36,16 @@ void main() {
   test(
     'a dashboard theme gets a placeholder scene and plain icons, for now',
     () {
-      final r = resolve(whole('cozy-cabin'));
+      final r = resolve(whole('spider-night'));
       expect(r.wallpaperTheme.scene, isNull);
       expect(r.homeTheme.hasIconPack, isFalse);
-      expect(r.wallpaperTheme.palette.background, const Color(0xFF3A2318));
+      expect(r.wallpaperTheme.palette.background, const Color(0xFF0B1026));
     },
   );
 
   test('a built-in icon pack on a dashboard theme draws painted icons', () {
     final r = resolve(
-      whole('cozy-cabin')
+      whole('spider-night')
           .withIconPack(catalog.iconPack('gold-ornament')!, at: at),
     );
     expect(r.homeTheme.iconStyle, SceneKind.christmas);
@@ -55,17 +55,17 @@ void main() {
   });
 
   group('the clock font goes only where the user put it', () {
-    final pacifico = catalog.font('pacifico')!;
+    final playfair = catalog.font('playfair-display')!;
 
     test('lock screen only', () {
       final r = resolve(
         whole('halloween-night').withClockFont(
-          pacifico,
+          playfair,
           at: at,
           places: const ClockPlaces(homeClock: false),
         ),
       );
-      expect(r.lockTheme.displayFont, 'Pacifico');
+      expect(r.lockTheme.displayFont, 'Playfair Display');
       expect(r.homeTheme.displayFont, 'Creepster');
       expect(r.homeTheme.bodyFont, 'Creepster');
     });
@@ -73,7 +73,7 @@ void main() {
     test('app labels only', () {
       final r = resolve(
         whole('halloween-night').withClockFont(
-          pacifico,
+          playfair,
           at: at,
           places: const ClockPlaces(
             lockScreen: false,
@@ -84,13 +84,13 @@ void main() {
       );
       expect(r.lockTheme.displayFont, 'Creepster');
       expect(r.homeTheme.displayFont, 'Creepster');
-      expect(r.homeTheme.bodyFont, 'Pacifico');
+      expect(r.homeTheme.bodyFont, 'Playfair Display');
     });
 
     test('size and colour', () {
       final r = resolve(
         whole('halloween-night').withClockFont(
-          pacifico,
+          playfair,
           at: at,
           size: ClockSize.large,
           color: ClockColor.fixed(const HexColor('#A970FF')),
@@ -101,7 +101,7 @@ void main() {
       expect(
         resolve(
           whole('halloween-night')
-              .withClockFont(pacifico, at: at, color: const ClockColor.text()),
+              .withClockFont(playfair, at: at, color: const ClockColor.text()),
         ).clockColor,
         r.lockTheme.palette.text,
       );
@@ -110,7 +110,7 @@ void main() {
 
   group('wallpaper', () {
     test('wallpaper only: another theme\'s scene and accent', () {
-      final look = whole('cozy-cabin').apply(
+      final look = whole('spider-night').apply(
         catalog,
         mockTheme('halloween-night'),
         ApplyOption.wallpaperOnly,
@@ -120,25 +120,26 @@ void main() {
       expect(r.wallpaperTheme.id, 'halloween-night');
       expect(r.wallpaperTheme.scene, SceneKind.halloween);
       expect(r.wallpaperAccent, const Color(0xFFFF8A2A));
-      // Clock and icons still Cozy Cabin's.
-      expect(r.lockTheme.displayFont, 'Caveat');
+      // Clock and icons still Spider Night's.
+      expect(r.lockTheme.displayFont, 'Bebas Neue');
     });
 
     test('a stand-alone wallpaper uses its own sky colours', () {
       final r = resolve(
-        whole('quiet-ink').withWallpaper(
-          WallpaperChoice.standalone(catalog.wallpaper('lanterns')!),
+        whole('halloween-night').withWallpaper(
+          WallpaperChoice.standalone(catalog.wallpaper('web-corner')!),
           at: at,
         ),
       );
-      expect(r.wallpaperTheme.id, 'lanterns');
+      expect(r.wallpaperTheme.id, 'web-corner');
       expect(r.wallpaperTheme.scene, isNull);
-      expect(r.wallpaperTheme.palette.background, const Color(0xFF1E1440));
+      // The bottom of its sky gradient, not Haunted Moon's palette.
+      expect(r.wallpaperTheme.palette.background, const Color(0xFF3A1030));
     });
 
     test('a built-in stand-alone wallpaper uses its painter', () {
       final r = resolve(
-        whole('quiet-ink').withWallpaper(
+        whole('spider-night').withWallpaper(
           WallpaperChoice.standalone(catalog.wallpaper('silent-night')!),
           at: at,
         ),
@@ -149,7 +150,7 @@ void main() {
 
   group('countdown', () {
     test('undated collections have none', () {
-      expect(resolve(whole('quiet-ink')).lockTheme.event, isNull);
+      expect(resolve(whole('spider-night')).lockTheme.event, isNull);
     });
 
     test('says "Happy Thingyan!" on every day it runs', () {

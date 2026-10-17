@@ -53,9 +53,9 @@ The user can also change each part on its own: a different wallpaper, clock font
 
 | | Built-in | Dashboard-made |
 |---|---|---|
-| Examples | Halloween, Christmas, Thingyan | Thadingyut, Minimal, Cozy Cabin, … |
+| Examples | Halloween, Christmas, Thingyan | Spider Night |
 | Scene drawn by | A Dart painter written for it | The generic `layers` engine, from JSON layers |
-| Icons | Painted by `ThemedIconPainter` | Each app's own logo on the pack's downloaded background tile; the per-app-type pictures are for store previews |
+| Icons | Painted by `ThemedIconPainter` | Each app's own logo on the pack's downloaded background tile |
 | Download | Nothing | Images and fonts, a few hundred KB to a few MB |
 
 ---
@@ -112,7 +112,7 @@ lib/
 ├── store/                    The store UI: 5-tab shell, screens, apply flow, state, widgets
 ├── render/                   Layers engine painter, downloaded images, fonts, icon shapes
 ├── scenes/                   Built-in scene painters + SceneView (animation)
-├── icons/                    Painted icon painter + app → glyph key matching
+├── icons/                    Painted icon painter + app → symbol matching
 ├── models/                   PhoneTheme: the drawing model the painters and overlays read
 ├── widgets/                  Phone previews, lock/home overlays, apply sheet, home dialog
 ├── services/                 Wallpaper, launcher and icon channels to Android
@@ -133,7 +133,7 @@ assets/
 
 tool/seed/                    Generates both catalogs (and the test fixture) from Dart
 docs/                         Theme API, dashboard, store plan + this guide
-test/                         Unit and widget tests; test/fixtures/ has the full 30-theme catalog
+test/                         Unit and widget tests, reading the mock catalog in assets/mock/
 ```
 
 Packages used ([pubspec.yaml](../pubspec.yaml)):
@@ -233,7 +233,7 @@ Theme files are fetched on demand (`repo.theme(id)`) and saved by `rev`, so a th
 
 Code: [lib/data/assets/](../lib/data/assets/).
 
-Dashboard-made themes need files: scene images, icon pictures and fonts. Every file is an `AssetRef` named by its **sha256**, so a file can never change under the same name.
+Dashboard-made themes need files: scene images, an icon tile and fonts. Every file is an `AssetRef` named by its **sha256**, so a file can never change under the same name.
 
 | Class | Job |
 |---|---|
@@ -272,7 +272,7 @@ AppliedLook
 
 Why copies instead of IDs? Because wallp Home and the live wallpaper must draw it **with no network and no catalog**, and a theme removed from the catalog must keep working on phones that applied it.
 
-Each change builds a **new** look from the current one, so untouched parts stay: `withWallpaper`, `withClockFont`, `withIconPack`, `withAccent`, `withVariant`. `look.assets` lists every file it needs (scene images, icon pictures, font files).
+Each change builds a **new** look from the current one, so untouched parts stay: `withWallpaper`, `withClockFont`, `withIconPack`, `withAccent`. `look.assets` lists every file it needs (scene images, the icon tile, font files).
 
 The theme detail page's Apply sheet has three options (`ApplyOption`): **Whole theme**, **Wallpaper only** (keeps icons and font) and **Clock font only**.
 
@@ -284,7 +284,7 @@ It also keeps the **pending look** (`pending_look`) for the home-app switch (sec
 
 ### 7.3 `LookController` ([look_controller.dart](../lib/look/look_controller.dart))
 
-Every way the store changes the look: `applyTheme`, `applyWallpaper`, `useThemeWallpaper`, `applyClockFont`, `applyIconPack`, `setAccent`, `setVariant`. Each one:
+Every way the store changes the look: `applyTheme`, `applyWallpaper`, `applyClockFont`, `applyIconPack`. Each one:
 
 1. Builds the next look.
 2. Pins its files as `incoming`, then **downloads everything it needs** (`prepare`). If that fails or is cancelled, it stops here: **the old look stays**.
@@ -599,9 +599,9 @@ Stores only **package names**: `pages: [[pkg, pkg, …], …]` and `dock: [pkg, 
 ### 13.6 Icons and names on wallp Home
 
 [launcher_icon.dart](../lib/launcher/launcher_icon.dart) picks, per app:
-1. The icon pack has a **picture** for the app's glyph key → the picture, clipped to the user's tile shape.
+1. A **downloaded** pack → the app's own logo (an adaptive icon's foreground layer; older icons whole) on the pack's background tile, clipped to the user's tile shape (`PackTileIcon`).
 2. A **painted** pack → `ThemedIcon` in the pack's style and shape (section 15).
-3. Otherwise → the app's own icon, tinted.
+3. Otherwise → the app's own icon.
 
 App names use the look's label colour (Theme / Accent / White / Dark / custom) with a shadow so they read on any wallpaper, in the theme's label font or the phone's own (`PhoneTheme.appNameStyle`).
 
@@ -642,25 +642,27 @@ Why draw a clock? Apps cannot restyle Android's own lock screen clock, so wallp 
 
 ## 15. Step 12 — Themed app icons and fonts
 
-### 15.1 Which glyph for which app ([app_glyphs.dart](../lib/icons/app_glyphs.dart))
+### 15.1 Which symbol for which app ([app_glyphs.dart](../lib/icons/app_glyphs.dart))
 
-A list of rules matches an app to a **glyph key** (`phone`, `messages`, `camera`, `browser`, … 20 in all) by package name fragment or exact label:
+Painted packs draw a symbol for common apps. A list of rules matches an app to one by package name fragment or exact label:
 
-- `whatsapp`, `telegram`, `viber` → `messages`
-- `dialer` or label "phone" → `phone`
-- `chrome`, `firefox`, `browser` → `browser`
+- `whatsapp`, `telegram`, `viber` → a chat symbol
+- `dialer` or label "phone" → a phone
+- `chrome`, `firefox`, `browser` → a globe
 - …first match wins, so specific rules come first.
 
-No match, or the pack has no picture for that key → the app's own icon, tinted. The same keys name the pictures in a downloaded icon pack.
+No match → the app's own icon, tinted. Downloaded packs don't use symbols: every app keeps its logo.
 
 ### 15.2 Two kinds of icon pack
 
 | Kind | Drawn by |
 |---|---|
 | `painted` (built-in packs) | [ThemedIconPainter](../lib/icons/themed_icon_painter.dart) in the Halloween / Christmas / Thingyan style: glowing tile, decorations (cobweb, snow, padauk flowers), accent ring, and the glyph in the accent only if contrast is at least 3:1 |
-| `images` (dashboard packs) | One downloaded picture per glyph key ([image_icons.dart](../lib/render/image_icons.dart)), decoded once by `SceneAssets` |
+| `images` (dashboard packs) | One downloaded background tile ([image_icons.dart](../lib/render/image_icons.dart)), decoded once by `SceneAssets`, with each app's own logo on it. The store previews the phone's real apps the same way; sample apps (no real icon) show a symbol |
 
-Both follow the user's **tile shape** (squircle, circle, square, leaf; [icon_shape.dart](../lib/render/icon_shape.dart)). Pictures are clipped to it.
+Both follow the user's **tile shape** (squircle, circle, square, leaf; [icon_shape.dart](../lib/render/icon_shape.dart)). The tile is clipped to it and the app draws the rim.
+
+The **icon pack page** has no Apply button: tapping a shape, name colour or font puts the pack on wallp Home at once, and the page downloads the pack's tile (a few dozen KB) as soon as it opens.
 
 **Two ways icons reach the phone:**
 
@@ -723,7 +725,7 @@ flutter test
 | `live_wallpaper_test.dart` | Live wallpaper widget from the snapshot alone |
 | `scene_test.dart`, `wallpaper_renderer_test.dart`, `themed_icon_test.dart`, `icon_pack_test.dart`, `dev_settings_test.dart` | Painters, PNG rendering, icons, Developer settings |
 
-The tests read the **full 30-theme catalog** in [test/fixtures/catalog/v1/](../test/fixtures/catalog/v1/), not the small demo the app shows.
+The tests read the same mock catalog the app shows, in [assets/mock/catalog/v1/](../assets/mock/catalog/v1/). Where those four themes have no example of a feature (a still `layers` scene, an `@accent` layer, a variant on a `layers` theme), the test edits a copy of Spider Night's JSON to make one.
 
 Many classes accept fake dependencies in their constructors (e.g. `CatalogRepository(source: …, store: …, clock: …)`, `LookController(prepare: …, pin: …)`, `LiveWallpaperApp(clock: …)`). This is **dependency injection**, so tests can pass fakes instead of the network, the disk or Android.
 

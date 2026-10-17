@@ -1,6 +1,7 @@
-// The small catalog the app shows (assets/mock/catalog/v1): three complete
-// themes and three wallpapers, for testing the app step by step, plus the
-// script-made Spider Night kit (tool/seed/spider_night.dart).
+// What's in the catalog the app shows (assets/mock/catalog/v1): three
+// complete painted themes with their wallpapers, plus the script-made
+// Spider Night kit (tool/seed/spider_night.dart). seed_catalog_test.dart
+// checks its files, hashes and references.
 import 'dart:convert';
 import 'dart:io';
 
@@ -51,57 +52,18 @@ void main() {
     );
   });
 
-  test('Spider Night is live, with downloaded icons and scene pictures', () {
+  test('Spider Night is live, with a downloaded icon tile and scene '
+      'pictures', () {
     final theme = catalog.theme('spider-night')!;
     expect(theme.isBuiltIn, isFalse);
     expect(theme.isLive, isTrue);
     expect(theme.scene.assets, hasLength(2));
     final pack = catalog.iconPack(theme.iconPackId)!;
     expect(pack.kind, IconPackKind.images);
-    expect(pack.glyphs.keys, unorderedEquals(GlyphKeys.all));
-    expect(pack.background, isNotNull, reason: 'apps without an icon');
+    // Just the tile: every app keeps its own logo on it.
+    expect(pack.assets, [pack.background]);
     final still = catalog.wallpapers.firstWhere((w) => w.id == 'web-corner');
     expect(still.scene!.isLive, isFalse);
-  });
-
-  test('nothing points at what was cut', () {
-    expect(catalog.issues, isEmpty);
-    expect(catalog.validate(), isEmpty);
-    expect(catalog.banners, isNotEmpty);
-  });
-
-  test('each theme is complete: painter, icons, fonts, full file', () {
-    for (final t in catalog.themes) {
-      expect(
-        catalog.iconPack(t.iconPackId)?.kind,
-        t.isBuiltIn ? IconPackKind.painted : IconPackKind.images,
-        reason: t.id,
-      );
-      final detail = ThemeDetail.fromJson(
-        JsonReader.of(_read('themes/${t.id}.${t.rev}.json'), t.id),
-      );
-      expect(
-        catalog.assetsFor(detail),
-        isNotEmpty,
-        reason: 'its fonts download',
-      );
-      expect(detail.downloadBytes, greaterThan(0), reason: t.id);
-    }
-  });
-
-  test('every file is there, with the right hash, and nothing extra', () {
-    final used = <AssetRef>{
-      for (final f in catalog.fonts) ...f.files.map((f) => f.asset),
-      for (final p in catalog.iconPacks) ...p.assets,
-      for (final t in catalog.themes) ...t.scene.assets,
-      for (final w in catalog.wallpapers) ...?w.scene?.assets,
-    };
-    for (final ref in used) {
-      final bytes = File('$_dir/${ref.url}').readAsBytesSync();
-      expect(sha256.convert(bytes).toString(), ref.sha256, reason: ref.url);
-    }
-    final onDisk = Directory('$_dir/assets').listSync().length;
-    expect(onDisk, used.length);
   });
 
   test('the app loads it through its own asset bundle', () async {

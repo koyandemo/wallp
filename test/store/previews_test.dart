@@ -84,7 +84,6 @@ void main() {
     await h.pump(
       tester,
       home: const IconPackDetailScreen(packId: 'spooky-glow'),
-      demo: true,
     );
     tester.view.physicalSize = const Size(320 * 3, 2532);
     await settle(tester);

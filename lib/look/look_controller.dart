@@ -9,7 +9,7 @@ import 'applied_look.dart';
 import 'look_store.dart';
 
 /// Gets everything [next] needs onto the phone before it's applied, e.g.
-/// downloads its files, showing [label] ("Cozy Cabin") while it works.
+/// downloads its files, showing [label] ("Spider Night") while it works.
 typedef PrepareLook = Future<void> Function(AppliedLook next, String label);
 
 /// Keeps [files] on the phone for [owner] (`applied` or `pending`),
@@ -17,8 +17,8 @@ typedef PrepareLook = Future<void> Function(AppliedLook next, String label);
 typedef PinFiles = Future<void> Function(String owner, Set<AssetRef> files);
 
 /// Every way the store changes what the phone looks like: apply a theme
-/// (whole, wallpaper only or clock font only), a wallpaper, a clock font,
-/// an icon pack, an accent or a colour variant.
+/// (whole, wallpaper only or clock font only, with its accent and colour
+/// variant), a wallpaper, a clock font or an icon pack.
 ///
 /// Each change builds the next [AppliedLook] from the current one, so the
 /// parts the user didn't touch stay as they were. Changes run one at a
@@ -125,14 +125,6 @@ class LookController extends ChangeNotifier {
         );
       });
 
-  /// Back to the theme's own wallpaper.
-  Future<AppliedLook> useThemeWallpaper() => _change(
-    (current, _, at) async => (
-      current.withWallpaper(WallpaperChoice.followTheme, at: at),
-      current.theme.name.en,
-    ),
-  );
-
   /// A clock font from the Fonts screen, with the Font detail page's
   /// options (unchanged ones keep their current value).
   Future<AppliedLook> applyClockFont(
@@ -175,16 +167,6 @@ class LookController extends ChangeNotifier {
       pack.name.en,
     );
   });
-
-  Future<AppliedLook> setAccent(Accent accent) => _change(
-    (current, _, at) async =>
-        (current.withAccent(accent, at: at), current.theme.name.en),
-  );
-
-  Future<AppliedLook> setVariant(String? variantId) => _change(
-    (current, _, at) async =>
-        (current.withVariant(variantId, at: at), current.theme.name.en),
-  );
 
   Future<AppliedLook> _change(
     Future<(AppliedLook, String)> Function(

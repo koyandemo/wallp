@@ -25,7 +25,7 @@ class SceneAssets {
   final AssetCache _cache;
   final _images = <String, Future<ui.Image?>>{};
 
-  /// How many decoded pictures to keep; icon packs have 20.
+  /// How many decoded pictures to keep.
   static const _keep = 64;
 
   /// The file's bytes, or null if it isn't on the phone.

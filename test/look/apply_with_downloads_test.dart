@@ -64,8 +64,8 @@ void main() {
   }
 
   test('apply downloads everything, then applies and pins it', () async {
-    final look = await looks.applyTheme('cozy-cabin');
-    expect(downloads.current!.label, 'Cozy Cabin');
+    final look = await looks.applyTheme('spider-night');
+    expect(downloads.current!.label, 'Spider Night');
     expect(downloads.current!.state, DownloadState.done);
     expect(await cache.missing(look.assets), isEmpty);
     expect(await cache.pinned(), {for (final a in look.assets) a.sha256});
@@ -74,7 +74,7 @@ void main() {
   test('offline before downloading: nothing is applied', () async {
     source.offline = true;
     await expectLater(
-      looks.applyTheme('cozy-cabin'),
+      looks.applyTheme('spider-night'),
       throwsA(isA<DownloadFailedException>()),
     );
     expect(looks.isApplied, isFalse);
@@ -83,58 +83,55 @@ void main() {
 
   test('once downloaded, it applies and draws with no internet', () async {
     await useRoomyCache();
-    await looks.applyTheme('cozy-cabin');
-    await looks.applyTheme('ember');
-    // Go offline; Cozy Cabin's theme file and assets were cached before.
+    await looks.applyTheme('spider-night');
+    await looks.applyTheme('halloween-night');
+    // Go offline; Spider Night's theme file and assets were cached before.
     source.offline = true;
     source.requests.clear();
-    final again = await looks.applyTheme('cozy-cabin');
-    expect(again.theme.id, 'cozy-cabin');
+    final again = await looks.applyTheme('spider-night');
+    expect(again.theme.id, 'spider-night');
     expect(source.requests.keys.where((p) => p.startsWith('assets/')), isEmpty);
   });
 
   test(
     'the applied look\'s files survive a clean-up; old ones don\'t',
     () async {
-      final cabin = await looks.applyTheme('cozy-cabin');
-      final ember = await looks.applyTheme('ember');
+      final spider = await looks.applyTheme('spider-night');
+      final haunted = await looks.applyTheme('halloween-night');
       // limitBytes is 0: everything not pinned is gone.
-      expect(await cache.missing(ember.assets), isEmpty);
-      final onlyCabin = cabin.assets.difference(ember.assets);
-      expect(await cache.missing(onlyCabin), hasLength(onlyCabin.length));
+      expect(await cache.missing(haunted.assets), isEmpty);
+      final onlySpider = spider.assets.difference(haunted.assets);
+      expect(await cache.missing(onlySpider), hasLength(onlySpider.length));
     },
   );
 
   test(
     'a pending apply\'s files are kept until wallp Home finishes it',
     () async {
-      await looks.applyTheme('cozy-cabin');
-      final pending = await looks.applyTheme(
-        'festival-of-lights',
-        asPending: true,
-      );
+      await looks.applyTheme('spider-night');
+      final pending = await looks.applyTheme('christmas-eve', asPending: true);
       expect(await cache.missing(pending.assets), isEmpty);
-      // The applied look is still Cozy Cabin, and still pinned too.
-      expect(looks.look!.theme.id, 'cozy-cabin');
+      // The applied look is still Spider Night, and still pinned too.
+      expect(looks.look!.theme.id, 'spider-night');
       expect(await cache.missing(looks.look!.assets), isEmpty);
     },
   );
 
   test('a cancelled apply changes nothing, and resumes next time', () async {
     source.conditions = const NetworkConditions(bytesPerSecond: 256 * 1024);
-    final apply = looks.applyTheme('festival-of-lights');
+    final apply = looks.applyTheme('christmas-eve');
     await Future<void>.delayed(const Duration(milliseconds: 300));
     downloads.current!.cancel();
     await expectLater(apply, throwsA(isA<DownloadCancelledException>()));
     expect(looks.isApplied, isFalse);
 
     source.conditions = NetworkConditions.fast;
-    final look = await looks.applyTheme('festival-of-lights');
-    expect(look.theme.id, 'festival-of-lights');
+    final look = await looks.applyTheme('christmas-eve');
+    expect(look.theme.id, 'christmas-eve');
   });
 
   test('repair() re-downloads a pinned file the phone lost', () async {
-    final look = await looks.applyTheme('cozy-cabin');
+    final look = await looks.applyTheme('spider-night');
     final lost = look.assets.first;
     await (await cache.fileFor(lost)).delete();
 
@@ -148,13 +145,13 @@ void main() {
     test(
       'lists downloaded themes; the applied one can\'t be deleted',
       () async {
-        await looks.applyTheme('cozy-cabin');
+        await looks.applyTheme('spider-night');
         final list = await downloadedThemes(
           catalog: catalog,
           cache: cache,
           applied: looks.look,
         );
-        expect(list.map((d) => d.theme.id), ['cozy-cabin']);
+        expect(list.map((d) => d.theme.id), ['spider-night']);
         expect(list.single.isApplied, isTrue);
         expect(await deleteDownload(list.single, cache), 0);
         expect(await cache.missing(list.single.files), isEmpty);
@@ -162,42 +159,44 @@ void main() {
     );
 
     test('a theme no longer applied can be deleted', () async {
-      // Room for both, so switching doesn't clean Cabin up by itself.
+      // Room for both, so switching doesn't clean Spider Night up by itself.
       await useRoomyCache();
-      await looks.applyTheme('cozy-cabin');
-      await looks.applyTheme('ember');
+      await looks.applyTheme('spider-night');
+      await looks.applyTheme('halloween-night');
 
       final list = await downloadedThemes(
         catalog: catalog,
         cache: cache,
         applied: looks.look,
       );
-      final cabin = list.firstWhere((d) => d.theme.id == 'cozy-cabin');
-      expect(cabin.isApplied, isFalse);
-      expect(await deleteDownload(cabin, cache), greaterThan(0));
+      final spider = list.firstWhere((d) => d.theme.id == 'spider-night');
+      expect(spider.isApplied, isFalse);
+      expect(await deleteDownload(spider, cache), greaterThan(0));
       final after = await downloadedThemes(
         catalog: catalog,
         cache: cache,
         applied: looks.look,
       );
-      expect(after.map((d) => d.theme.id), ['ember']);
+      // Built-in themes (the applied Haunted Moon) aren't listed: they work
+      // with no download.
+      expect(after, isEmpty);
     });
   });
 
   test('the size shown before Apply is what\'s actually missing', () async {
-    final detail = await catalog.theme('gold-ornaments');
+    final detail = await catalog.theme('thingyan-water');
     final files = catalog.catalog.assetsFor(detail);
     expect(await cache.missingBytes(files), detail.downloadBytes);
-    await looks.applyTheme('gold-ornaments');
+    await looks.applyTheme('thingyan-water');
     expect(await cache.missingBytes(files), 0);
   });
 
   test('a wallpaper-only apply downloads only that theme\'s scene', () async {
-    await looks.applyTheme('ember');
+    await looks.applyTheme('halloween-night');
     source.requests.clear();
-    await looks.applyTheme('cozy-cabin', option: ApplyOption.wallpaperOnly);
+    await looks.applyTheme('spider-night', option: ApplyOption.wallpaperOnly);
     final fetched = source.requests.keys.where((p) => p.startsWith('assets/'));
-    // The hills image and Cabin's fonts, not its 20 icon pictures.
+    // Spider Night's scene pictures and fonts, not its 21 icon pictures.
     expect(fetched.length, lessThan(10));
   });
 }

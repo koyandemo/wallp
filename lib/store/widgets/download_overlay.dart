@@ -6,7 +6,7 @@ import '../../data/assets/download_manager.dart';
 import '../logic/queries.dart';
 
 /// The download progress card, above every screen while a download runs:
-/// "Downloading Cozy Cabin · 0.4 of 0.8 MB", a bar, and Cancel. Failures
+/// "Downloading Spider Night · 0.4 of 0.8 MB", a bar, and Cancel. Failures
 /// and cancels are reported by the apply flow's toast instead.
 class DownloadOverlay extends StatelessWidget {
   const DownloadOverlay({super.key, required this.child});

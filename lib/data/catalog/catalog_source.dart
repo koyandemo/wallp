@@ -4,7 +4,7 @@ import 'dart:typed_data';
 /// Where catalog files come from: the CDN later, the bundled mock now.
 ///
 /// Paths are relative to the catalog base (`/catalog/v1/`), exactly as the
-/// catalog writes them: `manifest.json`, `themes/ember.1.json`,
+/// catalog writes them: `manifest.json`, `themes/spider-night.3.json`,
 /// `assets/<sha256>.png`. Swapping the source is all it takes to move from
 /// mock data to the real API; caching, checks and fallbacks live in
 /// CatalogRepository and don't change.

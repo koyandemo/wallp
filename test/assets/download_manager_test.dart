@@ -47,7 +47,7 @@ void main() {
   late Directory dir;
   late AssetCache cache;
   late _Source source;
-  late List<AssetRef> cabin;
+  late List<AssetRef> spider;
 
   DownloadManager manager({int parallel = 3}) => DownloadManager(
     source: source,
@@ -60,8 +60,8 @@ void main() {
     dir = Directory.systemTemp.createTempSync('wallp_dl_');
     cache = AssetCache(dir);
     source = _Source();
-    // Cozy Cabin: hills, 20 icon pictures and two fonts (~0.75 MB).
-    cabin = mockCatalog().assetsFor(mockTheme('cozy-cabin'));
+    // Spider Night: two scene pictures, 21 icon pictures and two fonts.
+    spider = mockCatalog().assetsFor(mockTheme('spider-night'));
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
@@ -78,38 +78,43 @@ void main() {
 
   test('downloads every file, with progress that adds up', () async {
     final m = manager();
-    final task = await m.start(cabin, label: 'Cozy Cabin');
+    final task = await m.start(spider, label: 'Spider Night');
     final seen = <int>[];
     task.addListener(() => seen.add(task.receivedBytes));
     await task.done;
 
     expect(task.state, DownloadState.done);
-    expect(task.totalBytes, total(cabin));
+    expect(task.totalBytes, total(spider));
     expect(task.receivedBytes, task.totalBytes);
-    expect(task.doneFiles, cabin.length);
+    expect(task.doneFiles, spider.length);
     expect(task.progress, 1);
-    expect(seen.length, greaterThan(cabin.length), reason: 'chunk by chunk');
-    expect(await cache.missing(cabin), isEmpty);
+    expect(seen.length, greaterThan(spider.length), reason: 'chunk by chunk');
+    expect(await cache.missing(spider), isEmpty);
     expect(partFiles(), isEmpty);
   });
 
   test('files already on the phone aren\'t downloaded again', () async {
-    await manager().ensure(cabin, label: 'Cozy Cabin');
+    await manager().ensure(spider, label: 'Spider Night');
     source.requests.clear();
-    final task = await manager().start(cabin, label: 'Cozy Cabin');
+    final task = await manager().start(spider, label: 'Spider Night');
     expect(task.state, DownloadState.done);
     expect(task.totalBytes, 0);
     expect(source.requests, isEmpty);
   });
 
   test('only what\'s missing counts toward the total', () async {
-    final cocoa = mockCatalog().assetsFor(mockTheme('cocoa-night'));
-    await manager().ensure(cabin, label: 'Cozy Cabin');
-    // Cocoa Night shares the hills and the Candy Cane icons.
-    final task = await manager().start(cocoa, label: 'Cocoa Night');
-    final shared = cocoa.where(cabin.contains);
+    final catalog = mockCatalog();
+    // Halloween with the Web Corner wallpaper: shares Spider Night's scene
+    // pictures and its Space Grotesk font.
+    final other = {
+      ...catalog.assetsFor(mockTheme('halloween-night')),
+      ...catalog.wallpaper('web-corner')!.scene!.assets,
+    }.toList();
+    await manager().ensure(spider, label: 'Spider Night');
+    final task = await manager().start(other, label: 'Haunted Moon');
+    final shared = other.where(spider.contains);
     expect(shared, isNotEmpty);
-    expect(task.totalBytes, total(cocoa) - total(shared));
+    expect(task.totalBytes, total(other) - total(shared));
     await task.done;
   });
 
@@ -119,14 +124,14 @@ void main() {
       source.conditions = NetworkConditions.offlineNow;
       final m = manager();
       await expectLater(
-        m.ensure(cabin, label: 'Cozy Cabin'),
+        m.ensure(spider, label: 'Spider Night'),
         throwsA(
           isA<DownloadFailedException>()
               .having((e) => e.isOffline, 'isOffline', isTrue)
               .having(
                 (e) => e.message,
                 'message',
-                "Couldn't download Cozy Cabin. Check your connection.",
+                "Couldn't download Spider Night. Check your connection.",
               ),
         ),
       );
@@ -138,31 +143,31 @@ void main() {
   test(
     'a brief server error is retried and the download still finishes',
     () async {
-      source.failFirst[cabin.first.url] = 2;
-      await manager().ensure(cabin, label: 'Cozy Cabin');
-      expect(source.requests[cabin.first.url], 3);
-      expect(await cache.missing(cabin), isEmpty);
+      source.failFirst[spider.first.url] = 2;
+      await manager().ensure(spider, label: 'Spider Night');
+      expect(source.requests[spider.first.url], 3);
+      expect(await cache.missing(spider), isEmpty);
     },
   );
 
   test(
     'a file that keeps failing fails the task; the rest stay cached',
     () async {
-      final broken = cabin.first;
+      final broken = spider.first;
       source.failFirst[broken.url] = 99;
       final m = manager();
-      final task = await m.start(cabin, label: 'Cozy Cabin');
+      final task = await m.start(spider, label: 'Spider Night');
       await expectLater(task.done, throwsA(isA<DownloadFailedException>()));
       expect(task.receivedBytes, lessThanOrEqualTo(task.totalBytes));
 
       // Trying again continues where it stopped: only what's missing.
       source.failFirst.clear();
       source.requests.clear();
-      final retry = await m.start(cabin, label: 'Cozy Cabin');
+      final retry = await m.start(spider, label: 'Spider Night');
       await retry.done;
-      expect(retry.files.length, lessThan(cabin.length));
+      expect(retry.files.length, lessThan(spider.length));
       expect(retry.files, contains(broken));
-      expect(await cache.missing(cabin), isEmpty);
+      expect(await cache.missing(spider), isEmpty);
     },
   );
 
@@ -170,7 +175,7 @@ void main() {
     source.conditions = const NetworkConditions(corrupt: true);
     final m = manager();
     await expectLater(
-      m.ensure(cabin, label: 'Cozy Cabin'),
+      m.ensure(spider, label: 'Spider Night'),
       throwsA(
         isA<DownloadFailedException>().having(
           (e) => e.cause,
@@ -179,14 +184,14 @@ void main() {
         ),
       ),
     );
-    expect(await cache.missing(cabin), hasLength(cabin.length));
+    expect(await cache.missing(spider), hasLength(spider.length));
     expect(source.requests.values.every((n) => n == 1), isTrue);
   });
 
   test('a connection dropped half way gives back its progress', () async {
     source.conditions = const NetworkConditions(dropAfter: 0.5);
     final m = manager(parallel: 1);
-    final task = await m.start(cabin, label: 'Cozy Cabin');
+    final task = await m.start(spider, label: 'Spider Night');
     await expectLater(task.done, throwsA(isA<DownloadFailedException>()));
     // Nothing of the dropped file is counted or left on disk.
     expect(task.receivedBytes, 0);
@@ -196,15 +201,18 @@ void main() {
   test('cancel stops the download; nothing half done is left', () async {
     source.conditions = const NetworkConditions(bytesPerSecond: 256 * 1024);
     final m = manager(parallel: 1);
-    final task = await m.start(cabin, label: 'Cozy Cabin');
+    final task = await m.start(spider, label: 'Spider Night');
     await Future<void>.delayed(const Duration(milliseconds: 400));
     task.cancel();
     await expectLater(task.done, throwsA(isA<DownloadCancelledException>()));
     expect(task.state, DownloadState.cancelled);
-    expect(task.doneFiles, lessThan(cabin.length));
+    expect(task.doneFiles, lessThan(spider.length));
     expect(partFiles(), isEmpty);
     // Finished files are kept for next time.
-    expect((await cache.missing(cabin)).length, cabin.length - task.doneFiles);
+    expect(
+      (await cache.missing(spider)).length,
+      spider.length - task.doneFiles,
+    );
   });
 
   test('downloads at most [parallel] files at once', () async {
@@ -212,15 +220,15 @@ void main() {
     source.conditions = const NetworkConditions(
       latency: Duration(milliseconds: 20),
     );
-    await manager(parallel: 2).ensure(cabin, label: 'Cozy Cabin');
+    await manager(parallel: 2).ensure(spider, label: 'Spider Night');
     expect(source.maxRunning, 2);
   });
 
   test('asking twice while it runs shares one download', () async {
     source.conditions = const NetworkConditions(bytesPerSecond: 1024 * 1024);
     final m = manager();
-    final a = await m.start(cabin, label: 'Cozy Cabin');
-    final b = await m.start(cabin.take(5), label: 'Cozy Cabin');
+    final a = await m.start(spider, label: 'Spider Night');
+    final b = await m.start(spider.take(5), label: 'Spider Night');
     expect(identical(a, b), isTrue);
     await a.done;
     expect(source.requests.values.every((n) => n == 1), isTrue);

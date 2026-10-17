@@ -31,19 +31,8 @@ class LauncherIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final own = _OwnIcon(app: app, size: size);
     // A downloaded pack: every app keeps its own logo, on the pack's tile.
-    // Only previews, whose sample apps have no icon, show the pack's
-    // pictures.
     if (theme.imageIcons case final pack?) {
-      final framed = PackFallbackIcon(pack: pack, app: app, size: size);
-      final picture = app.icon == null ? pack.pictureFor(app.glyphKey) : null;
-      if (picture == null) return framed;
-      return PackPictureIcon(
-        picture: picture,
-        shape: pack.shape,
-        size: size,
-        placeholder: framed,
-        ring: pack.tile == null ? null : pack.ring,
-      );
+      return PackTileIcon(pack: pack, app: app, size: size);
     }
     final style = theme.iconStyle;
     if (theme.hasIconPack && style != null) {
@@ -78,11 +67,12 @@ class _OwnIcon extends StatelessWidget {
   }
 }
 
-/// An app under a downloaded pack: its own logo on the pack's background
-/// picture, or, without one (or until it loads), on the pack's tile colour.
-/// Clipped to the user's tile shape and ringed in the pack's ring colour.
-class PackFallbackIcon extends StatefulWidget {
-  const PackFallbackIcon({
+/// An app under a downloaded pack: its own logo (a sample app in a preview:
+/// its symbol) on the pack's background picture, or, until that loads, on
+/// the pack's tile colour. Clipped to the user's tile shape and ringed in
+/// the pack's ring colour.
+class PackTileIcon extends StatefulWidget {
+  const PackTileIcon({
     super.key,
     required this.pack,
     required this.app,
@@ -94,21 +84,29 @@ class PackFallbackIcon extends StatefulWidget {
   final double size;
 
   @override
-  State<PackFallbackIcon> createState() => _PackFallbackIconState();
+  State<PackTileIcon> createState() => _PackTileIconState();
 }
 
-class _PackFallbackIconState extends State<PackFallbackIcon> {
+class _PackTileIconState extends State<PackTileIcon> {
   ui.Image? _background;
   AssetRef? _loading;
+  bool _inFlight = false;
 
+  /// Reads the tile picture from the phone. Until it's there, every rebuild
+  /// looks again, so a preview picks it up once it has downloaded.
   void _load() {
     final wanted = widget.pack.background;
-    if (_loading == wanted) return;
-    _loading = wanted;
-    _background = null;
-    if (wanted == null) return;
+    if (_loading != wanted) {
+      _loading = wanted;
+      _background = null;
+    }
+    if (wanted == null || _background != null || _inFlight) return;
+    _inFlight = true;
     SceneAssets.of(context).image(wanted).then((img) {
-      if (mounted && _loading == wanted) setState(() => _background = img);
+      _inFlight = false;
+      if (mounted && _loading == wanted && img != null) {
+        setState(() => _background = img);
+      }
     });
   }
 
@@ -118,82 +116,23 @@ class _PackFallbackIconState extends State<PackFallbackIcon> {
     final pack = widget.pack;
     final size = widget.size;
     final background = _background;
-    final icon = widget.app.icon;
+    final app = widget.app;
     return IconShapeTile(
       shape: pack.shape,
       size: size,
       ring: pack.tile == null ? null : pack.ring,
-      child: icon == null && background == null
-          ? Icon(Icons.apps_rounded, size: size * 0.55, color: Colors.white)
-          : CustomPaint(
-              size: Size.square(size),
-              painter: PackFallbackPainter(
-                pack: pack,
-                appIcon: icon,
-                logo: widget.app.logo,
-                background: background,
-                // The size of the pack's own glyphs, so its art shows around.
-                iconScale: background == null ? 0.6 : 0.5,
-              ),
-            ),
-    );
-  }
-}
-
-/// A downloaded icon-pack picture, clipped to the user's tile shape and
-/// ringed in [ring]. Shows [placeholder] until the picture loads, or if it
-/// can't.
-class PackPictureIcon extends StatefulWidget {
-  const PackPictureIcon({
-    super.key,
-    required this.picture,
-    required this.shape,
-    required this.size,
-    required this.placeholder,
-    this.ring,
-  });
-
-  final AssetRef picture;
-  final IconShape shape;
-  final double size;
-  final Widget placeholder;
-
-  /// Null = no rim (packs without a tile).
-  final Color? ring;
-
-  @override
-  State<PackPictureIcon> createState() => _PackPictureIconState();
-}
-
-class _PackPictureIconState extends State<PackPictureIcon> {
-  ui.Image? _image;
-  AssetRef? _loading;
-
-  void _load() {
-    if (_loading == widget.picture) return;
-    _loading = widget.picture;
-    _image = null;
-    final wanted = widget.picture;
-    SceneAssets.of(context).image(wanted).then((img) {
-      if (mounted && _loading == wanted) setState(() => _image = img);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _load();
-    final image = _image;
-    if (image == null) return widget.placeholder;
-    final s = widget.size;
-    final picture = SizedBox.square(
-      dimension: s,
-      child: RawImage(image: image, filterQuality: FilterQuality.medium),
-    );
-    return IconShapeTile(
-      shape: widget.shape,
-      size: s,
-      ring: widget.ring,
-      child: picture,
+      child: CustomPaint(
+        size: Size.square(size),
+        painter: PackTilePainter(
+          pack: pack,
+          appIcon: app.icon,
+          logo: app.logo,
+          symbol: app.glyph ?? Icons.apps_rounded,
+          background: background,
+          // Half the tile, so the pack's art shows around the logo.
+          iconScale: background == null ? 0.6 : 0.5,
+        ),
+      ),
     );
   }
 }

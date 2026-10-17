@@ -52,7 +52,10 @@ void main() {
     });
 
     test('carries every font it draws with, and nothing else', () {
-      expect(whole('cozy-cabin').fonts.keys.toSet(), {'caveat', 'dm-sans'});
+      expect(whole('spider-night').fonts.keys.toSet(), {
+        'bebas-neue',
+        'space-grotesk',
+      });
     });
 
     test('rejects a variant the theme doesn\'t have', () {
@@ -64,22 +67,22 @@ void main() {
   });
 
   group('partial applies keep everything else', () {
-    final base = whole('cozy-cabin');
+    final base = whole('spider-night');
 
     test('wallpaper only: another theme\'s scene, same icons and clock', () {
       final next = base.apply(
         catalog,
-        mockTheme('gold-ornaments'),
+        mockTheme('christmas-eve'),
         ApplyOption.wallpaperOnly,
         at: at,
-        variantId: 'navy',
+        variantId: 'berry',
       );
-      expect(next.theme.id, 'cozy-cabin');
+      expect(next.theme.id, 'spider-night');
       expect(next.icons.pack.id, base.icons.pack.id);
       expect(next.clock.fontId, base.clock.fontId);
-      expect(next.wallpaper.theme!.id, 'gold-ornaments');
-      expect(next.wallpaper.variantId, 'navy');
-      expect(next.wallpaper.accent!.primary.hex, '#F2B33D');
+      expect(next.wallpaper.theme!.id, 'christmas-eve');
+      expect(next.wallpaper.variantId, 'berry');
+      expect(next.wallpaper.accent!.primary.hex, '#B8862E');
       // The other theme's fonts come along for its scene.
       expect(next.fonts.keys, containsAll(['playfair-display', 'dm-sans']));
     });
@@ -98,7 +101,7 @@ void main() {
         ApplyOption.clockFontOnly,
         at: at,
       );
-      expect(next.theme.id, 'cozy-cabin');
+      expect(next.theme.id, 'spider-night');
       expect(next.clock.fontId, 'creepster');
       expect(next.clock.size, ClockSize.large);
       expect(next.clock.color.hex?.hex, '#A970FF');
@@ -108,21 +111,21 @@ void main() {
 
     test('an icon pack, with the user\'s tile shape', () {
       final next = base.withIconPack(
-        catalog.iconPack('mono-ember')!,
+        catalog.iconPack('gold-ornament')!,
         at: at,
         shape: IconShape.leaf,
       );
-      expect(next.icons.pack.id, 'mono-ember');
+      expect(next.icons.pack.id, 'gold-ornament');
       expect(next.icons.shape, IconShape.leaf);
-      expect(next.theme.id, 'cozy-cabin');
+      expect(next.theme.id, 'spider-night');
     });
 
     test('a stand-alone wallpaper, then back to the theme\'s own', () {
       final next = base.withWallpaper(
-        WallpaperChoice.standalone(catalog.wallpaper('lanterns')!),
+        WallpaperChoice.standalone(catalog.wallpaper('harvest-moon')!),
         at: at,
       );
-      expect(next.wallpaper.wallpaper!.id, 'lanterns');
+      expect(next.wallpaper.wallpaper!.id, 'harvest-moon');
       expect(
         next
             .withWallpaper(WallpaperChoice.followTheme, at: at)
@@ -132,56 +135,47 @@ void main() {
       );
     });
 
-    test('changing variant resets the accent unless asked to keep it', () {
-      final custom = Accent(
-        id: 'mine-1',
-        name: LocalizedText.en('Mine 1'),
-        colors: const [HexColor('#FF7A1A'), HexColor('#E0245E')],
-        angle: 135,
-      );
-      final picked = base.withAccent(custom, at: at);
-      expect(picked.withVariant('snowed-in', at: at).accent.id, 'snow');
-      expect(
-        picked.withVariant('snowed-in', at: at, keepAccent: true).accent.id,
-        'mine-1',
-      );
-    });
-
     test('fonts nothing uses any more are dropped', () {
-      final a = base.withClockFont(catalog.font('pacifico')!, at: at);
-      final b = a.withClockFont(catalog.font('bebas-neue')!, at: at);
-      expect(a.fonts.keys, contains('pacifico'));
-      expect(b.fonts.keys, isNot(contains('pacifico')));
-      expect(b.fonts.keys, contains('bebas-neue'));
+      final a = base.withClockFont(catalog.font('playfair-display')!, at: at);
+      final b = a.withClockFont(catalog.font('creepster')!, at: at);
+      expect(a.fonts.keys, contains('playfair-display'));
+      expect(b.fonts.keys, isNot(contains('playfair-display')));
+      expect(b.fonts.keys, contains('creepster'));
     });
   });
 
   group('saved form', () {
     test('every part survives a round trip', () {
-      final look = whole('cozy-cabin', variantId: 'snowed-in')
-          .apply(catalog, mockTheme('ember'), ApplyOption.wallpaperOnly, at: at)
+      final look = whole('christmas-eve', variantId: 'midnight')
+          .apply(
+            catalog,
+            mockTheme('spider-night'),
+            ApplyOption.wallpaperOnly,
+            at: at,
+          )
           .withClockFont(catalog.font('padauk')!, at: at, size: ClockSize.small)
-          .withIconPack(catalog.iconPack('lantern-light')!, at: at);
+          .withIconPack(catalog.iconPack('web-slinger')!, at: at);
       expect(jsonEncode(roundTrip(look).toJson()), jsonEncode(look.toJson()));
     });
 
     test('a stand-alone wallpaper survives a round trip', () {
-      final look = whole('quiet-ink').withWallpaper(
-        WallpaperChoice.standalone(catalog.wallpaper('snowy-cabin')!),
+      final look = whole('halloween-night').withWallpaper(
+        WallpaperChoice.standalone(catalog.wallpaper('web-corner')!),
         at: at,
       );
-      expect(roundTrip(look).wallpaper.wallpaper!.id, 'snowy-cabin');
+      expect(roundTrip(look).wallpaper.wallpaper!.id, 'web-corner');
     });
 
     test('works without the catalog: everything is in the snapshot', () {
-      final look = roundTrip(whole('festival-of-lights'));
-      expect(look.festival.countdown(designDay).isAnyTime, isFalse);
-      expect(look.clockFont.family, 'Caveat');
-      expect(look.icons.pack.glyphs, hasLength(GlyphKeys.all.length));
+      final look = roundTrip(whole('spider-night'));
+      expect(look.clockFont.family, 'Bebas Neue');
+      expect(look.icons.pack.background, isNotNull);
+      final thingyan = roundTrip(whole('thingyan-water'));
+      expect(thingyan.festival.countdown(designDay).isAnyTime, isFalse);
     });
 
     test('a look from a newer app version is refused', () {
-      final json = whole('ember').toJson()..['v'] = 2;
+      final json = whole('spider-night').toJson()..['v'] = 2;
       expect(
         () => AppliedLook.fromJson(JsonReader(json)),
         throwsA(isA<CatalogFormatException>()),
@@ -189,7 +183,7 @@ void main() {
     });
 
     test('a clock with no place to show is refused', () {
-      final json = whole('ember').toJson();
+      final json = whole('spider-night').toJson();
       (json['clock']! as Map)['places'] = {
         'lockScreen': false,
         'homeClock': false,
@@ -205,18 +199,19 @@ void main() {
   });
 
   test('lists every file it needs on disk', () {
-    final look = whole('cozy-cabin').apply(
+    final look = whole('spider-night').apply(
       catalog,
-      mockTheme('festival-of-lights'),
+      mockTheme('halloween-night'),
       ApplyOption.wallpaperOnly,
       at: at,
     );
     final assets = look.assets.map((a) => a.url).toSet();
-    // Cabin's hills, the lantern garland, every icon and every font file.
+    // Spider Night's skyline and web, every icon picture and every font
+    // file, Halloween's Creepster among them.
+    expect(look.fonts.keys, contains('creepster'));
     for (final a in [
-      ...mockTheme('cozy-cabin').scene.assets,
-      ...mockTheme('festival-of-lights').scene.assets,
-      ...look.icons.pack.glyphs.values,
+      ...mockTheme('spider-night').scene.assets,
+      ...look.icons.pack.assets,
       for (final f in look.fonts.values) ...f.files.map((f) => f.asset),
     ]) {
       expect(assets, contains(a.url));

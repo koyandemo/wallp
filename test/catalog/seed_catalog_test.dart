@@ -1,4 +1,4 @@
-// Checks the full generated mock catalog (test/fixtures/catalog/v1) end to end:
+// Checks the generated mock catalog (assets/mock/catalog/v1) end to end:
 // the same checks the app's download code and the dashboard's publish step
 // rely on. Regenerate with `dart run tool/seed/generate.dart`.
 import 'dart:convert';
@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 
-const _dir = 'test/fixtures/catalog/v1';
+const _dir = 'assets/mock/catalog/v1';
 
 Object? _read(String path) =>
     jsonDecode(File('$_dir/$path').readAsStringSync());
@@ -57,11 +57,10 @@ void main() {
 
     test('has the design\'s theme counts per festival', () {
       int count(String id) => catalog.themesIn(id).length;
-      expect(count('halloween'), 8);
-      expect(count('christmas'), 10);
-      expect(count('thingyan'), 6);
-      expect(count('thadingyut'), 3);
-      expect(count('minimal'), 3);
+      expect(count('halloween'), 1);
+      expect(count('christmas'), 1);
+      expect(count('thingyan'), 1);
+      expect(count('heroes'), 1);
       expect(catalog.themes.where((t) => t.isBuiltIn), hasLength(3));
     });
 
@@ -84,17 +83,19 @@ void main() {
     test('has a live and a NEW theme to show each badge', () {
       final now = DateTime.utc(2026, 10, 15, 14);
       expect(catalog.themes.where((t) => t.isLive), isNotEmpty);
-      expect(catalog.themes.where((t) => t.isNew(now)), isNotEmpty);
-      expect(
-        catalog.themes.where((t) => !t.isNew(now) && !t.isLive),
-        isNotEmpty,
-      );
+      expect(catalog.themes.where((t) => t.isNew(now)).map((t) => t.id), [
+        'spider-night',
+      ]);
     });
 
-    test('one banner is scheduled for later and hidden today', () {
+    test('banners with a window show only inside it', () {
       final now = DateTime.utc(2026, 10, 15, 14);
-      expect(catalog.banners.where((b) => !b.isShowing(now)), hasLength(1));
-      expect(catalog.banners.where((b) => b.isShowing(now)), hasLength(4));
+      expect(catalog.banners.every((b) => b.isShowing(now)), isTrue);
+      final halloween = catalog.banners.firstWhere(
+        (b) => b.id == 'halloween-2026',
+      );
+      expect(halloween.isShowing(DateTime.utc(2026, 11, 2)), isFalse);
+      expect(halloween.isShowing(DateTime.utc(2026, 9, 30)), isFalse);
     });
 
     test('engines.json lists every engine the catalog uses', () {
@@ -194,11 +195,11 @@ void main() {
       expect(onDisk.difference(used), isEmpty);
     });
 
-    test('image packs draw every glyph key', () {
+    test('image packs have their background tile', () {
       for (final p in catalog.iconPacks.where(
         (p) => p.kind == IconPackKind.images,
       )) {
-        expect(p.glyphs.keys.toSet(), GlyphKeys.all.toSet(), reason: p.id);
+        expect(p.background, isNotNull, reason: p.id);
       }
     });
   });

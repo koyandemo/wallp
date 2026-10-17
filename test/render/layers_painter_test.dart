@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -48,19 +49,50 @@ bool _close(Color a, Color b, {int tolerance = 6}) =>
     ((a.g - b.g) * 255).abs() <= tolerance &&
     ((a.b - b.b) * 255).abs() <= tolerance;
 
+/// Average brightness (0..255) of the bottom tenth of [data].
+double _bottomBrightness(ByteData data) {
+  final w = _size.width.toInt(), h = _size.height.toInt();
+  var sum = 0.0, n = 0;
+  for (var y = (h * 0.9).round(); y < h; y++) {
+    for (var x = 0; x < w; x += 3) {
+      final c = _pixel(data, x, y);
+      sum += (c.r + c.g + c.b) / 3 * 255;
+      n++;
+    }
+  }
+  return sum / n;
+}
+
 void main() {
   final catalog = mockCatalog();
 
-  PhoneTheme themeOf(String id, {String? variantId, Accent? accent}) {
+  /// Spider Night's theme file, editable: the only theme on the layers
+  /// engine, so tests add what they need to it (a variant, a layer).
+  Map<String, dynamic> spiderJson() {
+    final rev = catalog.theme('spider-night')!.rev;
+    return jsonDecode(
+      File('$mockDir/themes/spider-night.$rev.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+  }
+
+  List<dynamic> layersOf(Map<String, dynamic> json) =>
+      (json['scene'] as Map)['params']['layers'] as List;
+
+  PhoneTheme themeOf(ThemeDetail theme, {String? variantId, Accent? accent}) {
     var look = AppliedLook.wholeTheme(
       catalog,
-      mockTheme(id),
+      theme,
       at: designDay,
       variantId: variantId,
     );
     if (accent != null) look = look.withAccent(accent, at: designDay);
     return ResolvedLook.of(look, designDay).wallpaperTheme;
   }
+
+  ThemeDetail parse(Map<String, dynamic> json) =>
+      ThemeDetail.fromJson(JsonReader(json, 'theme'));
+
+  PhoneTheme spider() => themeOf(mockTheme('spider-night'));
 
   LayersPainter painterFor(
     PhoneTheme theme, {
@@ -73,18 +105,34 @@ void main() {
     images: images,
   );
 
+  /// The skyline picture along Spider Night's bottom edge.
+  AssetRef skyline() =>
+      mockTheme('spider-night').scene.layers!
+          .whereType<ImageLayer>()
+          .firstWhere((l) => l.anchor == ImageAnchor.bottom)
+          .image;
+
+  Future<Map<String, ui.Image>> decoded(Iterable<AssetRef> refs) async => {
+    for (final ref in refs)
+      ref.sha256: (await (await ui.instantiateImageCodec(
+        File('$mockDir/${ref.url}').readAsBytesSync(),
+      )).getNextFrame()).image,
+  };
+
   test('every dashboard theme and wallpaper draws, at any moment', () async {
     final layered = [
       for (final t in catalog.themes)
-        if (!t.isBuiltIn) themeOf(t.id),
+        if (!t.isBuiltIn) themeOf(mockTheme(t.id)),
     ];
-    expect(layered, hasLength(27));
+    expect(layered, hasLength(1));
     for (final theme in layered) {
       for (final t in [0.0, 1.2, 37.5]) {
         await _render(painterFor(theme, t: t));
       }
     }
-    for (final w in catalog.wallpapers.where((w) => w.scene?.layers != null)) {
+    final wallpapers = catalog.wallpapers.where((w) => w.scene?.layers != null);
+    expect(wallpapers, hasLength(2));
+    for (final w in wallpapers) {
       final scene = LayeredScene(layers: w.scene!.layers!, tokens: const {});
       await _render(
         LayersPainter(
@@ -97,51 +145,71 @@ void main() {
   });
 
   test('the sky is the palette\'s colours, following the variant', () async {
-    // Gradient @surface → @background, top to bottom.
-    final warm = await _render(painterFor(themeOf('cozy-cabin')));
-    final snowedIn = await _render(
-      painterFor(themeOf('cozy-cabin', variantId: 'snowed-in')),
+    // Gradient @background → @surface → #3A1030, top to bottom.
+    final json = spiderJson()
+      ..['variants'] = [
+        {
+          'id': 'night',
+          'name': {'en': 'Night'},
+        },
+        {
+          'id': 'dusk',
+          'name': {'en': 'Dusk'},
+          'palette': {'background': '#402060'},
+        },
+      ];
+    final theme = parse(json);
+    final night = await _render(painterFor(themeOf(theme)));
+    final dusk = await _render(painterFor(themeOf(theme, variantId: 'dusk')));
+    expect(
+      _close(_pixel(night, 5, 1), Color(theme.palette.background.argb)),
+      isTrue,
     );
-    final surface = Color(mockTheme('cozy-cabin').palette.surface.argb);
-    expect(_close(_pixel(warm, 5, 1), surface), isTrue);
-    final snowSurface = Color(
-      mockTheme('cozy-cabin').paletteFor('snowed-in').surface.argb,
-    );
-    expect(_close(_pixel(snowedIn, 5, 1), snowSurface), isTrue);
+    expect(_close(_pixel(dusk, 5, 1), const Color(0xFF402060)), isTrue);
   });
 
   test('@accent shapes follow the user\'s accent', () async {
-    // Quiet Ink's moon is @motif; its crater is @deep. The tree star in
-    // Midnight Snow is @accent at (0.5, 0.42).
+    final json = spiderJson();
+    layersOf(json).add({
+      'type': 'shape',
+      'shape': 'circle',
+      'x': 0.5,
+      'y': 0.6,
+      'width': 0.2,
+      'color': '@accent',
+    });
     final rose = Accent(
       id: 'rose',
       name: LocalizedText.en('Rose'),
       colors: const [HexColor('#FF5FA2')],
     );
-    final data = await _render(
-      painterFor(themeOf('midnight-snow', accent: rose)),
-    );
-    final star = _pixel(
+    final data = await _render(painterFor(themeOf(parse(json), accent: rose)));
+    final dot = _pixel(
       data,
       (_size.width * 0.5).round(),
-      (_size.height * 0.42).round(),
+      (_size.height * 0.6).round(),
     );
     expect(
-      _close(star, const Color(0xFFFF5FA2), tolerance: 30),
+      _close(dot, const Color(0xFFFF5FA2), tolerance: 30),
       isTrue,
-      reason: '$star',
+      reason: '$dot',
     );
   });
 
   test(
     'a still theme looks the same at every moment; a live one moves',
     () async {
-      final still = themeOf('quiet-ink');
+      final json = spiderJson();
+      layersOf(json).removeWhere((l) => (l as Map)['type'] == 'particles');
+      for (final l in layersOf(json).cast<Map>()) {
+        l.remove('motion');
+      }
+      final still = themeOf(parse(json));
       expect(
         (await _render(painterFor(still, t: 1))).buffer.asUint8List(),
         (await _render(painterFor(still, t: 9))).buffer.asUint8List(),
       );
-      final live = themeOf('cocoa-night'); // snow
+      final live = spider(); // rain, a pulsing moon, a swinging spider
       expect(
         (await _render(painterFor(live, t: 1))).buffer.asUint8List(),
         isNot((await _render(painterFor(live, t: 9))).buffer.asUint8List()),
@@ -152,44 +220,26 @@ void main() {
   test(
     'an image layer draws once its picture is loaded, and is skipped before',
     () async {
-      final theme = themeOf('golden-pagoda');
-      final ref = theme.layered!.images.single;
-      final bytes = File('$mockDir/${ref.url}').readAsBytesSync();
-      final codec = await ui.instantiateImageCodec(bytes);
-      final pagoda = (await codec.getNextFrame()).image;
-
+      final theme = spider();
+      final images = await decoded([skyline()]);
       final without = await _render(painterFor(theme));
-      final with_ = await _render(
-        painterFor(theme, images: {ref.sha256: pagoda}),
-      );
-      // The gold pagoda stands in the middle, above the ground.
-      final x = (_size.width * 0.5).round(), y = (_size.height * 0.88).round();
+      final with_ = await _render(painterFor(theme, images: images));
+      // The near-black buildings fill the bottom edge.
       expect(
-        _close(_pixel(with_, x, y), const Color(0xFFF2B33D), tolerance: 20),
-        isTrue,
-      );
-      expect(
-        _close(_pixel(without, x, y), const Color(0xFFF2B33D), tolerance: 20),
-        isFalse,
+        _bottomBrightness(with_),
+        lessThan(_bottomBrightness(without) - 5),
       );
     },
   );
 
   test('scenePainterFor picks the layers painter for dashboard themes', () {
     final painter = scenePainterFor(
-      themeOf('ember'),
+      spider(),
       ValueNotifier(0),
-      const Color(0xFFFFB547),
+      const Color(0xFFE23636),
     );
     expect(painter, isA<LayersPainter>());
-    final builtIn = ResolvedLook.of(
-      AppliedLook.wholeTheme(
-        catalog,
-        mockTheme('halloween-night'),
-        at: designDay,
-      ),
-      designDay,
-    ).wallpaperTheme;
+    final builtIn = themeOf(mockTheme('halloween-night'));
     expect(
       scenePainterFor(builtIn, ValueNotifier(0), const Color(0xFFFFB547)),
       isNot(isA<LayersPainter>()),
@@ -204,40 +254,53 @@ void main() {
       dir = Directory.systemTemp.createTempSync('wallp_render_');
       final cache = AssetCache(dir);
       assets = SceneAssets(cache);
-      // "Download" Golden Pagoda's files.
-      for (final ref in catalog.assetsFor(mockTheme('golden-pagoda'))) {
+      // "Download" Spider Night's files.
+      for (final ref in catalog.assetsFor(mockTheme('spider-night'))) {
         await cache.put(ref, File('$mockDir/${ref.url}').readAsBytesSync());
       }
     });
     tearDown(() => dir.deleteSync(recursive: true));
 
     test('SceneAssets decodes a picture once and shares it', () async {
-      final ref = themeOf('golden-pagoda').layered!.images.single;
-      final a = await assets.image(ref);
-      final b = await assets.image(ref);
+      final a = await assets.image(skyline());
+      final b = await assets.image(skyline());
       expect(a, isNotNull);
       expect(identical(a, b), isTrue);
     });
 
     test('a file that isn\'t on the phone is null, not an error', () async {
-      final missing = themeOf('cozy-cabin').layered!.images.single;
+      const sha =
+          'ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12';
+      const missing = AssetRef(
+        url: 'assets/$sha.png',
+        sha256: sha,
+        bytes: 100,
+        format: AssetFormat.png,
+      );
       expect(await assets.image(missing), isNull);
       expect(await assets.bytes(missing), isNull);
     });
 
-    test('the wallpaper image includes the downloaded picture', () async {
-      final png = await WallpaperRenderer.renderPng(
-        theme: themeOf('golden-pagoda'),
-        accent: const Color(0xFFF2B33D),
-        pixelSize: _size,
-        assets: assets,
-      );
-      final image = await (await ui.instantiateImageCodec(png)).getNextFrame();
-      final data = (await image.image.toByteData())!;
-      final x = (_size.width * 0.5).round(), y = (_size.height * 0.88).round();
+    test('the wallpaper image includes the downloaded pictures', () async {
+      Future<ByteData> render(SceneAssets from) async {
+        final png = await WallpaperRenderer.renderPng(
+          theme: spider(),
+          accent: const Color(0xFFE23636),
+          pixelSize: _size,
+          assets: from,
+        );
+        final image = await (await ui.instantiateImageCodec(png))
+            .getNextFrame();
+        return (await image.image.toByteData())!;
+      }
+
+      final empty = Directory.systemTemp.createTempSync('wallp_render_none_');
+      addTearDown(() => empty.deleteSync(recursive: true));
+      final with_ = await render(assets);
+      final without = await render(SceneAssets(AssetCache(empty)));
       expect(
-        _close(_pixel(data, x, y), const Color(0xFFF2B33D), tolerance: 20),
-        isTrue,
+        _bottomBrightness(with_),
+        lessThan(_bottomBrightness(without) - 5),
       );
     });
   });

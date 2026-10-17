@@ -217,23 +217,6 @@ class AppliedLook {
   AppliedLook withAccent(Accent accent, {required DateTime at}) =>
       _copy(accent: accent, at: at);
 
-  /// Another colour variant; the accent follows it unless [keepAccent].
-  AppliedLook withVariant(
-    String? variantId, {
-    required DateTime at,
-    bool keepAccent = false,
-  }) => AppliedLook(
-    theme: theme,
-    festival: festival,
-    variantId: variantId,
-    accent: keepAccent ? accent : defaultAccentFor(theme, variantId),
-    clock: clock,
-    icons: icons,
-    wallpaper: wallpaper,
-    fonts: fonts,
-    appliedAt: at,
-  );
-
   AppliedLook _copy({
     required DateTime at,
     Accent? accent,

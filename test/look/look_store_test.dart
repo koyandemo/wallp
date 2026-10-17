@@ -47,8 +47,8 @@ void main() {
   });
 
   test('a saved look comes back exactly, in any engine', () async {
-    final saved = look('cozy-cabin')
-        .withIconPack(mockCatalog().iconPack('mono-ember')!, at: designDay);
+    final saved = look('spider-night')
+        .withIconPack(mockCatalog().iconPack('gold-ornament')!, at: designDay);
     await store.save(saved);
     final again = await LookStore().load();
     expect(jsonEncode(again.toJson()), jsonEncode(saved.toJson()));
@@ -56,10 +56,10 @@ void main() {
 
   test('a dashboard theme keeps working without any catalog', () async {
     // Nothing but the snapshot: no mock catalog, no network.
-    await store.save(look('festival-of-lights'));
+    await store.save(look('spider-night'));
     final again = await LookStore().load();
     expect(again.theme.scene.engine, 'layers');
-    expect(again.icons.pack.id, 'lantern-light');
+    expect(again.icons.pack.id, 'web-slinger');
   });
 
   test('a damaged save falls back to the default and is cleared', () async {
@@ -99,16 +99,16 @@ void main() {
 
   group('pending apply (switching the home app)', () {
     test('a recent one is handed over once', () async {
-      await store.savePending(look('ember'), at: designDay);
+      await store.savePending(look('spider-night'), at: designDay);
       final taken = await store.takePending(
         now: designDay.add(const Duration(minutes: 2)),
       );
-      expect(taken!.theme.id, 'ember');
+      expect(taken!.theme.id, 'spider-night');
       expect(await store.takePending(now: designDay), isNull);
     });
 
     test('a stale one is dropped', () async {
-      await store.savePending(look('ember'), at: designDay);
+      await store.savePending(look('spider-night'), at: designDay);
       expect(
         await store.takePending(
           now: designDay.add(
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('one from the future (clock changed) is dropped', () async {
-      await store.savePending(look('ember'), at: designDay);
+      await store.savePending(look('spider-night'), at: designDay);
       expect(
         await store.takePending(
           now: designDay.subtract(const Duration(hours: 1)),

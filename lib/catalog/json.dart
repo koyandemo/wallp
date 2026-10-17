@@ -81,8 +81,6 @@ class JsonReader {
   double number(String key, {double? orElse}) =>
       (orElse == null ? _req<num>(key) : (_opt<num>(key) ?? orElse)).toDouble();
 
-  double? optNumber(String key) => _opt<num>(key)?.toDouble();
-
   /// A lowercase kebab-case ID, the only ID form the catalog allows.
   String id(String key) {
     final value = string(key);

@@ -4,7 +4,8 @@
 // * scene-<t>.png: the live wallpaper at a few moments of its animation,
 //   drawn by the app's own LayersPainter.
 // * still.png: the Web Corner still wallpaper.
-// * icons.png: every Web Slinger icon on the wallpaper.
+// * icons.png: the Web Slinger tile under each kind of app, on the
+//   wallpaper.
 //
 //   flutter test tool/seed/spider_night_preview_test.dart
 //
@@ -13,11 +14,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
+import 'package:wallp/render/icon_shape.dart';
+import 'package:wallp/render/image_icons.dart';
 import 'package:wallp/render/layered_scene.dart';
+import 'package:wallp/store/screens/icon_pack_screens.dart' show sampleApp;
 import 'package:wallp/render/layers_painter.dart';
 
 import 'seed_data.dart' show spiderThemeId;
@@ -50,6 +54,19 @@ void main() {
   final images = <String, ui.Image>{};
 
   setUpAll(() async {
+    // flutter test draws icon fonts as boxes unless they're loaded. The
+    // test runner lives in the Flutter SDK's bin/cache.
+    final exe = Platform.resolvedExecutable;
+    final cache = exe.contains('/bin/cache/')
+        ? exe.substring(0, exe.indexOf('/bin/cache/') + '/bin/cache/'.length)
+        : '';
+    final icons = File(
+      '${cache}artifacts/material_fonts/MaterialIcons-Regular.otf',
+    );
+    if (icons.existsSync()) {
+      final bytes = ByteData.sublistView(icons.readAsBytesSync());
+      await (FontLoader('MaterialIcons')..addFont(Future.value(bytes))).load();
+    }
     final manifest = Manifest.fromJson(
       JsonReader.of(_read('manifest.json'), 'manifest'),
     );
@@ -112,19 +129,37 @@ void main() {
 
   test('icon pack on the wallpaper', () async {
     final pack = catalog.iconPack(theme.iconPackId)!;
+    final tiles = ImageIconPack.of(pack, pack.shape);
+    final background = images[pack.background!.sha256]!;
     await _save('icons.png', (canvas) {
       painter(theme.scene.layers!, 1.3).paint(canvas, size);
       const cols = 4, icon = 96.0, gap = (_w - cols * icon) / (cols + 1);
-      for (final (i, ref) in pack.glyphs.values.indexed) {
-        final image = images[ref.sha256]!;
+      for (final (i, key) in GlyphKeys.all.indexed) {
         final x = gap + (i % cols) * (icon + gap);
         final y = 150 + (i ~/ cols) * (icon + gap * 1.1);
-        canvas.drawImageRect(
-          image,
-          Rect.fromLTWH(0, 0, image.width * 1.0, image.height * 1.0),
-          Rect.fromLTWH(x, y, icon, icon),
-          Paint()..filterQuality = FilterQuality.medium,
-        );
+        final rect = Rect.fromLTWH(x, y, icon, icon);
+        final shape = iconShapeRadius(pack.shape, icon).toRRect(rect);
+        // A sample app's symbol on the tile, as the store previews it.
+        canvas
+          ..save()
+          ..clipRRect(shape)
+          ..translate(x, y);
+        PackTilePainter(
+          pack: tiles,
+          appIcon: null,
+          symbol: sampleApp(key).glyph,
+          background: background,
+          iconScale: 0.5,
+        ).paint(canvas, const Size(icon, icon));
+        canvas
+          ..restore()
+          ..drawRRect(
+            shape.deflate(icon * IconShapeTile.ringWidth / 2),
+            Paint()
+              ..color = tiles.ring
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = icon * IconShapeTile.ringWidth,
+          );
       }
     });
   });

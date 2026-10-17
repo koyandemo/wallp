@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 
-const _dir = 'test/fixtures/catalog/v1';
+const _dir = 'assets/mock/catalog/v1';
 
 /// A fresh, editable copy of the seed catalog JSON.
 Map<String, dynamic> _seedCatalog() {
@@ -68,30 +68,31 @@ void main() {
       final json = _seedCatalog();
       final themes = _list(json, 'themes');
       final total = themes.length;
-      (themes[3]['palette'] as Map)['background'] = 'orange';
+      (themes[1]['palette'] as Map)['background'] = 'orange';
 
       final catalog = _parse(json);
       expect(catalog.themes, hasLength(total - 1));
       expect(
         catalog.issues.single.path,
-        r'catalog.themes[3].palette.background',
+        r'catalog.themes[1].palette.background',
       );
       expect(catalog.issues.single.message, contains('"#RRGGBB"'));
     });
 
     test('an unknown layer type skips only that theme', () {
       final json = _seedCatalog();
-      final cabin = _list(
+      final spider = _list(
         json,
         'themes',
-      ).firstWhere((t) => t['id'] == 'cozy-cabin');
-      ((cabin['scene'] as Map)['params']['layers'] as List).add({
+      ).firstWhere((t) => t['id'] == 'spider-night');
+      ((spider['scene'] as Map)['params']['layers'] as List).add({
         'type': 'video',
       });
 
       final catalog = _parse(json);
-      expect(catalog.theme('cozy-cabin'), isNull);
-      expect(catalog.theme('cocoa-night'), isNotNull);
+      expect(catalog.theme('spider-night'), isNull);
+      expect(catalog.theme('halloween-night'), isNotNull);
+      expect(catalog.wallpaper('red-moon-swing'), isNotNull);
     });
 
     test('a theme whose festival is missing is dropped', () {
@@ -99,13 +100,13 @@ void main() {
       _list(
         json,
         'themes',
-      ).firstWhere((t) => t['id'] == 'ember')['festivalId'] = 'gone';
+      ).firstWhere((t) => t['id'] == 'thingyan-water')['festivalId'] = 'gone';
 
       final catalog = _parse(json);
-      expect(catalog.theme('ember'), isNull);
+      expect(catalog.theme('thingyan-water'), isNull);
       expect(
         catalog.issues.map((e) => e.message),
-        contains('themes[ember].festivalId: no festival "gone"'),
+        contains('themes[thingyan-water].festivalId: no festival "gone"'),
       );
     });
 
@@ -123,7 +124,7 @@ void main() {
       expect(catalog.banners, isNotEmpty);
       // The festival it was the cover of stays: a cover is only decoration.
       expect(catalog.festival('halloween'), isNotNull);
-      expect(catalog.themesIn('halloween'), hasLength(7));
+      expect(catalog.themesIn('halloween'), isEmpty);
     });
 
     test('a missing cover or banner art is a soft reference: kept, reported '
@@ -160,17 +161,24 @@ void main() {
         catalog.wallpapers.every((w) => w.scene!.engine != EngineIds.layers),
         isTrue,
       );
-      expect(catalog.issues, isEmpty);
+      // The banner that opened Spider Night goes with it; the rest stay.
+      expect(catalog.banners.map((b) => b.id), isNot(contains('spider-night')));
+      expect(catalog.banners.map((b) => b.id), contains('halloween-2026'));
     });
 
     test('a theme on a future engine is hidden from this build', () {
       final json = _seedCatalog();
-      final theme = _list(json, 'themes').firstWhere((t) => t['id'] == 'slate');
+      final theme = _list(
+        json,
+        'themes',
+      ).firstWhere((t) => t['id'] == 'spider-night');
       theme['scene'] = {'engine': 'rive', 'params': {}};
       final catalog = _parse(json)
           .supportedBy({...EngineIds.builtIn, EngineIds.layers});
-      expect(catalog.theme('slate'), isNull);
-      expect(catalog.theme('quiet-ink'), isNotNull);
+      expect(catalog.theme('spider-night'), isNull);
+      expect(catalog.theme('halloween-night'), isNotNull);
+      // Its wallpapers are still on the layers engine, so they stay.
+      expect(catalog.wallpaper('red-moon-swing'), isNotNull);
     });
   });
 
@@ -179,7 +187,7 @@ void main() {
         ThemeDetail.fromJson(JsonReader(json, 'theme'));
 
     test('a variant can\'t point at an accent the theme doesn\'t have', () {
-      final json = _seedTheme('gold-ornaments');
+      final json = _seedTheme('christmas-eve');
       (json['variants'] as List)[1]['accentId'] = 'nope';
       expect(() => parse(json), _formatError('theme.variants[1].accentId'));
     });
@@ -200,7 +208,7 @@ void main() {
     });
 
     test('the NEW badge lasts 14 days from publishing', () {
-      final theme = parse(_seedTheme('cozy-cabin'));
+      final theme = parse(_seedTheme('spider-night'));
       final published = theme.publishedAt;
       expect(theme.isNew(published), isTrue);
       expect(
@@ -218,8 +226,15 @@ void main() {
     test(
       'a theme with particles or moving shapes is live; still ones aren\'t',
       () {
-        expect(parse(_seedTheme('ember')).isLive, isTrue);
-        expect(parse(_seedTheme('quiet-ink')).isLive, isFalse);
+        final json = _seedTheme('spider-night');
+        expect(parse(json).isLive, isTrue);
+        // The same scene without its particles and motion is still.
+        final layers = (json['scene'] as Map)['params']['layers'] as List;
+        layers.removeWhere((l) => (l as Map)['type'] == 'particles');
+        for (final l in layers.cast<Map>()) {
+          l.remove('motion');
+        }
+        expect(parse(json).isLive, isFalse);
         // Built-in painters always animate.
         expect(parse(_seedTheme('thingyan-water')).isLive, isTrue);
       },
@@ -253,7 +268,7 @@ void main() {
     });
 
     test('a particle layer can\'t ask for thousands of particles', () {
-      final json = _seedTheme('ember');
+      final json = _seedTheme('spider-night');
       final layers = (json['scene'] as Map)['params']['layers'] as List;
       layers.last['count'] = 5000;
       expect(
@@ -264,16 +279,16 @@ void main() {
 
     test('a wallpaper scene can\'t use palette tokens (it has no palette)', () {
       final json = _seedCatalog();
-      final ember = _list(
+      final corner = _list(
         json,
         'wallpapers',
-      ).firstWhere((w) => w['id'] == 'ember');
-      ((ember['scene'] as Map)['params']['layers'] as List).first['colors'] = [
+      ).firstWhere((w) => w['id'] == 'web-corner');
+      ((corner['scene'] as Map)['params']['layers'] as List).first['colors'] = [
         '@accent',
         '#000000',
       ];
       final catalog = _parse(json);
-      expect(catalog.wallpaper('ember'), isNull);
+      expect(catalog.wallpaper('web-corner'), isNull);
     });
 
     test('fonts must have a licence that allows redistribution', () {

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
-import 'package:wallp/icons/app_glyphs.dart';
 import 'package:wallp/launcher/launcher_icon.dart';
 import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/resolved_look.dart';
@@ -14,6 +13,7 @@ import 'package:wallp/render/font_registry.dart';
 import 'package:wallp/render/image_icons.dart';
 import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/services/icon_pack_service.dart';
+import 'package:wallp/store/screens/icon_pack_screens.dart' show sampleApps;
 
 import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
@@ -37,46 +37,10 @@ void main() {
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
-  group('glyph keys', () {
-    test('apps map to the catalog\'s glyph keys', () {
-      expect(glyphKeyFor('com.whatsapp', 'WhatsApp'), 'messages');
-      expect(glyphKeyFor('com.google.android.dialer', 'Phone'), 'phone');
-      expect(glyphKeyFor('com.instagram.android', 'Instagram'), 'camera');
-      expect(glyphKeyFor('com.google.android.youtube', 'YouTube'), 'video');
-      expect(glyphKeyFor('com.android.settings', 'Settings'), 'settings');
-    });
-
-    test('calls, pay and device-care apps get a picture too', () {
-      expect(glyphKeyFor('com.google.android.apps.tachyon', 'Meet'), 'video');
-      expect(glyphKeyFor('com.example.unknown', 'NugPay'), 'wallet');
-      expect(
-        glyphKeyFor('com.coloros.phonemanager', 'Phone Manager'),
-        'settings',
-      );
-      expect(
-        glyphKeyFor('com.google.android.apps.safetyhub', 'Safety'),
-        'settings',
-      );
-    });
-
-    test('apps no pack draws have no key, and keep their own icon', () {
-      expect(glyphKeyFor('com.facebook.katana', 'Facebook'), isNull);
-      expect(glyphKeyFor('com.example.game', 'Cool Game'), isNull);
-    });
-
-    test('every key an app can get is one packs draw', () {
-      for (final (pkg, label) in [
-        ('com.whatsapp', 'WhatsApp'),
-        ('com.android.chrome', 'Chrome'),
-        ('com.google.android.gm', 'Gmail'),
-        ('com.spotify.music', 'Spotify'),
-        ('com.android.vending', 'Play Store'),
-        ('com.android.calculator2', 'Calculator'),
-        ('com.google.android.keep', 'Keep Notes'),
-      ]) {
-        expect(GlyphKeys.all, contains(glyphKeyFor(pkg, label)), reason: pkg);
-      }
-    });
+  test('every sample app in the store\'s previews has a symbol', () {
+    for (final app in sampleApps) {
+      expect(app.glyph, isNotNull, reason: app.label);
+    }
   });
 
   group('FontRegistry', () {
@@ -92,8 +56,8 @@ void main() {
 
     test('a font whose files aren\'t on the phone isn\'t loaded', () async {
       final registry = FontRegistry(assets: assets);
-      expect(await registry.ensure(catalog.font('pacifico')!), isFalse);
-      expect(registry.loadedFamily('Pacifico'), isNull);
+      expect(await registry.ensure(catalog.font('bebas-neue')!), isFalse);
+      expect(registry.loadedFamily('Bebas Neue'), isNull);
     });
 
     test('Burmese text falls back to Padauk once it\'s loaded', () async {
@@ -114,10 +78,10 @@ void main() {
     final look =
         AppliedLook.wholeTheme(
           catalog,
-          mockTheme('ember'),
+          mockTheme('spider-night'),
           at: designDay,
         ).withIconPack(
-          catalog.iconPack('mono-ember')!,
+          catalog.iconPack('web-slinger')!,
           at: designDay,
           shape: IconShape.circle,
         );
@@ -129,15 +93,18 @@ void main() {
       expect(home.hasIconPack, isFalse, reason: 'not a painted pack');
     });
 
-    testWidgets('an app with a picture shows it, clipped to the shape', (
-      tester,
-    ) async {
-      // Download and decode for real first: inside testWidgets' fake clock,
-      // file reads never finish.
-      await tester.runAsync(() async {
-        await download(look.icons.pack.glyphs.values);
-        await assets.image(look.icons.pack.glyphs['messages']!);
-      });
+    PackTilePainter painterIn(WidgetTester tester) =>
+        tester
+                .widget<CustomPaint>(
+                  find.descendant(
+                    of: find.byType(PackTileIcon),
+                    matching: find.byType(CustomPaint),
+                  ),
+                )
+                .painter!
+            as PackTilePainter;
+
+    testWidgets('a sample app shows its symbol on the tile', (tester) async {
       const whatsapp = InstalledApp(
         packageName: 'com.whatsapp',
         label: 'WhatsApp',
@@ -155,16 +122,11 @@ void main() {
           ),
         ),
       );
-      // The picture was decoded in the real zone; its callback runs there,
-      // so give real async a turn, then draw.
-      await tester.pump();
-      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-      await tester.pump();
+      expect(painterIn(tester).symbol, Icons.forum_rounded);
       expect(find.byType(ClipRRect), findsOneWidget);
-      expect(find.byType(RawImage), findsOneWidget);
     });
 
-    testWidgets('an app the pack doesn\'t draw is framed in its tile', (
+    testWidgets('an app with no known symbol gets a generic one', (
       tester,
     ) async {
       const game = InstalledApp(
@@ -180,26 +142,14 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(PackPictureIcon), findsNothing);
-      expect(find.byType(PackFallbackIcon), findsOneWidget);
-      expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
+      expect(painterIn(tester).symbol, Icons.apps_rounded);
     });
 
     testWidgets('a pack with a background puts the app on that picture', (
       tester,
     ) async {
-      // Any of the pack's pictures stands in for its empty tile.
-      final background = look.icons.pack.glyphs['phone']!;
-      final pack = home.imageIcons!;
-      final withBackground = home.copyWith(
-        imageIcons: ImageIconPack(
-          glyphs: pack.glyphs,
-          shape: pack.shape,
-          ring: pack.ring,
-          tile: pack.tile,
-          background: background,
-        ),
-      );
+      final background = look.icons.pack.background!;
+      expect(home.imageIcons!.background, background);
       await tester.runAsync(() async {
         await download([background]);
         await assets.image(background);
@@ -213,39 +163,21 @@ void main() {
           assets: assets,
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: LauncherIcon(
-              app: game,
-              theme: withBackground,
-              accent: Colors.orange,
-            ),
+            child: LauncherIcon(app: game, theme: home, accent: Colors.orange),
           ),
         ),
       );
-      PackFallbackPainter painter() =>
-          tester
-                  .widget<CustomPaint>(
-                    find.descendant(
-                      of: find.byType(PackFallbackIcon),
-                      matching: find.byType(CustomPaint),
-                    ),
-                  )
-                  .painter!
-              as PackFallbackPainter;
       // The plain tile until the picture loads, then the picture.
-      expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
+      expect(painterIn(tester).background, isNull);
       await tester.pump();
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       await tester.pump();
-      expect(find.byIcon(Icons.apps_rounded), findsNothing);
-      expect(painter().background, isNotNull);
+      expect(painterIn(tester).background, isNotNull);
     });
 
-    testWidgets('a real app keeps its own logo, even one the pack draws', (
-      tester,
-    ) async {
+    testWidgets('a real app keeps its own logo', (tester) async {
       late ui.Image icon, logo;
       await tester.runAsync(() async {
-        await download(look.icons.pack.glyphs.values);
         icon = await _square(const Color(0xFF25D366));
         logo = await _square(const Color(0xFFFFFFFF));
       });
@@ -255,7 +187,6 @@ void main() {
         icon: icon,
         logo: logo,
       );
-      expect(whatsapp.glyphKey, 'messages');
       await tester.pumpWidget(
         SceneAssetsScope(
           assets: assets,
@@ -269,25 +200,14 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(PackPictureIcon), findsNothing);
-      final painter =
-          tester
-                  .widget<CustomPaint>(
-                    find.descendant(
-                      of: find.byType(PackFallbackIcon),
-                      matching: find.byType(CustomPaint),
-                    ),
-                  )
-                  .painter!
-              as PackFallbackPainter;
-      expect(painter.logo, logo);
+      expect(painterIn(tester).logo, logo);
     });
 
     test(
-      'a pinned shortcut draws the app\'s logo, not the pack\'s picture',
+      'a pinned shortcut draws the app\'s logo on the pack\'s tile',
       () async {
         TestWidgetsFlutterBinding.ensureInitialized();
-        await download(look.icons.pack.glyphs.values);
+        await download(look.icons.pack.assets);
         const channel = MethodChannel('wallp/icons');
         final messenger =
             TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -309,39 +229,31 @@ void main() {
           accent: Colors.orange,
           assets: assets,
         );
-        final picture = look.icons.pack.glyphs['messages']!;
-        expect(sent, isA<Uint8List>());
-        expect(sent, isNot(File('$mockDir/${picture.url}').readAsBytesSync()));
-      },
-    );
-
-    test(
-      'a pinned shortcut for an app with no picture is still themed',
-      () async {
-        TestWidgetsFlutterBinding.ensureInitialized();
-        const channel = MethodChannel('wallp/icons');
-        final messenger =
-            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-        Object? sent;
-        messenger.setMockMethodCallHandler(channel, (call) async {
-          sent = (call.arguments as Map)['icon'];
-          return true;
-        });
-        addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
-
-        final added = await const IconPackService().pin(
-          theme: home,
-          app: const InstalledApp(
-            packageName: 'com.shopee.mm',
-            label: 'Shopee',
-          ),
-          accent: Colors.orange,
-          assets: assets,
-        );
-        expect(added, isTrue);
         expect(sent, isA<Uint8List>());
       },
     );
+
+    test('a pinned shortcut for an app with no logo is still themed', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      const channel = MethodChannel('wallp/icons');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      Object? sent;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        sent = (call.arguments as Map)['icon'];
+        return true;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+      final added = await const IconPackService().pin(
+        theme: home,
+        app: const InstalledApp(packageName: 'com.shopee.mm', label: 'Shopee'),
+        accent: Colors.orange,
+        assets: assets,
+      );
+      expect(added, isTrue);
+      expect(sent, isA<Uint8List>());
+    });
   });
 }
 

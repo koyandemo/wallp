@@ -7,12 +7,12 @@ import 'package:wallp/look/look_store.dart';
 import 'package:wallp/look/resolved_look.dart';
 import 'package:wallp/models/phone_theme.dart';
 
-const _dir = 'test/fixtures/catalog/v1';
+const _dir = 'assets/mock/catalog/v1';
 
 Object? _read(String path) =>
     jsonDecode(File('$_dir/$path').readAsStringSync());
 
-/// The full mock catalog, read straight from disk.
+/// The mock catalog, read straight from disk.
 Catalog mockCatalog() {
   final manifest = _read('manifest.json')! as Map<String, dynamic>;
   return Catalog.fromJson(

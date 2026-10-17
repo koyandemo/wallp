@@ -85,7 +85,7 @@ void main() {
     tester,
   ) async {
     final h = StoreHarness();
-    await h.pump(tester, demo: true);
+    await h.pump(tester);
     await settle(tester);
     await tester.scrollUntilVisible(
       find.text('Spooky Glow'),
@@ -120,7 +120,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       for (final name in ['Squircle', 'Circle', 'Square', 'Leaf']) {
@@ -135,7 +134,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('Leaf'));
@@ -149,16 +147,44 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('nothing is "in use" before you apply', (tester) async {
+    testWidgets('a tap puts the pack on wallp Home; there\'s no Apply step', (
+      tester,
+    ) async {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
-      expect(find.textContaining('In use'), findsNothing);
-      expect(find.textContaining('Apply icon pack'), findsOneWidget);
-      expect(find.text('Add icons to your home screen'), findsNothing);
+      expect(h.looks.isApplied, isFalse);
+      expect(find.byType(FilledButton), findsNothing);
+      expect(find.textContaining('Apply'), findsNothing);
+      expect(find.textContaining('to use it on wallp Home'), findsOneWidget);
+
+      /// Lets the apply's real file work run until [done] holds.
+      Future<void> until(bool Function() done) async {
+        for (var i = 0; i < 300 && !done(); i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump();
+        }
+        await settle(tester);
+      }
+
+      await tester.tap(find.bySemanticsLabel('Leaf'));
+      await until(() => h.looks.isApplied);
+      expect(h.looks.isApplied, isTrue);
+      expect(h.looks.look!.icons.pack.id, 'spooky-glow');
+      expect(h.looks.look!.icons.shape, IconShape.leaf);
+      expect(find.textContaining('Changes show there right away'), findsOne);
+
+      // Later choices go straight on too.
+      await tester.ensureVisible(find.text('System font'));
+      await tester.pump();
+      await tester.tap(find.text('System font'));
+      await until(() => h.looks.look!.icons.labelFont == LabelFont.system);
+      expect(h.looks.look!.icons.labelFont, LabelFont.system);
+      expect(h.looks.look!.icons.shape, IconShape.leaf);
       await tester.pumpWidget(const SizedBox());
     });
   });

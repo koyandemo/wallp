@@ -10,12 +10,12 @@ import 'package:crypto/crypto.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
 import 'package:wallp/data/catalog/mock_catalog_source.dart';
 
-/// The full mock catalog (30 themes): what the tests check features with.
-/// The app itself ships the small demo catalog in assets/mock.
-const mockDir = 'test/fixtures/catalog/v1';
+/// The mock catalog the app ships: the Halloween, Christmas, Thingyan and
+/// Spider Night themes.
+const mockDir = 'assets/mock/catalog/v1';
 
-/// Reads "assets" straight from disk, so tests can serve [mockDir] (which
-/// isn't an app asset) through the same MockCatalogSource the app uses.
+/// Reads "assets" straight from disk, so tests can serve [mockDir] through
+/// the same MockCatalogSource the app uses without an asset bundle.
 class DiskBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
@@ -25,7 +25,7 @@ class DiskBundle extends CachingAssetBundle {
   }
 }
 
-/// The mock CDN over the full fixture catalog.
+/// The mock CDN over the mock catalog, read from disk.
 MockCatalogSource fixtureSource({
   NetworkConditions Function()? conditions,
   Random? random,

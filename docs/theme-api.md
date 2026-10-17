@@ -145,7 +145,7 @@ Format rules:
 
 ### 4.1 Asset
 
-Every downloadable file (images, icon pictures, fonts) is an Asset object:
+Every downloadable file (images, icon tiles, fonts) is an Asset object:
 
 ```json
 { "url": "assets/9a359a28….png", "sha256": "9a359a28…", "bytes": 15577, "format": "png" }
@@ -254,7 +254,7 @@ A festival with dates (Halloween, Thingyan) or an undated collection (Minimal).
 | `downloadBytes` | Size of every file a whole-theme apply needs (below). Shown as "Apply · 0.8 MB" |
 | `previewImage` | Optional Asset: a small picture for app versions that can't draw `scene` |
 
-**What a whole-theme apply downloads.** The scene's image layers, every picture of its icon pack, and every file of its display, body and labels fonts, each counted once. The publish step computes `downloadBytes` this way (`Catalog.assetsFor` in the models). The app downloads the same list, and applies nothing until all of it is on disk.
+**What a whole-theme apply downloads.** The scene's image layers, its icon pack's `background` tile, and every file of its display, body and labels fonts, each counted once. The publish step computes `downloadBytes` this way (`Catalog.assetsFor` in the models). The app downloads the same list, and applies nothing until all of it is on disk.
 
 ### 4.4 ThemeSummary (inside the catalog)
 
@@ -331,27 +331,25 @@ The summary includes `scene` and `palette`, so cards can draw the real scene, no
 
 ```json
 {
-  "id": "candy-cane",
-  "festivalId": "christmas",
-  "name": { "en": "Candy Cane" },
-  "style": { "en": "Filled" },
+  "id": "web-slinger",
+  "festivalId": "heroes",
+  "name": { "en": "Web Slinger" },
+  "style": { "en": "Comic" },
   "kind": "images",
   "shape": "squircle",
-  "tile": "#F5F1EA", "glyph": "#B0182F", "ring": "#B0182F",
-  "glyphs": { "phone": { /* Asset, png */ }, "messages": { /* Asset */ }, "…": {} },
-  "background": { /* Asset, png; optional */ },
-  "publishedAt": "2026-10-11T14:00:00Z",
-  "popularity": 5
+  "tile": "#D3202A", "glyph": "#FFFFFF", "ring": "#0A0A12",
+  "background": { /* Asset, png */ },
+  "publishedAt": "2026-10-14T14:00:00Z",
+  "popularity": 0
 }
 ```
 
-- **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`; required for this kind). `images` = one downloaded picture per glyph key, at least one. Packs made in the dashboard are always `images`.
-- **On wallp Home, an `images` pack never replaces an app's logo.** Every app keeps its own logo (an adaptive icon's foreground layer; older icons whole), drawn on the pack's `background`, or its `tile` colour. The glyph pictures show the pack in the store and in theme previews, whose sample apps have no real icon.
-- **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it on the icon pack page, where the picker shows the pack's own phone icon in each shape. Every icon follows the chosen shape: painted packs are drawn in it, and pictures are clipped to it. So **draw pictures edge to edge on a square canvas, with no rim, border or rounded corners**, and the important part inside the middle 80%, which the `circle` and `leaf` shapes keep. The app draws the rim itself, in `ring`, along whichever shape the user picked (packs with a `tile`; packs without one get no rim). A pinned home-screen shortcut gets the same square, masked by the launcher's own shape.
-- **`tile`, `glyph`, `ring`:** the pack's colours. `tile` is behind app logos when the pack has no `background`, and stands in for pictures still downloading; `ring` is the rim the app draws around every tile. No `tile` = icons sit straight on the wallpaper.
-- **Glyph keys** (an unknown key rejects the pack): `phone`, `messages`, `camera`, `maps`, `music`, `mail`, `photos`, `clock`, `calendar`, `settings`, `browser`, `weather`, `notes`, `calculator`, `wallet`, `store`, `video`, `contacts`, `files`, `health`. The app maps installed apps to a key by package name or label ([app_glyphs.dart](../lib/icons/app_glyphs.dart)). The keys only pick pictures for previews.
-- **`background`:** optional, `images` packs only. The pack's empty tile: a picture drawn exactly like the others, without a glyph. Every app's own logo goes in the middle of it on wallp Home, so all apps match the pack and stay recognisable; without it they sit on a plain `tile` colour with a `ring` border. **Recommended:** it's what most users see. Keep it dark or busy enough that white logos still read. Downloaded with the pictures and counted in the pack's size.
-- **Pictures:** square PNG or WebP with a transparent background, 256 px or larger.
+- **`kind`:** `painted` = drawn on the phone by `ThemedIconPainter` in the built-in style named by `painter` (`halloween`, `christmas`, `thingyan`; required for this kind). `images` = one downloaded `background` tile (required for this kind). Packs made in the dashboard are always `images`.
+- **An `images` pack never replaces an app's logo.** On wallp Home every app keeps its own logo (an adaptive icon's foreground layer; older icons whole), drawn on the pack's `background`. The store's previews show the phone's own apps the same way, and a symbol per kind of app (Phone, Messages…) where there are no real apps to show. There are no per-app pictures.
+- **`shape`:** the default tile shape: `squircle`, `circle`, `square` or `leaf`. Users can change it on the icon pack page, where the picker shows one of their apps in each shape; tapping a shape puts the pack on wallp Home at once (the page has no Apply step). Every icon follows the chosen shape: painted packs are drawn in it, and the `background` is clipped to it. So **draw the background edge to edge on a square canvas, with no rim, border or rounded corners**. The app draws the rim itself, in `ring`, along whichever shape the user picked (packs with a `tile`; packs without one get no rim). A pinned home-screen shortcut gets the same square, masked by the launcher's own shape.
+- **`tile`, `glyph`, `ring`:** the pack's colours. `tile` stands in for the `background` while it downloads; `glyph` colours the sample apps' symbols in previews; `ring` is the rim the app draws around every tile. No `tile` = icons sit straight on the wallpaper.
+- **`background`:** `images` packs only, required. The pack's tile picture: every app's own logo goes in the middle of it, so all apps match the pack and stay recognisable. Keep the middle half calm, and the whole tile dark or busy enough that white logos still read. It's the only file the pack downloads (a few dozen KB), fetched as soon as the user opens the pack's page.
+- **The `background` file:** square PNG or WebP, 256 px or larger.
 
 ### 4.8 Banner (store home carousel)
 
@@ -416,16 +414,13 @@ The publish step must be stricter: the dashboard refuses to publish while `Catal
 
 ### 4.11 The mock catalog
 
-Until the real API exists, the app reads a mock catalog laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`. There are two:
+Until the real API exists, the app reads a mock catalog laid out exactly like the CDN: `manifest.json`, `catalog.<version>.json`, `themes/<id>.<rev>.json`, `engines.json` and `assets/<sha256>.<ext>`.
 
-- **The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their icon packs, fonts and banners, plus **Spider Night**, a theme made entirely from script (live `layers` scene, two wallpapers, a downloaded icon pack; see [tool/seed/spider_night.dart](../tool/seed/spider_night.dart) and run `tool/seed/spider_night.sh`). Small on purpose, for testing the app step by step (3.1 MB).
-- **The full catalog** at [test/fixtures/catalog/v1/](../test/fixtures/catalog/v1/) is what the tests check every feature with: 7 festivals (2 coming soon), 30 themes (3 built-in, 27 on the `layers` engine), 12 wallpapers, 10 fonts, 9 icon packs (6 with downloaded pictures) and 5 banners (1 scheduled for later), with 135 asset files. It isn't shipped in the app.
-
-To show more in the app, add IDs to `demoThemes` and `demoWallpapers` in [tool/seed/generate.dart](../tool/seed/generate.dart) and run it again.
+**The demo catalog** at [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) is what the app shows and what the tests check: three complete themes (Haunted Moon for Halloween, Snowy Pines for Christmas, Water Splash for Thingyan) and one wallpaper per festival, with their painted icon packs, fonts and banners, plus **Spider Night**, a theme made entirely from script (live `layers` scene, two wallpapers, a downloaded icon pack; see [tool/seed/spider_night.dart](../tool/seed/spider_night.dart) and run `tool/seed/spider_night.sh`). 4 festivals, 4 themes, 5 wallpapers, 7 fonts, 4 icon packs, 5 banners and 31 asset files (3.1 MB).
 
 **Versions in the demo catalog.** Installed apps only fetch a catalog whose `catalogVersion` is new, and only re-read a theme file whose `rev` is new (section 9). So every change to the demo data needs both bumps, or phones that already have it keep the old data:
-- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.8`).
-- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2, Spider Night 3).
+- `demoRevision` in [seed_data.dart](../tool/seed/seed_data.dart) → the demo's `catalogVersion` becomes `2026-10-15.1-demo.<demoRevision>` (now `demo.10`).
+- The changed theme's `rev` (now Haunted Moon 3, Snowy Pines 2, Water Splash 2, Spider Night 4).
 
 The `rev` comments in `seed_data.dart` say what each bump changed.
 
@@ -435,7 +430,7 @@ The `rev` comments in `seed_data.dart` say what each bump changed.
 
 The generator also writes the **built-in catalog** at [assets/builtin/catalog/](../assets/builtin/catalog/), which the app keeps after the mock is removed. It holds the three painted themes, the festivals they belong to, their banners and only the painted icon packs, so a first launch with no internet still has a working store. Its `catalogVersion` is `built-in`, so it never matches a published version and the first successful refresh always replaces it.
 
-**Dates in the mock catalog are placeholders.** The Thingyan and Thadingyut dates are not checked against the Myanmar calendar. "Published" dates are counted back from 15 October 2026, so NEW badges expire in real time; tests use a fixed clock.
+**Dates in the mock catalog are placeholders.** The Thingyan dates are not checked against the Myanmar calendar. "Published" dates are counted back from 15 October 2026, so NEW badges expire in real time; tests use a fixed clock.
 
 ---
 

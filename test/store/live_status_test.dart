@@ -58,7 +58,6 @@ void main() {
             },
           ),
         ),
-        demo: true,
       );
       final wallpaper = h.catalog.catalog.wallpapers.first;
       final flow = ApplyFlow(wallpapers: fake);

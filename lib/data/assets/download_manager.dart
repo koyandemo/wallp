@@ -8,12 +8,12 @@ import 'asset_cache.dart';
 
 enum DownloadState { downloading, done, failed, cancelled }
 
-/// One "get these files" job, e.g. everything Cozy Cabin needs. The Apply
+/// One "get these files" job, e.g. everything Spider Night needs. The Apply
 /// sheet's progress bar listens to it.
 class DownloadTask extends ChangeNotifier {
   DownloadTask._(this.label, this.files, this.totalBytes);
 
-  /// What's downloading, for the sheet: "Cozy Cabin".
+  /// What's downloading, for the sheet: "Spider Night".
   final String label;
 
   /// Only the files that weren't on the phone yet.

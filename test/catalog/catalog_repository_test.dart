@@ -66,7 +66,7 @@ void main() {
       await r.start(refresh: false);
       expect(await r.refresh(), RefreshOutcome.updated);
       expect(r.origin, CatalogOrigin.network);
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
       expect(r.catalogVersion, seedManifestJson()['catalogVersion']);
       expect(r.lastError, isNull);
       expect(store.files.keys, containsAll(['manifest.json', 'catalog.json']));
@@ -90,9 +90,9 @@ void main() {
       final r = repo();
       await r.start(refresh: false);
       expect(r.origin, CatalogOrigin.cache);
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
       expect(await r.refresh(), RefreshOutcome.failed);
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
     });
 
     test(
@@ -113,14 +113,14 @@ void main() {
 
     test('pick up a newly published version', () async {
       final json = seedCatalogJson();
-      (json['themes'] as List).removeWhere((t) => t['id'] == 'slate');
+      (json['themes'] as List).removeWhere((t) => t['id'] == 'spider-night');
       source.publish(json, '2026-10-16.1');
 
       final r = repo();
       await r.start(refresh: false);
       expect(await r.refresh(), RefreshOutcome.updated);
       expect(r.catalogVersion, '2026-10-16.1');
-      expect(r.catalog.theme('slate'), isNull);
+      expect(r.catalog.theme('spider-night'), isNull);
     });
 
     test('a damaged saved catalog is discarded, not trusted', () async {
@@ -137,7 +137,7 @@ void main() {
     test('forgetSaved() goes back to a fresh install', () async {
       final r = repo();
       await r.start(refresh: false);
-      await r.theme('cozy-cabin');
+      await r.theme('spider-night');
       await r.forgetSaved();
       expect(r.origin, CatalogOrigin.builtIn);
       expect(store.files, isEmpty);
@@ -152,8 +152,8 @@ void main() {
         await r.start(refresh: false);
         expect(r.origin, CatalogOrigin.builtIn);
         expect(await r.refresh(), RefreshOutcome.updated);
-        expect(r.catalog.themes, hasLength(30));
-        expect((await r.theme('ember')).id, 'ember');
+        expect(r.catalog.themes, hasLength(4));
+        expect((await r.theme('spider-night')).id, 'spider-night');
         await r.forgetSaved();
       },
     );
@@ -178,7 +178,7 @@ void main() {
         (r.lastError! as CatalogFetchException).failure,
         FetchFailure.integrity,
       );
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
     });
 
     test('a catalog file whose version disagrees with the manifest', () async {
@@ -206,7 +206,7 @@ void main() {
       source.files['manifest.json'] = _bytes(manifest);
 
       expect(await r.refresh(), RefreshOutcome.failed);
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
     });
 
     test('a manifest over the size limit', () async {
@@ -224,7 +224,7 @@ void main() {
       source.publish(seedCatalogJson(), '2027-01-01.1', schemaVersion: 2);
       expect(await r.refresh(), RefreshOutcome.unsupported);
       expect(r.updateRecommended, isTrue);
-      expect(r.catalog.themes, hasLength(30));
+      expect(r.catalog.themes, hasLength(4));
     });
   });
 
@@ -235,25 +235,25 @@ void main() {
       await r.start(refresh: false);
       await r.refresh();
       expect(r.updateRecommended, isTrue);
-      expect(r.catalog.themes, hasLength(30), reason: 'still usable');
+      expect(r.catalog.themes, hasLength(4), reason: 'still usable');
     });
 
     test('themes that need a newer app are hidden and counted', () async {
       final json = seedCatalogJson();
       (json['themes'] as List).firstWhere(
-        (t) => t['id'] == 'ember',
+        (t) => t['id'] == 'spider-night',
       )['minAppVersion'] = '2.0.0';
       source.publish(json, '2026-10-16.1');
 
       final r = repo();
       await r.start(refresh: false);
       await r.refresh();
-      expect(r.catalog.theme('ember'), isNull);
+      expect(r.catalog.theme('spider-night'), isNull);
       expect(r.hiddenForUpdate, 1);
 
       final newer = repo(appVersion: '2.0.0');
       await newer.start(refresh: false);
-      expect(newer.catalog.theme('ember'), isNotNull);
+      expect(newer.catalog.theme('spider-night'), isNotNull);
       expect(newer.hiddenForUpdate, 0);
     });
 
@@ -263,8 +263,11 @@ void main() {
         final r = repo(engines: EngineIds.builtIn);
         await r.start(refresh: false);
         await r.refresh();
-        expect(r.catalog.themes, hasLength(3));
-        expect(r.catalog.issues, isEmpty);
+        expect(r.catalog.themes.map((t) => t.id), [
+          'halloween-night',
+          'christmas-eve',
+          'thingyan-water',
+        ]);
       },
     );
   });
@@ -313,33 +316,36 @@ void main() {
     });
 
     test('download once, then come from memory', () async {
-      final a = await r.theme('cozy-cabin');
-      final b = await r.theme('cozy-cabin');
+      final a = await r.theme('christmas-eve');
+      final b = await r.theme('christmas-eve');
       expect(identical(a, b), isTrue);
-      expect(a.variants, hasLength(2));
-      expect(source.requests['themes/cozy-cabin.1.json'], 1);
-      expect(r.cachedTheme('cozy-cabin'), same(a));
+      expect(a.variants, hasLength(3));
+      expect(source.requests[_themeFile('christmas-eve')], 1);
+      expect(r.cachedTheme('christmas-eve'), same(a));
     });
 
     test('two pages opening the same theme share one download', () async {
-      final results = await Future.wait([r.theme('ember'), r.theme('ember')]);
+      final results = await Future.wait([
+        r.theme('spider-night'),
+        r.theme('spider-night'),
+      ]);
       expect(identical(results[0], results[1]), isTrue);
-      expect(source.requests['themes/ember.1.json'], 1);
+      expect(source.requests[_themeFile('spider-night')], 1);
     });
 
     test('a theme opened once still opens offline next launch', () async {
-      await r.theme('cozy-cabin');
+      await r.theme('spider-night');
       source.offline = true;
       final next = repo();
       await next.start(refresh: false);
-      final theme = await next.theme('cozy-cabin');
-      expect(theme.name.en, 'Cozy Cabin');
+      final theme = await next.theme('spider-night');
+      expect(theme.name.en, 'Spider Night');
     });
 
     test('a theme never opened can\'t open offline, and says why', () async {
       source.offline = true;
       await expectLater(
-        r.theme('gold-ornaments'),
+        r.theme('spider-night'),
         throwsA(
           isA<ThemeUnavailableException>().having(
             (e) => e.isOffline,
@@ -357,14 +363,17 @@ void main() {
     });
 
     test('a file for the wrong theme or rev is rejected', () async {
-      source.files['themes/ember.1.json'] = _bytes(
-        jsonDecode(File('$mockDir/themes/quiet-ink.1.json').readAsStringSync()),
+      final file = _themeFile('spider-night');
+      source.files[file] = _bytes(
+        jsonDecode(
+          File('$mockDir/${_themeFile('halloween-night')}').readAsStringSync(),
+        ),
       );
       await expectLater(
-        r.theme('ember'),
+        r.theme('spider-night'),
         throwsA(isA<ThemeUnavailableException>()),
       );
-      expect(store.files.containsKey('themes/ember.1.json'), isFalse);
+      expect(store.files.containsKey(file), isFalse);
     });
 
     test('an ID the catalog doesn\'t list', () async {
@@ -381,17 +390,27 @@ void main() {
     });
 
     test('files for themes a new version removed are deleted', () async {
-      await r.theme('slate');
-      await r.theme('ember');
+      await r.theme('spider-night');
+      await r.theme('halloween-night');
+      final spider = _themeFile('spider-night');
+      final haunted = _themeFile('halloween-night');
       final json = seedCatalogJson();
-      (json['themes'] as List).removeWhere((t) => t['id'] == 'slate');
+      (json['themes'] as List).removeWhere((t) => t['id'] == 'spider-night');
       source.publish(json, '2026-10-16.1');
       await r.refresh();
       await pumpEventQueue();
-      expect(store.files.containsKey('themes/slate.1.json'), isFalse);
-      expect(store.files.containsKey('themes/ember.1.json'), isTrue);
+      expect(store.files.containsKey(spider), isFalse);
+      expect(store.files.containsKey(haunted), isTrue);
     });
   });
+}
+
+/// A theme's file in the mock catalog, at whatever rev it's on.
+String _themeFile(String id) {
+  final theme = (seedCatalogJson()['themes'] as List).firstWhere(
+    (t) => t['id'] == id,
+  );
+  return 'themes/$id.${theme['rev']}.json';
 }
 
 String _sha(List<int> bytes) => sha256.convert(bytes).toString();

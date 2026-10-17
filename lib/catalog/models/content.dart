@@ -110,9 +110,6 @@ class WallpaperImage {
   final HexColor dominant;
   final String? blurhash;
 
-  ImageSize sizeFor(int screenWidth) =>
-      sizes.firstWhere((s) => s.width >= screenWidth, orElse: () => sizes.last);
-
   Map<String, Object?> toJson() => compact({
     'sizes': [for (final s in sizes) s.toJson()],
     'blurhash': blurhash,
@@ -272,8 +269,6 @@ class FontFile {
   final int? maxWeight;
   final String style;
 
-  bool get isVariable => maxWeight != null;
-
   Map<String, Object?> toJson() => compact({
     'weight': weight,
     'maxWeight': maxWeight,
@@ -415,9 +410,9 @@ class BannerLook {
   });
 }
 
-/// The app symbols an icon pack can redraw. Apps are matched to a key by
-/// package name or label in the app (app_glyphs.dart); apps without a key,
-/// or whose key a pack doesn't draw, keep their own icon, tinted.
+/// The kinds of app the store's previews show an icon pack with (Phone,
+/// Messages, …) when it has no real apps to show: a symbol for each, on the
+/// pack's tile.
 abstract final class GlyphKeys {
   static const all = [
     'phone',
@@ -447,7 +442,8 @@ enum IconPackKind {
   /// Drawn on the phone by ThemedIconPainter in a built-in style.
   painted,
 
-  /// One downloaded picture per glyph key.
+  /// A downloaded [IconPack.background] tile, with each app's own logo on
+  /// it.
   images,
 }
 
@@ -466,28 +462,19 @@ class IconPack {
     required this.ring,
     required this.publishedAt,
     this.painter,
-    this.glyphs = const {},
     this.background,
     this.popularity = 0,
   });
 
   factory IconPack.fromJson(JsonReader r) {
     final kind = r.enumValue('kind', IconPackKind.values);
-    final glyphs = <String, AssetRef>{};
-    final rawGlyphs = r.optObject('glyphs');
-    for (final key in rawGlyphs?.json.keys ?? const <String>[]) {
-      if (!GlyphKeys.all.contains(key)) {
-        throw CatalogFormatException(rawGlyphs!.at(key), 'unknown glyph key');
-      }
-      glyphs[key] = AssetRef.fromJson(rawGlyphs!.object(key));
-    }
     final rawBackground = r.optObject('background');
     final painter = r.optId('painter');
     if (kind == IconPackKind.painted && painter == null) {
       r.fail('painter', 'a painted pack names its painter style');
     }
-    if (kind == IconPackKind.images && glyphs.isEmpty) {
-      r.fail('glyphs', 'an image pack needs at least one glyph');
+    if (kind == IconPackKind.images && rawBackground == null) {
+      r.fail('background', 'an image pack needs its background tile');
     }
     return IconPack(
       id: r.id('id'),
@@ -500,7 +487,6 @@ class IconPack {
       tile: r.optColor('tile'),
       glyph: r.color('glyph'),
       ring: r.color('ring'),
-      glyphs: glyphs,
       background: rawBackground == null
           ? null
           : AssetRef.fromJson(rawBackground),
@@ -527,17 +513,15 @@ class IconPack {
   final HexColor? tile;
   final HexColor glyph;
   final HexColor ring;
-  final Map<String, AssetRef> glyphs;
 
-  /// [IconPackKind.images] only, optional: the pack's empty tile (its
-  /// pictures without a glyph). Apps the pack has no picture for show their
-  /// own icon on it; without one they sit on a plain [tile] colour.
+  /// [IconPackKind.images] only (required there): the pack's tile picture.
+  /// wallp Home puts every app's own logo on it.
   final AssetRef? background;
   final DateTime publishedAt;
   final int popularity;
 
   /// Every picture the pack downloads.
-  Iterable<AssetRef> get assets => [...glyphs.values, ?background];
+  Iterable<AssetRef> get assets => [?background];
 
   int get bytes => assets.fold(0, (sum, a) => sum + a.bytes);
 
@@ -557,12 +541,6 @@ class IconPack {
     'tile': tile?.hex,
     'glyph': glyph.hex,
     'ring': ring.hex,
-    'glyphs': glyphs.isEmpty
-        ? null
-        : {
-            for (final key in GlyphKeys.all)
-              if (glyphs[key] case final a?) key: a.toJson(),
-          },
     'background': background?.toJson(),
     'publishedAt': publishedAt.toIso8601String(),
     'popularity': popularity,

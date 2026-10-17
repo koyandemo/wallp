@@ -205,7 +205,7 @@ class Catalog {
   )._withoutBrokenReferences();
 
   /// Every reference that points at nothing, e.g.
-  /// `themes[cozy-cabin].iconPackId: no icon pack "x"`.
+  /// `themes[spider-night].iconPackId: no icon pack "x"`.
   ///
   /// Publishing wants none at all. The app, reading a catalog, only acts on
   /// *hard* references (an item can't work without its target). *Soft* ones

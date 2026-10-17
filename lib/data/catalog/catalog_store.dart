@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 /// The phone's copy of catalog JSON files, so the store opens instantly and
 /// works offline. Keys are catalog paths: `manifest.json`,
-/// `catalog.json`, `themes/ember.1.json`.
+/// `catalog.json`, `themes/spider-night.3.json`.
 ///
 /// Downloaded assets (images, fonts) get their own cache in Phase 5; this
 /// only holds the small JSON files.

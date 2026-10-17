@@ -166,7 +166,12 @@ class _PackChip extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   for (final key in const ['phone', 'messages', 'camera'])
-                    PackIcon(pack: pack, glyphKey: key, shape: shape, size: 36),
+                    PackIcon(
+                      pack: pack,
+                      app: sampleApp(key),
+                      shape: shape,
+                      size: 36,
+                    ),
                 ],
               ),
               const Spacer(),

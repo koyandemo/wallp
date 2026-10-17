@@ -42,41 +42,41 @@ void main() {
   test('applying a whole theme saves it and tells listeners', () async {
     var notified = 0;
     looks.addListener(() => notified++);
-    final look = await looks.applyTheme('cozy-cabin', variantId: 'snowed-in');
+    final look = await looks.applyTheme('christmas-eve', variantId: 'midnight');
     expect(looks.isApplied, isTrue);
     expect(looks.look, same(look));
-    expect(look.palette.background.hex, '#2A3440');
+    expect(look.palette.background.hex, '#10223D');
     expect(notified, 1);
   });
 
   test('each part changes on its own and the rest stays', () async {
-    await looks.applyTheme('cozy-cabin');
+    await looks.applyTheme('spider-night');
     await looks.applyTheme(
-      'gold-ornaments',
+      'christmas-eve',
       option: ApplyOption.wallpaperOnly,
-      variantId: 'emerald',
+      variantId: 'midnight',
     );
     await looks.applyTheme(
       'halloween-night',
       option: ApplyOption.clockFontOnly,
     );
-    await looks.applyIconPack('quiet-line', shape: IconShape.circle);
-    final preset = catalog.catalog.accentPresets.gradients.first;
-    final look = await looks.setAccent(preset);
+    final look = await looks.applyIconPack(
+      'spooky-glow',
+      shape: IconShape.circle,
+    );
 
-    expect(look.theme.id, 'cozy-cabin');
-    expect(look.wallpaper.theme!.id, 'gold-ornaments');
-    expect(look.wallpaper.variantId, 'emerald');
+    expect(look.theme.id, 'spider-night');
+    expect(look.wallpaper.theme!.id, 'christmas-eve');
+    expect(look.wallpaper.variantId, 'midnight');
     expect(look.clock.fontId, 'creepster');
-    expect(look.icons.pack.id, 'quiet-line');
+    expect(look.icons.pack.id, 'spooky-glow');
     expect(look.icons.shape, IconShape.circle);
-    expect(look.accent.id, preset.id);
   });
 
   test(
     'what the store applies is what wallp Home and the wallpaper read',
     () async {
-      await looks.applyTheme('festival-of-lights');
+      await looks.applyTheme('thingyan-water');
       await looks.applyClockFont(
         'bebas-neue',
         size: ClockSize.small,
@@ -93,18 +93,18 @@ void main() {
   test(
     'a pending apply waits for wallp Home and changes nothing yet',
     () async {
-      await looks.applyTheme('ember', asPending: true);
+      await looks.applyTheme('spider-night', asPending: true);
       expect(looks.isApplied, isFalse);
       expect(looks.look!.theme.id, 'halloween-night');
       final pending = await LookStore().takePending(now: designDay);
-      expect(pending!.theme.id, 'ember');
+      expect(pending!.theme.id, 'spider-night');
     },
   );
 
   test('if preparing fails (say, a download), the old look stays', () async {
     final failing = controller(prepare: (_, _) => throw StateError('no space'));
     await failing.load();
-    await expectLater(failing.applyTheme('ember'), throwsStateError);
+    await expectLater(failing.applyTheme('spider-night'), throwsStateError);
     expect(failing.isApplied, isFalse);
     expect(await LookStore().saved(), isNull);
   });
@@ -113,7 +113,7 @@ void main() {
     AppliedLook? prepared;
     final c = controller(prepare: (next, _) async => prepared = next);
     await c.load();
-    final look = await c.applyTheme('slate');
+    final look = await c.applyTheme('christmas-eve');
     expect(prepared, same(look));
   });
 
@@ -128,28 +128,29 @@ void main() {
         looks.applyIconPack('nope'),
         throwsA(isA<NotInCatalogException>()),
       );
-      expect((await looks.applyTheme('ember')).theme.id, 'ember');
+      expect((await looks.applyTheme('spider-night')).theme.id, 'spider-night');
     },
   );
 
   test('a theme that can\'t load offline is refused; the look stays', () async {
-    await looks.applyTheme('ember');
+    await looks.applyTheme('christmas-eve');
     source.offline = true;
+    // Never opened, and not built in.
     await expectLater(
-      looks.applyTheme('gold-ornaments'),
+      looks.applyTheme('spider-night'),
       throwsA(isA<ThemeUnavailableException>()),
     );
-    expect(looks.look!.theme.id, 'ember');
+    expect(looks.look!.theme.id, 'christmas-eve');
   });
 
   test('quick taps apply in order, none lost', () async {
-    final a = looks.applyTheme('cozy-cabin');
-    final b = looks.applyIconPack('mono-ember');
-    final c = looks.applyClockFont('pacifico');
+    final a = looks.applyTheme('spider-night');
+    final b = looks.applyIconPack('gold-ornament');
+    final c = looks.applyClockFont('playfair-display');
     await Future.wait([a, b, c]);
     final look = looks.look!;
-    expect(look.theme.id, 'cozy-cabin');
-    expect(look.icons.pack.id, 'mono-ember');
-    expect(look.clock.fontId, 'pacifico');
+    expect(look.theme.id, 'spider-night');
+    expect(look.icons.pack.id, 'gold-ornament');
+    expect(look.clock.fontId, 'playfair-display');
   });
 }

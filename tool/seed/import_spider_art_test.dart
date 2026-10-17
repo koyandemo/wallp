@@ -1,15 +1,13 @@
 // Imports Spider Night pictures made in an outside image generator
 // (docs/spiderman-script.md) in place of the drawn ones:
 //
-//   tool/seed/incoming/spider-night/icons/<glyph>.png   20 app icons
-//   tool/seed/incoming/spider-night/icons/background.png  the empty tile,
-//                                         for apps without an icon
+//   tool/seed/incoming/spider-night/icons/background.png  the icon tile
 //   tool/seed/incoming/spider-night/skyline.png         bottom scene layer
 //   tool/seed/incoming/spider-night/web.png             top scene layer
 //
 //   flutter test tool/seed/import_spider_art_test.dart
 //
-// PNG, JPG or WebP. Icons are centre-cropped square and resized to
+// PNG, JPG or WebP. The tile is centre-cropped square and resized to
 // [iconPixels]. Layers are resized to 1080 px wide; a solid green
 // (#00FF00) background is made transparent, since most generators can't
 // export transparency. Missing files keep the current picture.
@@ -36,12 +34,8 @@ void main() {
     }
     final imported = <String>[];
 
-    for (final glyph in [...glyphPaths.keys, null]) {
-      final source = _find('$_incoming/icons/${glyph ?? 'background'}');
-      if (source == null) continue;
-      final out = glyph == null
-          ? backgroundPath('web-slinger')
-          : iconPath('web-slinger', glyph);
+    if (_find('$_incoming/icons/background') case final source?) {
+      final out = backgroundPath(webSlinger.id);
       await _import(source, out, square: true);
       imported.add(out);
     }
@@ -82,7 +76,7 @@ Future<void> _import(String source, String out, {required bool square}) async {
   final image = (await codec.getNextFrame()).image;
   final iw = image.width.toDouble(), ih = image.height.toDouble();
 
-  // Icons: the centre square. Layers: the whole picture.
+  // The tile: the centre square. Layers: the whole picture.
   final side = iw < ih ? iw : ih;
   final from = square
       ? ui.Rect.fromCenter(

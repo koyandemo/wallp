@@ -86,13 +86,7 @@ class ResolvedLook {
         hasIconPack: iconStyle != null,
         iconStyle: iconStyle,
         imageIcons: pack.kind == IconPackKind.images
-            ? ImageIconPack(
-                glyphs: pack.glyphs,
-                background: pack.background,
-                shape: look.icons.shape,
-                tile: pack.tile == null ? null : _color(pack.tile!),
-                ring: _color(pack.ring),
-              )
+            ? ImageIconPack.of(pack, look.icons.shape)
             : null,
         iconShape: look.icons.shape,
         labelColor: switch (look.icons.labels) {
@@ -139,8 +133,6 @@ class ResolvedLook {
   final Color onAccent;
 
   double get clockScale => look.clock.size.scale;
-
-  String get themeName => look.theme.name.en;
 }
 
 Color _color(HexColor c) => Color(c.argb);

@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2026-10-15.1-demo.8",
+  "catalogVersion": "2026-10-15.1-demo.10",
   "festivals": [
     {
       "id": "halloween",
@@ -99,7 +99,7 @@
         "outline": "#2C3660",
         "nav": "#0E1330",
         "muted": "#A9B3CF",
-        "brand": "#E23636",
+        "brand": "#CB3131",
         "displayFont": "bebas-neue"
       },
       "coverThemeId": "spider-night"
@@ -246,7 +246,7 @@
     },
     {
       "id": "spider-night",
-      "rev": 3,
+      "rev": 4,
       "festivalId": "heroes",
       "name": {
         "en": "Spider Night"
@@ -856,7 +856,7 @@
       },
       "displayFont": "bebas-neue",
       "iconPackId": "web-slinger",
-      "downloadBytes": 982544
+      "downloadBytes": 485241
     }
   ],
   "wallpapers": [
@@ -2350,128 +2350,6 @@
       "tile": "#D3202A",
       "glyph": "#FFFFFF",
       "ring": "#0A0A12",
-      "glyphs": {
-        "phone": {
-          "url": "assets/c8c7db55ddf57fc23e43f3414aeb80c4a7accaf65820cd82292c74373121e3c6.png",
-          "sha256": "c8c7db55ddf57fc23e43f3414aeb80c4a7accaf65820cd82292c74373121e3c6",
-          "bytes": 27333,
-          "format": "png"
-        },
-        "messages": {
-          "url": "assets/22ff77a5a4fdb3ff7c40f739a5973fe2f0a4c045b2f382c40aeea8c4ec97b763.png",
-          "sha256": "22ff77a5a4fdb3ff7c40f739a5973fe2f0a4c045b2f382c40aeea8c4ec97b763",
-          "bytes": 22132,
-          "format": "png"
-        },
-        "camera": {
-          "url": "assets/ce27cabc913ec3ba1860a5420071d0fba3130a8989a3bd4219aa3cb127e1416c.png",
-          "sha256": "ce27cabc913ec3ba1860a5420071d0fba3130a8989a3bd4219aa3cb127e1416c",
-          "bytes": 24121,
-          "format": "png"
-        },
-        "maps": {
-          "url": "assets/2051e5be28838b43d6f4d644fbba97d165de9e83b9b01cc4b2c1b550e427ec40.png",
-          "sha256": "2051e5be28838b43d6f4d644fbba97d165de9e83b9b01cc4b2c1b550e427ec40",
-          "bytes": 28447,
-          "format": "png"
-        },
-        "music": {
-          "url": "assets/4b72f97f23f20e559bde9e6204e8f56304c095c2057dbeb7d0592f67812ba7f2.png",
-          "sha256": "4b72f97f23f20e559bde9e6204e8f56304c095c2057dbeb7d0592f67812ba7f2",
-          "bytes": 25775,
-          "format": "png"
-        },
-        "mail": {
-          "url": "assets/5f56e4714fcbb55a99b2d9bc40d7b003e6fe1a105612c460a392b6f09dca145f.png",
-          "sha256": "5f56e4714fcbb55a99b2d9bc40d7b003e6fe1a105612c460a392b6f09dca145f",
-          "bytes": 23040,
-          "format": "png"
-        },
-        "photos": {
-          "url": "assets/7b176f0bbad8bbb0bd6fb55730774f13ecd7061b8ba5ffee38005056ad494e3d.png",
-          "sha256": "7b176f0bbad8bbb0bd6fb55730774f13ecd7061b8ba5ffee38005056ad494e3d",
-          "bytes": 24248,
-          "format": "png"
-        },
-        "clock": {
-          "url": "assets/834c5c630e8995a059b4c93925a7705cde1d8a4cd44451c9dbdf77804f5e8f60.png",
-          "sha256": "834c5c630e8995a059b4c93925a7705cde1d8a4cd44451c9dbdf77804f5e8f60",
-          "bytes": 27908,
-          "format": "png"
-        },
-        "calendar": {
-          "url": "assets/c89ced4da920c250949d9ea9ccd5e28056455ad5c1485ef62d61e3e9de81e73e.png",
-          "sha256": "c89ced4da920c250949d9ea9ccd5e28056455ad5c1485ef62d61e3e9de81e73e",
-          "bytes": 21747,
-          "format": "png"
-        },
-        "settings": {
-          "url": "assets/3d2bd83e5a56a0197ddfdb2b1b4906969e7dda95d90c3aad94c2f75fb5c29d9a.png",
-          "sha256": "3d2bd83e5a56a0197ddfdb2b1b4906969e7dda95d90c3aad94c2f75fb5c29d9a",
-          "bytes": 29386,
-          "format": "png"
-        },
-        "browser": {
-          "url": "assets/e01fa908c1ddf39ce7f9be4f4d4e006302ae49291bb9aa9bd9f8578ad771c6ae.png",
-          "sha256": "e01fa908c1ddf39ce7f9be4f4d4e006302ae49291bb9aa9bd9f8578ad771c6ae",
-          "bytes": 27582,
-          "format": "png"
-        },
-        "weather": {
-          "url": "assets/5f5ecd1c14a27dd706384ee107380ee1591f5de242ef604b2f25b12772800838.png",
-          "sha256": "5f5ecd1c14a27dd706384ee107380ee1591f5de242ef604b2f25b12772800838",
-          "bytes": 26559,
-          "format": "png"
-        },
-        "notes": {
-          "url": "assets/36a7f4b10ec27695d83bd6126ac777a028678533a4b14039f939f2c607f30afa.png",
-          "sha256": "36a7f4b10ec27695d83bd6126ac777a028678533a4b14039f939f2c607f30afa",
-          "bytes": 21706,
-          "format": "png"
-        },
-        "calculator": {
-          "url": "assets/6717d4d7121be199e1d276d2f598b973d7baeb77210894152ff8a1439d5d660f.png",
-          "sha256": "6717d4d7121be199e1d276d2f598b973d7baeb77210894152ff8a1439d5d660f",
-          "bytes": 22436,
-          "format": "png"
-        },
-        "wallet": {
-          "url": "assets/9428fa65fb03da57976250a4ffad52dfb6328b804d063b90ded297804f3c8634.png",
-          "sha256": "9428fa65fb03da57976250a4ffad52dfb6328b804d063b90ded297804f3c8634",
-          "bytes": 22416,
-          "format": "png"
-        },
-        "store": {
-          "url": "assets/031969f10bcf554a531fedd6e889a6dc1b1d076b4eb4917a2fc1207a3a720ce1.png",
-          "sha256": "031969f10bcf554a531fedd6e889a6dc1b1d076b4eb4917a2fc1207a3a720ce1",
-          "bytes": 23333,
-          "format": "png"
-        },
-        "video": {
-          "url": "assets/2c96536b143bcc79955ee65f77c57a3ded7b9f9462aedd782186a12d62e2da02.png",
-          "sha256": "2c96536b143bcc79955ee65f77c57a3ded7b9f9462aedd782186a12d62e2da02",
-          "bytes": 22846,
-          "format": "png"
-        },
-        "contacts": {
-          "url": "assets/c44ec536cf8cd40cee4abf4e7472cb4674d9b6f00cfe6fab993e710bbacb8f0c.png",
-          "sha256": "c44ec536cf8cd40cee4abf4e7472cb4674d9b6f00cfe6fab993e710bbacb8f0c",
-          "bytes": 27352,
-          "format": "png"
-        },
-        "files": {
-          "url": "assets/cc14a899e4490a0dc2e775eb38a6a375a00e033b0d2915049a8f895b7aa424dc.png",
-          "sha256": "cc14a899e4490a0dc2e775eb38a6a375a00e033b0d2915049a8f895b7aa424dc",
-          "bytes": 22117,
-          "format": "png"
-        },
-        "health": {
-          "url": "assets/719d7b6f02b66df85a880c71e29624eccb969addf3ce0634d59283829ad49d34.png",
-          "sha256": "719d7b6f02b66df85a880c71e29624eccb969addf3ce0634d59283829ad49d34",
-          "bytes": 26819,
-          "format": "png"
-        }
-      },
       "background": {
         "url": "assets/3c5d137f449ecb0bbbcd95b9bedfdaf636cff1c54dc2a3d9b940120917a700bb.png",
         "sha256": "3c5d137f449ecb0bbbcd95b9bedfdaf636cff1c54dc2a3d9b940120917a700bb",

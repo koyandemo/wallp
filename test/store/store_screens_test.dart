@@ -54,28 +54,28 @@ void main() {
       );
       // Store home: today's banners and the soonest festival first.
       expect(
-        find.bySemanticsLabel(RegExp('Halloween Night, banner 1 of 4')),
+        find.bySemanticsLabel(RegExp('Spider Night, banner 1 of 5')),
         findsOneWidget,
       );
-      expect(find.text('16 nights left · 8 themes'), findsOneWidget);
+      expect(find.text('16 nights left · 1 theme'), findsOneWidget);
 
       await tapTab(tester, 'Themes');
-      expect(find.text('30 themes'), findsOneWidget);
+      expect(find.text('4 themes'), findsOneWidget);
       await tapTab(tester, 'Wallpapers');
-      expect(find.text('12 wallpapers'), findsOneWidget);
+      expect(find.text('5 wallpapers'), findsOneWidget);
       await tapTab(tester, 'Fonts');
-      expect(find.text('10 fonts for the lock and home clock'), findsOneWidget);
+      expect(find.text('7 fonts for the lock and home clock'), findsOneWidget);
       await tapTab(tester, 'Me');
       expect(find.text('Your look, favourites and settings'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });
 
-  group('the app\'s demo catalog', () {
+  group('the catalog', () {
     testWidgets('one theme each for Halloween, Christmas, Thingyan, Heroes', (
       tester,
     ) async {
-      await h.pump(tester, demo: true);
+      await h.pump(tester);
       await tapTab(tester, 'Themes');
       expect(find.text('4 themes'), findsOneWidget);
       for (final name in [
@@ -99,12 +99,13 @@ void main() {
       await h.pump(tester);
       await tapTab(tester, 'Themes');
       await tapChip(tester, 'Myanmar');
-      expect(find.text('9 themes'), findsOneWidget);
+      expect(find.text('1 theme'), findsOneWidget);
+      expect(find.text('Water Splash'), findsOneWidget);
 
       await tapChip(tester, 'Festivals');
-      expect(find.text('5 festivals'), findsOneWidget);
+      expect(find.text('4 festivals'), findsOneWidget);
       expect(
-        find.bySemanticsLabel(RegExp(r'^Christmas, 71 days left, 10 themes')),
+        find.bySemanticsLabel(RegExp(r'^Christmas, 71 days left, 1 theme')),
         findsOneWidget,
       );
 
@@ -116,36 +117,27 @@ void main() {
 
   group('festival page', () {
     testWidgets('only styles the festival has, and Live', (tester) async {
-      await h.pump(
-        tester,
-        home: const FestivalScreen(festivalId: 'thadingyut'),
-      );
+      await h.pump(tester, home: const FestivalScreen(festivalId: 'halloween'));
       await settle(tester);
-      expect(find.text('3 themes'), findsWidgets);
-      // Thadingyut has classic, cozy and cute themes, no minimal ones.
+      expect(find.text('1 theme'), findsWidgets);
+      // Halloween has one classic theme: no chips for other styles.
       expect(find.text('Minimal'), findsNothing);
-      expect(
-        find.text('Cozy'),
-        findsWidgets,
-      ); // the chip, and Candle Glow's card
+      expect(find.text('Cozy'), findsNothing);
       await tapChip(tester, 'Live');
-      expect(find.text('2 themes'), findsOneWidget);
+      expect(find.text('1 theme'), findsWidgets);
       await tester.pumpWidget(const SizedBox());
     });
 
     testWidgets('quick look steps through themes', (tester) async {
       await h.pump(
         tester,
-        home: const FestivalScreen(festivalId: 'thadingyut'),
-        themes: ['festival-of-lights', 'candle-glow', 'paper-lanterns'],
+        home: const FestivalScreen(festivalId: 'heroes'),
+        themes: ['spider-night'],
       );
       await settle(tester);
-      await tester.tap(find.byTooltip('Quick look at Festival of Lights'));
+      await tester.tap(find.byTooltip('Quick look at Spider Night'));
       await settle(tester);
-      expect(find.text('1 of 3'), findsOneWidget);
-      await tester.tap(find.byTooltip('Next theme'));
-      await settle(tester);
-      expect(find.text('2 of 3'), findsOneWidget);
+      expect(find.text('1 of 1'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });
@@ -156,17 +148,16 @@ void main() {
     ) async {
       await h.pump(
         tester,
-        home: const ThemeDetailScreen(themeId: 'cozy-cabin'),
-        themes: ['cozy-cabin'],
+        home: const ThemeDetailScreen(themeId: 'spider-night'),
+        themes: ['spider-night'],
       );
       await settle(tester);
-      expect(find.text('Cozy Cabin'), findsOneWidget);
+      expect(find.text('Spider Night'), findsOneWidget);
       expect(find.text('Colours'), findsNothing);
-      expect(find.bySemanticsLabel('Snowed in'), findsNothing);
-      await scrollTo(tester, find.text('Caveat clock font'));
-      expect(find.text('Wallpaper'), findsOneWidget);
-      expect(find.text('Candy Cane icons'), findsOneWidget);
-      expect(find.text('Caveat clock font'), findsOneWidget);
+      await scrollTo(tester, find.text('Bebas Neue clock font'));
+      expect(find.text('Live wallpaper'), findsOneWidget);
+      expect(find.text('Web Slinger icons'), findsOneWidget);
+      expect(find.text('Bebas Neue clock font'), findsOneWidget);
       expect(find.textContaining('Apply'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
@@ -174,13 +165,13 @@ void main() {
     testWidgets('the heart saves a favourite', (tester) async {
       await h.pump(
         tester,
-        home: const ThemeDetailScreen(themeId: 'cozy-cabin'),
-        themes: ['cozy-cabin'],
+        home: const ThemeDetailScreen(themeId: 'spider-night'),
+        themes: ['spider-night'],
       );
       await settle(tester);
       await tester.tap(find.byTooltip('Add to favourites'));
       await settle(tester);
-      expect(h.user.isFavouriteTheme('cozy-cabin'), isTrue);
+      expect(h.user.isFavouriteTheme('spider-night'), isTrue);
       expect(find.byTooltip('Remove from favourites'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
@@ -188,17 +179,20 @@ void main() {
     testWidgets('the Apply sheet offers all three ways', (tester) async {
       await h.pump(
         tester,
-        home: const ThemeDetailScreen(themeId: 'cozy-cabin'),
-        themes: ['cozy-cabin'],
+        home: const ThemeDetailScreen(themeId: 'spider-night'),
+        themes: ['spider-night'],
       );
       await settle(tester);
       await tester.tap(find.byType(FilledButton));
       await settle(tester);
-      expect(find.text('Apply Cozy Cabin'), findsOneWidget);
+      expect(find.text('Apply Spider Night'), findsOneWidget);
       expect(find.text('Whole theme'), findsOneWidget);
       expect(find.text('Wallpaper only'), findsOneWidget);
       expect(find.text('Clock font only'), findsOneWidget);
-      expect(find.text('Caveat on the lock and home clock'), findsOneWidget);
+      expect(
+        find.text('Bebas Neue on the lock and home clock'),
+        findsOneWidget,
+      );
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -266,17 +260,17 @@ void main() {
     ) async {
       await h.pump(tester);
       await tester.runAsync(() async {
-        await h.user.toggleTheme('ember');
-        await h.user.toggleTheme('cozy-cabin');
+        await h.user.toggleTheme('halloween-night');
+        await h.user.toggleTheme('spider-night');
       });
       await tapTab(tester, 'Me');
       expect(find.text('2 themes'), findsOneWidget);
-      await tester.tap(find.byTooltip('Remove Cozy Cabin from favourites'));
+      await tester.tap(find.byTooltip('Remove Spider Night from favourites'));
       await settle(tester);
-      expect(h.user.favouriteThemes, ['ember']);
+      expect(h.user.favouriteThemes, ['halloween-night']);
       await tester.tap(find.text('Undo'));
       await settle(tester);
-      expect(h.user.favouriteThemes, ['cozy-cabin', 'ember']);
+      expect(h.user.favouriteThemes, ['spider-night', 'halloween-night']);
       await tester.pumpWidget(const SizedBox());
     });
 

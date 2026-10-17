@@ -279,9 +279,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ThemedIcon), findsWidgets, reason: 'Spooky Glow icons');
 
-    // A downloaded (image) icon pack: drawn in Phase 6, own icons until then.
+    // A downloaded (image) icon pack: each app's own logo on its tile.
     await LookStore().save(
-      halloween.withIconPack(catalog.iconPack('moonlit')!, at: designDay),
+      halloween.withIconPack(catalog.iconPack('web-slinger')!, at: designDay),
     );
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);

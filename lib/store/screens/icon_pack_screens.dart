@@ -3,15 +3,16 @@ import 'package:provider/provider.dart';
 
 import '../../catalog/catalog.dart';
 import '../../core/store_palette.dart';
-import '../../data/assets/asset_cache.dart';
+import '../../data/assets/download_manager.dart';
 import '../../look/applied_look.dart';
 import '../../look/look_controller.dart';
 import '../../look/resolved_look.dart';
 import '../../icons/themed_icon_painter.dart';
 import '../../models/phone_theme.dart';
 import '../../render/font_registry.dart';
-import '../../render/icon_shape.dart';
-import '../../render/scene_assets.dart';
+import '../../launcher/launcher_icon.dart';
+import '../../render/image_icons.dart';
+import '../../services/icon_pack_service.dart';
 import '../../services/launcher_service.dart';
 import '../apply_flow.dart';
 import '../logic/queries.dart';
@@ -56,7 +57,7 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
               child: Text(
-                '${plural(packs.length, 'pack')} · ${GlyphKeys.all.length} icons in each',
+                '${plural(packs.length, 'pack')} · your own app logos on each',
                 style: TextStyle(fontSize: 13, color: context.palette.muted),
               ),
             ),
@@ -124,16 +125,60 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
   }
 }
 
-/// One pack: every icon (searchable), the tile shape, and Apply.
+/// Stand-ins for the phone's apps where there are none to show (the
+/// store's cards, or a phone that isn't Android): one per kind of app, drawn
+/// as its symbol on the pack's tile.
+final sampleApps = [
+  for (final key in GlyphKeys.all)
+    InstalledApp(
+      packageName: 'sample.$key',
+      label: key[0].toUpperCase() + key.substring(1),
+      symbol: _sampleSymbols[key],
+    ),
+];
+
+const _sampleSymbols = <String, IconData>{
+  'phone': Icons.phone_rounded,
+  'messages': Icons.chat_bubble_rounded,
+  'camera': Icons.photo_camera_rounded,
+  'maps': Icons.place_rounded,
+  'music': Icons.music_note_rounded,
+  'mail': Icons.mail_rounded,
+  'photos': Icons.photo_rounded,
+  'clock': Icons.schedule_rounded,
+  'calendar': Icons.calendar_month_rounded,
+  'settings': Icons.settings_rounded,
+  'browser': Icons.public_rounded,
+  'weather': Icons.cloud_rounded,
+  'notes': Icons.sticky_note_2_rounded,
+  'calculator': Icons.calculate_rounded,
+  'wallet': Icons.account_balance_wallet_rounded,
+  'store': Icons.shopping_bag_rounded,
+  'video': Icons.videocam_rounded,
+  'contacts': Icons.contacts_rounded,
+  'files': Icons.folder_rounded,
+  'health': Icons.favorite_rounded,
+};
+
+/// The sample app for [key] (`phone`, `messages`…).
+InstalledApp sampleApp(String key) => sampleApps[GlyphKeys.all.indexOf(key)];
+
+/// One pack, previewed on the phone's own apps: the tile shape, the app
+/// name colour and font. Every choice goes on wallp Home the moment it's
+/// tapped; there's no Apply step.
 class IconPackDetailScreen extends StatefulWidget {
   const IconPackDetailScreen({
     super.key,
     required this.packId,
     this.flow = const ApplyFlow(),
+    this.apps = const IconPackService(),
   });
 
   final String packId;
   final ApplyFlow flow;
+
+  /// Where the preview's apps come from.
+  final IconPackService apps;
 
   @override
   State<IconPackDetailScreen> createState() => _IconPackDetailScreenState();
@@ -144,18 +189,45 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
   LabelColor? _labels;
   LabelFont? _labelFont;
   String _query = '';
-  bool _applying = false;
-  int? _missing;
+
+  /// The phone's apps, or [sampleApps] if they can't be listed.
+  List<InstalledApp> _apps = sampleApps;
+  bool _started = false;
 
   @override
   void initState() {
     super.initState();
     // Icon names redraw once the theme's downloaded font has loaded.
     FontRegistry.shared.addListener(_redraw);
+    _loadApps();
   }
 
   void _redraw() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _loadApps() async {
+    try {
+      final apps = await widget.apps.installedApps();
+      if (mounted && apps.isNotEmpty) setState(() => _apps = apps);
+    } on Object {
+      // Not Android, or the list failed: keep the sample apps.
+    }
+  }
+
+  /// Fetches the pack's background tile for the preview (a few KB), so it
+  /// shows without an Apply. Offline, the plain tile colour stands in.
+  Future<void> _fetchBackground(IconPack pack) async {
+    if (pack.assets.isEmpty) return;
+    try {
+      await context.read<DownloadManager>().ensure(
+        pack.assets,
+        label: pack.name.en,
+      );
+      _redraw();
+    } on Object {
+      // The tile colour stands in until it can download.
+    }
   }
 
   @override
@@ -173,9 +245,25 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
     _labelFont ??= pack?.labelFont ?? LabelFont.theme;
   }
 
-  Future<void> _refreshSize(IconPack pack) async {
-    final bytes = await context.read<AssetCache>().missingBytes(pack.assets);
-    if (mounted && bytes != _missing) setState(() => _missing = bytes);
+  /// Takes the user's change and puts the pack on wallp Home with it.
+  void _choose(
+    IconPack pack, {
+    IconShape? shape,
+    LabelColor? labels,
+    LabelFont? labelFont,
+  }) {
+    setState(() {
+      _shape = shape ?? _shape;
+      _labels = labels ?? _labels;
+      _labelFont = labelFont ?? _labelFont;
+    });
+    widget.flow.applyIconPack(
+      context,
+      pack,
+      shape: _shape ?? pack.shape,
+      labels: _labels,
+      labelFont: _labelFont,
+    );
   }
 
   @override
@@ -191,16 +279,19 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
         ),
       );
     }
-    if (_missing == null) _refreshSize(pack);
+    if (!_started) {
+      _started = true;
+      _fetchBackground(pack);
+    }
     final shape = _shape ?? pack.shape;
     final inUse =
         context.watch<LookController>().isApplied &&
         context.read<LookController>().look?.icons.pack.id == pack.id;
-    final keys = [
-      for (final k in GlyphKeys.all)
-        if (k.contains(_query.trim().toLowerCase())) k,
+    final query = _query.trim().toLowerCase();
+    final apps = [
+      for (final a in _apps)
+        if (a.label.toLowerCase().contains(query)) a,
     ];
-    final missing = _missing ?? 0;
     final look = context.watch<LookController>().look;
     final names = namesPreview(
       look,
@@ -211,11 +302,21 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(pack.name.en)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
         children: [
           Text(
-            '${GlyphKeys.all.length} icons · ${catalog.festival(pack.festivalId)?.name.en ?? ''} · ${pack.style.en}',
+            '${catalog.festival(pack.festivalId)?.name.en ?? ''} · ${pack.style.en}',
             style: TextStyle(fontSize: 13, color: context.palette.muted),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            inUse
+                ? 'On wallp Home. Changes show there right away.'
+                : 'Pick a shape or name colour to use it on wallp Home.',
+            style: TextStyle(
+              fontSize: 13,
+              color: inUse ? context.palette.brand : context.palette.muted,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -241,11 +342,11 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
                   Expanded(
                     child: _ShapeOption(
                       label: label,
-                      selected: shape == option,
-                      onTap: () => setState(() => _shape = option),
+                      selected: inUse && shape == option,
+                      onTap: () => _choose(pack, shape: option),
                       child: PackIcon(
                         pack: pack,
-                        glyphKey: 'phone',
+                        app: _apps.first,
                         shape: option,
                         size: 56,
                       ),
@@ -272,24 +373,25 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
           _LabelColours(
             pack: pack,
             shape: shape,
+            apps: _apps,
             value: _labels!,
-            onChanged: (l) => setState(() => _labels = l),
+            onChanged: (l) => _choose(pack, labels: l),
             font: _labelFont!,
-            onFont: (f) => setState(() => _labelFont = f),
+            onFont: (f) => _choose(pack, labelFont: f),
           ),
           const SizedBox(height: 16),
           TextField(
             decoration: const InputDecoration(
-              labelText: 'Find an icon',
+              labelText: 'Find an app',
               prefixIcon: Icon(Icons.search_rounded),
             ),
             onChanged: (q) => setState(() => _query = q),
           ),
           const SizedBox(height: 12),
           Text(
-            keys.length == GlyphKeys.all.length
-                ? '${keys.length} icons'
-                : '${keys.length} of ${GlyphKeys.all.length}',
+            apps.length == _apps.length
+                ? plural(apps.length, 'app')
+                : '${apps.length} of ${_apps.length}',
             style: TextStyle(fontSize: 12, color: context.palette.muted),
           ),
           const SizedBox(height: 8),
@@ -314,10 +416,10 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
             ),
             const SizedBox(height: 12),
           ],
-          if (keys.isEmpty)
+          if (apps.isEmpty)
             const EmptyMessage(
               icon: Icons.search_off_rounded,
-              title: 'No icon by that name',
+              title: 'No app by that name',
             )
           else
             GridView.count(
@@ -328,22 +430,18 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
               crossAxisSpacing: 8,
               childAspectRatio: 0.8,
               children: [
-                for (final key in keys)
+                for (final app in apps)
                   Column(
                     children: [
-                      PackIcon(
-                        pack: pack,
-                        glyphKey: key,
-                        shape: shape,
-                        size: 56,
-                      ),
+                      PackIcon(pack: pack, app: app, shape: shape, size: 56),
                       const SizedBox(height: 4),
                       Text(
-                        key[0].toUpperCase() + key.substring(1),
+                        app.label,
                         // In the App name colour and font being picked.
                         style: names.appNameStyle(
                           const TextStyle(fontSize: 11),
                         ),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -352,49 +450,11 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-          child: SizedBox(
-            height: 56,
-            child: FilledButton(
-              onPressed: _applying
-                  ? null
-                  : () async {
-                      setState(() => _applying = true);
-                      await widget.flow.applyIconPack(
-                        context,
-                        pack,
-                        shape: shape,
-                        labels: _labels,
-                        labelFont: _labelFont,
-                      );
-                      if (!mounted) return;
-                      setState(() => _applying = false);
-                      _refreshSize(pack);
-                    },
-              child: Text(
-                _applying
-                    ? 'Applying…'
-                    : inUse
-                    ? 'In use · apply again'
-                    : missing > 0
-                    ? 'Apply icon pack · ${formatBytes(missing)}'
-                    : 'Apply icon pack',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
 
-/// Three icons of [pack], for list rows.
+/// A pack's Phone icon, for list rows.
 class PackSample extends StatelessWidget {
   const PackSample({super.key, required this.pack, required this.size});
 
@@ -402,89 +462,49 @@ class PackSample extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      PackIcon(pack: pack, glyphKey: 'phone', shape: pack.shape, size: size);
+  Widget build(BuildContext context) => PackIcon(
+    pack: pack,
+    app: sampleApp('phone'),
+    shape: pack.shape,
+    size: size,
+  );
 }
 
-/// One icon of a pack: the downloaded picture if it's on the phone, else
-/// the pack's colours around a stand-in symbol (not downloaded yet).
+/// [app] in [pack], exactly as wallp Home draws it: a painted pack's themed
+/// icon, or the app's own logo (a sample app: its symbol) on a downloaded
+/// pack's tile, which shows its plain colour until the tile picture is on
+/// the phone.
 class PackIcon extends StatelessWidget {
   const PackIcon({
     super.key,
     required this.pack,
-    required this.glyphKey,
+    required this.app,
     required this.shape,
     required this.size,
   });
 
   final IconPack pack;
-  final String glyphKey;
+  final InstalledApp app;
   final IconShape shape;
   final double size;
 
-  static const _symbols = <String, IconData>{
-    'phone': Icons.phone_rounded,
-    'messages': Icons.chat_bubble_rounded,
-    'camera': Icons.photo_camera_rounded,
-    'maps': Icons.place_rounded,
-    'music': Icons.music_note_rounded,
-    'mail': Icons.mail_rounded,
-    'photos': Icons.photo_rounded,
-    'clock': Icons.schedule_rounded,
-    'calendar': Icons.calendar_month_rounded,
-    'settings': Icons.settings_rounded,
-    'browser': Icons.public_rounded,
-    'weather': Icons.cloud_rounded,
-    'notes': Icons.sticky_note_2_rounded,
-    'calculator': Icons.calculate_rounded,
-    'wallet': Icons.account_balance_wallet_rounded,
-    'store': Icons.shopping_bag_rounded,
-    'video': Icons.videocam_rounded,
-    'contacts': Icons.contacts_rounded,
-    'files': Icons.folder_rounded,
-    'health': Icons.favorite_rounded,
-  };
-
   @override
   Widget build(BuildContext context) {
-    // A painted pack: the theme's real icon, as wallp Home draws it.
     final painter = SceneKind.values.asNameMap()[pack.painter];
     if (pack.kind == IconPackKind.painted && painter != null) {
       return ThemedIcon(
         style: painter,
         accent: Color(pack.ring.argb),
-        glyph: _symbols[glyphKey],
+        glyph: app.glyph ?? (app.icon == null ? Icons.apps_rounded : null),
+        appIcon: app.icon,
         size: size,
         shape: shape,
       );
     }
-    final picture = pack.glyphs[glyphKey];
-    // Pictures are edge-to-edge art; the shape and its rim are drawn here.
-    final tile = pack.tile;
-    Widget framed(Widget child) => IconShapeTile(
-      shape: shape,
+    return PackTileIcon(
+      pack: ImageIconPack.of(pack, shape),
+      app: app,
       size: size,
-      ring: tile == null ? null : Color(pack.ring.argb),
-      child: child,
-    );
-    final fallback = framed(
-      ColoredBox(
-        color: tile == null ? Colors.transparent : Color(tile.argb),
-        child: Icon(
-          _symbols[glyphKey] ?? Icons.apps_rounded,
-          color: Color(pack.glyph.argb),
-          size: size * 0.5,
-        ),
-      ),
-    );
-    if (picture == null) return fallback;
-    return FutureBuilder(
-      future: SceneAssets.of(context).image(picture),
-      builder: (context, snap) => snap.data == null
-          ? fallback
-          : framed(
-              RawImage(image: snap.data, filterQuality: FilterQuality.medium),
-            ),
     );
   }
 }
@@ -546,6 +566,7 @@ class _LabelColours extends StatelessWidget {
   const _LabelColours({
     required this.pack,
     required this.shape,
+    required this.apps,
     required this.value,
     required this.onChanged,
     required this.font,
@@ -554,6 +575,9 @@ class _LabelColours extends StatelessWidget {
 
   final IconPack pack;
   final IconShape shape;
+
+  /// The first four make the preview strip.
+  final List<InstalledApp> apps;
   final LabelColor value;
   final ValueChanged<LabelColor> onChanged;
   final LabelFont font;
@@ -697,24 +721,14 @@ class _LabelColours extends StatelessWidget {
             ),
             child: Row(
               children: [
-                for (final (key, name) in const [
-                  ('phone', 'Phone'),
-                  ('messages', 'Messages'),
-                  ('camera', 'Camera'),
-                  ('music', 'Music'),
-                ])
+                for (final app in apps.take(4))
                   Expanded(
                     child: Column(
                       children: [
-                        PackIcon(
-                          pack: pack,
-                          glyphKey: key,
-                          shape: shape,
-                          size: 48,
-                        ),
+                        PackIcon(pack: pack, app: app, shape: shape, size: 48),
                         const SizedBox(height: 6),
                         Text(
-                          name,
+                          app.label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: preview.labelStyle(

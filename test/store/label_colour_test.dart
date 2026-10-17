@@ -263,7 +263,7 @@ void main() {
     tester,
   ) async {
     final h = StoreHarness();
-    await h.pump(tester, home: const Scaffold(body: FontsScreen()), demo: true);
+    await h.pump(tester, home: const Scaffold(body: FontsScreen()));
     await settle(tester);
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -296,7 +296,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       expect(find.text('App name colour'), findsOneWidget);
@@ -318,7 +317,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       String? family() =>
@@ -335,7 +333,10 @@ void main() {
 
     testWidgets('the font page previews lock and home; each switch shows '
         'its screen', (tester) async {
-      await h.pump(tester, home: const FontDetailScreen(fontId: 'pacifico'));
+      await h.pump(
+        tester,
+        home: const FontDetailScreen(fontId: 'playfair-display'),
+      );
       // Tall enough for the preview and the switches at once.
       tester.view.physicalSize = const Size(1170, 6000);
       await settle(tester);
@@ -343,22 +344,22 @@ void main() {
       ThemePreview preview() =>
           tester.widget<ThemePreview>(find.byType(ThemePreview));
       expect(preview().screen, PhoneScreen.lock);
-      expect(preview().theme.displayFont, 'Pacifico');
+      expect(preview().theme.displayFont, 'Playfair Display');
 
       await tester.tap(find.text('App labels'));
       await tester.pump();
       expect(preview().screen, PhoneScreen.home);
-      expect(preview().theme.labelFont, 'Pacifico');
+      expect(preview().theme.labelFont, 'Playfair Display');
 
       await tester.tap(find.text('wallp Home clock'));
       await tester.pump();
       // Home clock off: the home clock keeps the theme's font.
-      expect(preview().theme.displayFont, isNot('Pacifico'));
+      expect(preview().theme.displayFont, isNot('Playfair Display'));
 
       await tester.tap(find.text('Lock screen clock'));
       await tester.pump();
       expect(preview().screen, PhoneScreen.lock);
-      expect(preview().theme.displayFont, isNot('Pacifico'));
+      expect(preview().theme.displayFont, isNot('Playfair Display'));
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -368,7 +369,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       Color grid() => tester.widget<Text>(find.text('Calendar')).style!.color!;
@@ -383,7 +383,6 @@ void main() {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
-        demo: true,
       );
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('Custom'));

@@ -407,101 +407,6 @@
       }
     },
     {
-      "id": "mountains-of-christmas",
-      "family": "Mountains of Christmas",
-      "category": "handwritten",
-      "scripts": [
-        "latin"
-      ],
-      "tags": [
-        "christmas",
-        "handwritten"
-      ],
-      "license": "Apache-2.0",
-      "files": [
-        {
-          "weight": 400,
-          "style": "normal",
-          "asset": {
-            "url": "assets/3855303be6b88707c00bb271f9c95e996605e9a8e656b3a30686862352b1052e.ttf",
-            "sha256": "3855303be6b88707c00bb271f9c95e996605e9a8e656b3a30686862352b1052e",
-            "bytes": 122376,
-            "format": "ttf"
-          }
-        },
-        {
-          "weight": 700,
-          "style": "normal",
-          "asset": {
-            "url": "assets/4c6126f43c650c81d236fd04ffc2fccbc3f37438c304cafad6894a835c2250ef.ttf",
-            "sha256": "4c6126f43c650c81d236fd04ffc2fccbc3f37438c304cafad6894a835c2250ef",
-            "bytes": 123172,
-            "format": "ttf"
-          }
-        }
-      ],
-      "fallbackFor": {
-        "my": "padauk"
-      }
-    },
-    {
-      "id": "caveat",
-      "family": "Caveat",
-      "category": "handwritten",
-      "scripts": [
-        "latin"
-      ],
-      "tags": [
-        "handwritten",
-        "casual"
-      ],
-      "license": "OFL-1.1",
-      "files": [
-        {
-          "weight": 400,
-          "maxWeight": 700,
-          "style": "normal",
-          "asset": {
-            "url": "assets/0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988.ttf",
-            "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988",
-            "bytes": 403648,
-            "format": "ttf"
-          }
-        }
-      ],
-      "fallbackFor": {
-        "my": "padauk"
-      }
-    },
-    {
-      "id": "pacifico",
-      "family": "Pacifico",
-      "category": "handwritten",
-      "scripts": [
-        "latin"
-      ],
-      "tags": [
-        "handwritten",
-        "script"
-      ],
-      "license": "OFL-1.1",
-      "files": [
-        {
-          "weight": 400,
-          "style": "normal",
-          "asset": {
-            "url": "assets/5b6c0d5334a7bf77dea52b975c5a0c408878c0f7115ed5b6fb151f634b7bf701.ttf",
-            "sha256": "5b6c0d5334a7bf77dea52b975c5a0c408878c0f7115ed5b6fb151f634b7bf701",
-            "bytes": 329380,
-            "format": "ttf"
-          }
-        }
-      ],
-      "fallbackFor": {
-        "my": "padauk"
-      }
-    },
-    {
       "id": "space-grotesk",
       "family": "Space Grotesk",
       "category": "clean",
@@ -949,11 +854,11 @@
   },
   "searchSuggestions": [
     "Halloween",
+    "Christmas",
+    "Thingyan",
     "moon",
     "snow",
-    "Thingyan",
-    "handwritten",
-    "minimal",
+    "spider",
     "live"
   ]
 }

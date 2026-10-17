@@ -138,7 +138,7 @@ void main() {
       tester,
       home: Scaffold(body: MeScreen(launcher: launcher)),
     );
-    await tester.runAsync(() => h.user.toggleWallpaper('lanterns'));
+    await tester.runAsync(() => h.user.toggleWallpaper('red-moon-swing'));
     await settle(tester);
     await scrollTo(tester, find.text('Favourite wallpapers'));
     expect(find.text('1 wallpaper'), findsOneWidget);

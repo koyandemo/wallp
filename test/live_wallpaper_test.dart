@@ -69,7 +69,11 @@ void main() {
   ) async {
     final catalog = mockCatalog();
     final look =
-        AppliedLook.wholeTheme(catalog, mockTheme('cozy-cabin'), at: designDay)
+        AppliedLook.wholeTheme(
+              catalog,
+              mockTheme('christmas-eve'),
+              at: designDay,
+            )
             .apply(
               catalog,
               mockTheme('halloween-night'),
@@ -77,7 +81,7 @@ void main() {
               at: designDay,
             )
             .withClockFont(
-              catalog.font('pacifico')!,
+              catalog.font('bebas-neue')!,
               at: designDay,
               size: ClockSize.large,
             );
@@ -99,12 +103,12 @@ void main() {
     // Halloween's scene on the wallpaper...
     expect(scene(tester).theme.id, 'halloween-night');
     expect(scene(tester).theme.scene, SceneKind.halloween);
-    // ...Cozy Cabin's countdown, in the user's clock font and size.
+    // ...Snowy Pines' countdown, in the user's clock font and size.
     final overlay = tester.widget<LockScreenOverlay>(
       find.byType(LockScreenOverlay),
     );
-    expect(overlay.theme.id, 'cozy-cabin');
-    expect(overlay.theme.displayFont, 'Pacifico');
+    expect(overlay.theme.id, 'christmas-eve');
+    expect(overlay.theme.displayFont, 'Bebas Neue');
     expect(overlay.clockScale, 1.25);
     expect(find.textContaining('until Christmas'), findsOneWidget);
 
@@ -113,7 +117,11 @@ void main() {
 
   testWidgets('a dashboard theme draws with the layers engine', (tester) async {
     await LookStore().save(
-      AppliedLook.wholeTheme(mockCatalog(), mockTheme('ember'), at: designDay),
+      AppliedLook.wholeTheme(
+        mockCatalog(),
+        mockTheme('spider-night'),
+        at: designDay,
+      ),
     );
     await tester.pumpWidget(LiveWallpaperApp(clock: () => designDay));
     await tester.pump();
@@ -126,7 +134,7 @@ void main() {
       ),
     );
     expect(paint.painter, isA<LayersPainter>());
-    expect(scene(tester).animate, isTrue, reason: 'Ember is live');
+    expect(scene(tester).animate, isTrue, reason: 'Spider Night is live');
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });

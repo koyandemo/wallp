@@ -18,6 +18,7 @@ class InstalledApp {
     required this.label,
     this.icon,
     this.logo,
+    this.symbol,
   });
 
   final String packageName;
@@ -31,11 +32,10 @@ class InstalledApp {
   /// icon pack puts it on the pack's tile.
   final ui.Image? logo;
 
-  IconData? get glyph => glyphFor(packageName, label);
+  /// A sample app's symbol, for previews where there are no real apps.
+  final IconData? symbol;
 
-  /// Which picture a downloaded icon pack draws it with in previews, which
-  /// have no real app icons.
-  String? get glyphKey => glyphKeyFor(packageName, label);
+  IconData? get glyph => symbol ?? glyphFor(packageName, label);
 }
 
 /// Adds themed app icons to the home screen as pinned shortcuts (Android 8+).
@@ -123,7 +123,7 @@ class IconPackService {
     // A downloaded pack: the app's own logo on the pack's tile (or its
     // background picture), small enough to stay inside the launcher's mask.
     if (theme.imageIcons case final pack?) {
-      return PackFallbackPainter(
+      return PackTilePainter(
         pack: pack,
         appIcon: app.icon,
         logo: app.logo,

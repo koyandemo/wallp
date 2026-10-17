@@ -1,6 +1,6 @@
 {
   "id": "spider-night",
-  "rev": 3,
+  "rev": 4,
   "festivalId": "heroes",
   "name": {
     "en": "Spider Night"
@@ -659,5 +659,5 @@
     "red-moon-swing",
     "web-corner"
   ],
-  "downloadBytes": 982544
+  "downloadBytes": 485241
 }

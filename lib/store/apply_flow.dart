@@ -131,6 +131,9 @@ class ApplyFlow {
     }
   }
 
+  /// Puts [pack] on wallp Home with the user's choices, right away. Says
+  /// so only when the pack itself changes: a new shape or name colour just
+  /// shows.
   Future<void> applyIconPack(
     BuildContext context,
     IconPack pack, {
@@ -138,15 +141,17 @@ class ApplyFlow {
     LabelColor? labels,
     LabelFont? labelFont,
   }) async {
+    final looks = context.read<LookController>();
+    final switching = !looks.isApplied || looks.look?.icons.pack.id != pack.id;
     try {
-      await context.read<LookController>().applyIconPack(
+      await looks.applyIconPack(
         pack.id,
         shape: shape,
         labels: labels,
         labelFont: labelFont,
       );
-      if (context.mounted) {
-        showToast(context, '${pack.name.en} icons applied to wallp Home');
+      if (switching && context.mounted) {
+        showToast(context, '${pack.name.en} icons on wallp Home');
       }
     } on Object catch (e) {
       if (context.mounted) showToast(context, failureMessage(e, pack.name.en));

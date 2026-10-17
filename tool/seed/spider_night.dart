@@ -3,11 +3,10 @@
 // * A live wallpaper on the `layers` engine: a pulsing red moon, a spider
 //   swinging on its thread, city rain and stars, over a picture skyline.
 // * The same scene as stand-alone wallpapers, one live and one still.
-// * The Web Slinger icon pack: 20 comic-style pictures (PackLook.comic).
+// * The Web Slinger icon pack: a comic-style tile for every app's logo.
 //
-// It goes in the demo catalog only (generate.dart), so the full test fixture
-// keeps its counts. Pictures come from render_art_test.dart; run
-// tool/seed/spider_night.sh to rebuild and preview everything.
+// Pictures come from render_art_test.dart; run tool/seed/spider_night.sh to
+// rebuild and preview everything.
 //
 // The art is an original spider-and-city look, not Marvel's Spider-Man:
 // shipping the real character, logo or name needs a licence.
@@ -188,7 +187,9 @@ SeedKit buildSpiderNight(AssetFor asset) {
         '#2C3660',
         '#0E1330',
         '#A9B3CF',
-        '#E23636',
+        // A deeper red than the theme's accent, so light button labels on
+        // it stay readable (4.5:1).
+        '#CB3131',
         'bebas-neue',
       ),
       coverThemeId: spiderThemeId,
@@ -197,7 +198,8 @@ SeedKit buildSpiderNight(AssetFor asset) {
       id: spiderThemeId,
       // 2: the icon pack's background tile (downloadBytes).
       // 3: edge-to-edge icon pictures (downloadBytes).
-      rev: 3,
+      // 4: the icon pack is only its tile (downloadBytes).
+      rev: 4,
       festivalId: 'heroes',
       name: _t('Spider Night'),
       subtitle: _t('A red moon, city rain and a spider on a swing'),
@@ -241,7 +243,7 @@ SeedKit buildSpiderNight(AssetFor asset) {
       ),
     ],
     iconPack: () {
-      final art = packArt.firstWhere((a) => a.id == 'web-slinger');
+      const art = webSlinger;
       HexColor rgb(int v) => _hex('#${v.toRadixString(16).padLeft(6, '0')}');
       return IconPack(
         id: art.id,
@@ -250,13 +252,9 @@ SeedKit buildSpiderNight(AssetFor asset) {
         style: _t('Comic'),
         kind: IconPackKind.images,
         shape: IconShape.values.byName(art.shape),
-        tile: rgb(art.tile!),
+        tile: rgb(art.tile),
         glyph: rgb(art.glyph),
         ring: rgb(art.ring),
-        glyphs: {
-          for (final key in GlyphKeys.all)
-            key: asset(iconPath(art.id, key), AssetFormat.png),
-        },
         background: asset(backgroundPath(art.id), AssetFormat.png),
         publishedAt: daysAgo(1),
         popularity: 0,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 import 'package:wallp/store/logic/queries.dart';
@@ -11,29 +13,44 @@ void main() {
   List<String> ids(Iterable<ThemeBase> list) => [for (final t in list) t.id];
 
   group('badges', () {
-    final cabin = catalog.theme('cozy-cabin')!; // new and still
-    final ember = catalog.theme('ember')!; // old and live
-    final ink = catalog.theme('quiet-ink')!; // old and still
+    final spider = catalog.theme('spider-night')!; // new and live
+    final haunted = catalog.theme('halloween-night')!; // old and live
+    // Old and still: Spider Night as if published long ago, with its
+    // particles and motion taken out.
+    final still = () {
+      final json =
+          jsonDecode(jsonEncode(spider.toJson())) as Map<String, dynamic>;
+      final layers = (json['scene'] as Map)['params']['layers'] as List;
+      layers.removeWhere((l) => (l as Map)['type'] == 'particles');
+      for (final l in layers.cast<Map>()) {
+        l.remove('motion');
+      }
+      json['publishedAt'] = '2026-01-01T00:00:00.000Z';
+      return ThemeSummary.fromJson(JsonReader(json));
+    }();
 
     test('APPLIED beats NEW beats LIVE', () {
       expect(
-        themeBadge(cabin, appliedId: 'cozy-cabin', now: now),
+        themeBadge(spider, appliedId: 'spider-night', now: now),
         CardBadge.applied,
       );
-      expect(themeBadge(cabin, now: now), CardBadge.isNew);
-      expect(themeBadge(ember, now: now), CardBadge.live);
-      expect(themeBadge(ink, now: now), isNull);
+      expect(themeBadge(spider, now: now), CardBadge.isNew);
+      expect(themeBadge(haunted, now: now), CardBadge.live);
+      expect(themeBadge(still, now: now), isNull);
     });
 
     test('NEW wears off after 14 days', () {
-      expect(themeBadge(cabin, now: now.add(const Duration(days: 30))), isNull);
+      expect(
+        themeBadge(spider, now: now.add(const Duration(days: 30))),
+        CardBadge.live,
+      );
     });
 
     test('wallpapers: IN USE beats LIVE', () {
-      final lanterns = catalog.wallpaper('lanterns')!;
-      expect(wallpaperBadge(lanterns, inUseId: 'lanterns'), CardBadge.inUse);
-      expect(wallpaperBadge(lanterns), CardBadge.live);
-      expect(wallpaperBadge(catalog.wallpaper('quiet-ink')!), isNull);
+      final swing = catalog.wallpaper('red-moon-swing')!;
+      expect(wallpaperBadge(swing, inUseId: 'red-moon-swing'), CardBadge.inUse);
+      expect(wallpaperBadge(swing), CardBadge.live);
+      expect(wallpaperBadge(catalog.wallpaper('web-corner')!), isNull);
     });
   });
 
@@ -41,7 +58,7 @@ void main() {
     test('soonest first, collections last, coming soon left out', () {
       expect(
         [for (final f in festivalsBySoonest(catalog, now)) f.id],
-        ['halloween', 'christmas', 'thingyan', 'thadingyut', 'minimal'],
+        ['halloween', 'christmas', 'thingyan', 'heroes'],
       );
     });
 
@@ -70,13 +87,13 @@ void main() {
       'All: every theme, soonest festival first, most popular first within',
       () {
         final all = tab(ThemesFilter.all);
-        expect(all, hasLength(30));
+        expect(all, hasLength(4));
         expect(all.first, 'halloween-night');
-        expect(all.last, 'slate', reason: 'Minimal has no date');
+        expect(all.last, 'spider-night', reason: 'Heroes has no date');
       },
     );
 
-    test('Myanmar: Thingyan and Thadingyut only', () {
+    test('Myanmar: festivals tagged myanmar only', () {
       final myanmar = themesTab(
         catalog,
         filter: ThemesFilter.myanmar,
@@ -84,25 +101,18 @@ void main() {
         favourites: const {},
         now: now,
       );
-      expect(myanmar, hasLength(9));
-      expect(
-        {for (final t in myanmar) t.festivalId},
-        {'thingyan', 'thadingyut'},
-      );
+      expect([for (final t in myanmar) t.id], ['thingyan-water']);
     });
 
-    test('Minimal: the undated collection', () {
-      expect(
-        tab(ThemesFilter.minimal),
-        unorderedEquals(['quiet-ink', 'ember', 'slate']),
-      );
+    test('Minimal: the undated collections', () {
+      expect(tab(ThemesFilter.minimal), ['spider-night']);
     });
 
     test('Favourites: only the ones the user hearted', () {
-      expect(tab(ThemesFilter.favourites, favs: {'ember', 'cozy-cabin'}), [
-        'cozy-cabin',
-        'ember',
-      ]);
+      expect(
+        tab(ThemesFilter.favourites, favs: {'spider-night', 'christmas-eve'}),
+        ['christmas-eve', 'spider-night'],
+      );
       expect(tab(ThemesFilter.favourites), isEmpty);
     });
 
@@ -131,7 +141,7 @@ void main() {
           'christmas',
           sort: FestivalSort.newest,
         ).first.id,
-        'gingerbread',
+        'christmas-eve',
       );
     });
 
@@ -141,10 +151,10 @@ void main() {
           festivalThemes(
             catalog,
             'christmas',
-            style: const OneStyle(ThemeStyle.cozy),
+            style: const OneStyle(ThemeStyle.classic),
           ),
         ),
-        unorderedEquals(['cozy-cabin', 'cocoa-night']),
+        ['christmas-eve'],
       );
       expect(
         festivalThemes(
@@ -160,7 +170,7 @@ void main() {
       expect(
         festivalThemes(
           catalog,
-          'thadingyut',
+          'christmas',
           style: const OneStyle(ThemeStyle.minimal),
         ),
         isEmpty,
@@ -168,7 +178,14 @@ void main() {
     });
 
     test('quick look steps through and wraps around', () {
-      final list = festivalThemes(catalog, 'thadingyut');
+      final list = themesTab(
+        catalog,
+        filter: ThemesFilter.all,
+        sort: ThemesSort.soonest,
+        favourites: const {},
+        now: now,
+      );
+      expect(stepThrough(list, list.first, 1).id, list[1].id);
       expect(stepThrough(list, list.last, 1).id, list.first.id);
       expect(stepThrough(list, list.first, -1).id, list.last.id);
     });
@@ -176,20 +193,20 @@ void main() {
 
   group('wallpapers, fonts, icon packs', () {
     test('wallpaper chips: Live and per festival', () {
-      expect(wallpapersTab(catalog), hasLength(12));
+      expect(wallpapersTab(catalog), hasLength(5));
       expect(
         wallpapersTab(catalog, filter: 'live').every((w) => w.isLive),
         isTrue,
       );
-      expect(wallpapersTab(catalog, filter: 'thingyan'), hasLength(3));
+      expect(wallpapersTab(catalog, filter: 'heroes'), hasLength(2));
       expect(
         [for (final f in wallpaperFestivals(catalog, now)) f.id],
-        ['halloween', 'christmas', 'thingyan', 'thadingyut', 'minimal'],
+        ['halloween', 'christmas', 'thingyan', 'heroes'],
       );
     });
 
     test('font chips by category', () {
-      expect(fontsTab(catalog), hasLength(10));
+      expect(fontsTab(catalog), hasLength(7));
       expect(
         [
           for (final f in fontsTab(catalog, category: FontCategory.myanmar))
@@ -197,18 +214,20 @@ void main() {
         ],
         ['padauk'],
       );
-      expect(
-        fontsTab(catalog, category: FontCategory.handwritten),
-        hasLength(3),
-      );
+      expect(fontsTab(catalog, category: FontCategory.display), hasLength(4));
+      expect(fontsTab(catalog, category: FontCategory.handwritten), isEmpty);
     });
 
     test('icon pack chips: New and per festival', () {
-      expect(iconPacksTab(catalog, now: now), hasLength(9));
-      expect([
-        for (final p in iconPacksTab(catalog, filter: 'new', now: now)) p.id,
-      ], unorderedEquals(['moonlit', 'candy-cane', 'lantern-light']));
-      expect(iconPacksTab(catalog, filter: 'minimal', now: now), hasLength(2));
+      expect(iconPacksTab(catalog, now: now), hasLength(4));
+      expect(
+        [for (final p in iconPacksTab(catalog, filter: 'new', now: now)) p.id],
+        ['web-slinger'],
+      );
+      expect(
+        iconPacksTab(catalog, filter: 'christmas', now: now),
+        hasLength(1),
+      );
     });
   });
 
@@ -221,7 +240,7 @@ void main() {
     });
 
     test('a festival\'s name finds its themes', () {
-      expect(search(catalog, 'Thadingyut').themes, hasLength(3));
+      expect(ids(search(catalog, 'Heroes').themes), ['spider-night']);
     });
 
     test('Burmese names work too', () {
@@ -231,8 +250,8 @@ void main() {
       );
     });
 
-    test('"handwritten" finds fonts by category; "live" finds what moves', () {
-      expect(search(catalog, 'handwritten').fonts, hasLength(3));
+    test('"display" finds fonts by category; "live" finds what moves', () {
+      expect(search(catalog, 'display').fonts, hasLength(4));
       final live = search(catalog, 'live');
       expect(live.themes.every((t) => t.isLive), isTrue);
       expect(live.themes, isNotEmpty);
