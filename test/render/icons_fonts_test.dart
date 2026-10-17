@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -239,28 +240,80 @@ void main() {
       expect(painter().background, isNotNull);
     });
 
-    test('a pinned shortcut sends the pack\'s picture as is', () async {
-      TestWidgetsFlutterBinding.ensureInitialized();
-      await download(look.icons.pack.glyphs.values);
-      const channel = MethodChannel('wallp/icons');
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      Object? sent;
-      messenger.setMockMethodCallHandler(channel, (call) async {
-        sent = (call.arguments as Map)['icon'];
-        return true;
+    testWidgets('a real app keeps its own logo, even one the pack draws', (
+      tester,
+    ) async {
+      late ui.Image icon, logo;
+      await tester.runAsync(() async {
+        await download(look.icons.pack.glyphs.values);
+        icon = await _square(const Color(0xFF25D366));
+        logo = await _square(const Color(0xFFFFFFFF));
       });
-      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
-
-      await const IconPackService().pin(
-        theme: home,
-        app: const InstalledApp(packageName: 'com.whatsapp', label: 'WhatsApp'),
-        accent: Colors.orange,
-        assets: assets,
+      final whatsapp = InstalledApp(
+        packageName: 'com.whatsapp',
+        label: 'WhatsApp',
+        icon: icon,
+        logo: logo,
       );
-      final picture = look.icons.pack.glyphs['messages']!;
-      expect(sent, File('$mockDir/${picture.url}').readAsBytesSync());
+      expect(whatsapp.glyphKey, 'messages');
+      await tester.pumpWidget(
+        SceneAssetsScope(
+          assets: assets,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: LauncherIcon(
+              app: whatsapp,
+              theme: home,
+              accent: Colors.orange,
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(PackPictureIcon), findsNothing);
+      final painter =
+          tester
+                  .widget<CustomPaint>(
+                    find.descendant(
+                      of: find.byType(PackFallbackIcon),
+                      matching: find.byType(CustomPaint),
+                    ),
+                  )
+                  .painter!
+              as PackFallbackPainter;
+      expect(painter.logo, logo);
     });
+
+    test(
+      'a pinned shortcut draws the app\'s logo, not the pack\'s picture',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        await download(look.icons.pack.glyphs.values);
+        const channel = MethodChannel('wallp/icons');
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        Object? sent;
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          sent = (call.arguments as Map)['icon'];
+          return true;
+        });
+        addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+        await const IconPackService().pin(
+          theme: home,
+          app: InstalledApp(
+            packageName: 'com.whatsapp',
+            label: 'WhatsApp',
+            icon: await _square(const Color(0xFF25D366)),
+            logo: await _square(const Color(0xFFFFFFFF)),
+          ),
+          accent: Colors.orange,
+          assets: assets,
+        );
+        final picture = look.icons.pack.glyphs['messages']!;
+        expect(sent, isA<Uint8List>());
+        expect(sent, isNot(File('$mockDir/${picture.url}').readAsBytesSync()));
+      },
+    );
 
     test(
       'a pinned shortcut for an app with no picture is still themed',
@@ -290,4 +343,12 @@ void main() {
       },
     );
   });
+}
+
+/// A plain coloured square standing in for an app icon or logo.
+Future<ui.Image> _square(Color color) {
+  final recorder = ui.PictureRecorder();
+  Canvas(recorder)
+      .drawRect(const Rect.fromLTWH(0, 0, 48, 48), Paint()..color = color);
+  return recorder.endRecording().toImage(48, 48);
 }

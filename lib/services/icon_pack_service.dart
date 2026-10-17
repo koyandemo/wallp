@@ -17,6 +17,7 @@ class InstalledApp {
     required this.packageName,
     required this.label,
     this.icon,
+    this.logo,
   });
 
   final String packageName;
@@ -25,9 +26,15 @@ class InstalledApp {
   /// The app's own launcher icon, used when there's no themed glyph.
   final ui.Image? icon;
 
+  /// For an adaptive icon, its foreground layer alone: the app's logo
+  /// without its own background, on a transparent 108dp square. A downloaded
+  /// icon pack puts it on the pack's tile.
+  final ui.Image? logo;
+
   IconData? get glyph => glyphFor(packageName, label);
 
-  /// Which picture a downloaded icon pack draws it with, if any.
+  /// Which picture a downloaded icon pack draws it with in previews, which
+  /// have no real app icons.
   String? get glyphKey => glyphKeyFor(packageName, label);
 }
 
@@ -76,6 +83,7 @@ class IconPackService {
     packageName: raw['package'] as String,
     label: raw['label'] as String,
     icon: await _decode(raw['icon'] as Uint8List?),
+    logo: await _decode(raw['logo'] as Uint8List?),
   );
 
   /// Asks the launcher to add [app] with [theme]'s icon style. Returns false
@@ -86,17 +94,12 @@ class IconPackService {
     required ui.Color accent,
     SceneAssets? assets,
   }) async {
-    // A downloaded pack sends its picture as is (already a tile).
-    assets ??= SceneAssets.shared;
-    final picture = theme.imageIcons?.pictureFor(app.glyphKey);
-    final downloaded = picture == null ? null : await assets.bytes(picture);
+    // A downloaded pack: the app's own logo on the pack's background.
     final background = switch (theme.imageIcons?.background) {
-      final ref? when downloaded == null => await assets.image(ref),
-      _ => null,
+      final ref? => await (assets ?? SceneAssets.shared).image(ref),
+      null => null,
     };
-    final png =
-        downloaded ??
-        await _renderIcon(_painterFor(theme, app, accent, background));
+    final png = await _renderIcon(_painterFor(theme, app, accent, background));
     try {
       return await _channel.invokeMethod<bool>('pinShortcut', {
             'id': '${theme.id}-${app.packageName}',
@@ -117,13 +120,13 @@ class IconPackService {
     ui.Color accent,
     ui.Image? background,
   ) {
-    // A downloaded pack: the app's own icon framed in the pack's tile (or on
-    // its background picture), small enough to stay inside the launcher's
-    // mask.
+    // A downloaded pack: the app's own logo on the pack's tile (or its
+    // background picture), small enough to stay inside the launcher's mask.
     if (theme.imageIcons case final pack?) {
       return PackFallbackPainter(
         pack: pack,
         appIcon: app.icon,
+        logo: app.logo,
         background: background,
         iconScale: 0.42,
       );

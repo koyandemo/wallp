@@ -14,6 +14,7 @@ import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
@@ -308,7 +309,7 @@ class NativeBridge(private val activity: Activity) {
     }
 
     /**
-     * Launchable apps as {package, label, icon PNG}, by label. Includes wallp
+     * Launchable apps as {package, label, icon PNG, logo PNG?}, by label. Includes wallp
      * itself, so the theme store can be opened from the drawer once wallp is
      * the home app.
      */
@@ -327,19 +328,24 @@ class NativeBridge(private val activity: Activity) {
     private fun appEntry(info: ResolveInfo): Map<String, Any> {
         val pm = activity.packageManager
         val pkg = info.activityInfo.packageName
-        return mapOf(
-            "package" to pkg,
-            "label" to info.loadLabel(pm).toString(),
-            "icon" to cachedIconPng(pkg) { info.loadIcon(pm) },
-        )
+        val (icon, logo) = cachedIconPngs(pkg) { info.loadIcon(pm) }
+        return buildMap {
+            put("package", pkg)
+            put("label", info.loadLabel(pm).toString())
+            put("icon", icon)
+            if (logo != null) put("logo", logo)
+        }
     }
 
     /**
-     * Icon PNG from the cache, keyed by the app's last update time so an
-     * updated app gets its new icon. Rendering ~150 icons is what made the
-     * first load slow; reading cached files is quick.
+     * The icon PNG, and for an adaptive icon its foreground layer alone (the
+     * logo, without the app's own background) as a full 108dp-square PNG.
+     *
+     * From the cache, keyed by the app's last update time so an updated app
+     * gets its new icon. Rendering ~150 icons is what made the first load
+     * slow; reading cached files is quick.
      */
-    private fun cachedIconPng(pkg: String, load: () -> Drawable): ByteArray {
+    private fun cachedIconPngs(pkg: String, load: () -> Drawable): Pair<ByteArray, ByteArray?> {
         val updated = try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 activity.packageManager
@@ -353,21 +359,37 @@ class NativeBridge(private val activity: Activity) {
         }
         val dir = File(activity.cacheDir, "app_icons").apply { mkdirs() }
         val file = File(dir, "$pkg-$updated.png")
-        if (file.exists()) {
+        // An empty logo file = not an adaptive icon.
+        val logoFile = File(dir, "$pkg-$updated.logo.png")
+        if (file.exists() && logoFile.exists()) {
             try {
-                return file.readBytes()
+                return file.readBytes() to logoFile.readBytes().takeIf { it.isNotEmpty() }
             } catch (e: Exception) {
                 // Fall through and re-render.
             }
         }
-        val png = drawableToPng(load())
+        val drawable = load()
+        val png = drawableToPng(drawable)
+        val logo = logoPng(drawable)
         try {
             dir.listFiles { f -> f.name.startsWith("$pkg-") }?.forEach { it.delete() }
             file.writeBytes(png)
+            logoFile.writeBytes(logo ?: ByteArray(0))
         } catch (e: Exception) {
             // A cache miss next time is fine.
         }
-        return png
+        return png to logo
+    }
+
+    /** An adaptive icon's foreground layer, or null for other icons. */
+    private fun logoPng(drawable: Drawable): ByteArray? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        val foreground = (drawable as? AdaptiveIconDrawable)?.foreground ?: return null
+        return try {
+            drawableToPng(foreground, LOGO_PIXELS)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun drawableToPng(drawable: Drawable, size: Int = 96): ByteArray {
@@ -526,6 +548,9 @@ class NativeBridge(private val activity: Activity) {
         private const val LAUNCHER_CHANNEL = "wallp/launcher"
         private const val REQUEST_HOME_ROLE = 4201
         private const val REQUEST_LIVE_WALLPAPER = 4202
+
+        /** An adaptive icon's foreground is 108dp; this keeps its logo sharp. */
+        private const val LOGO_PIXELS = 192
 
         /** A picker that closes faster than this never showed. */
         private const val LIVE_PICKER_GLITCH_MS = 1500L

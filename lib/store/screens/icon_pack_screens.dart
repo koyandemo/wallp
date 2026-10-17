@@ -445,8 +445,6 @@ class PackIcon extends StatelessWidget {
     'health': Icons.favorite_rounded,
   };
 
-  BorderRadius get _radius => iconShapeRadius(shape, size);
-
   @override
   Widget build(BuildContext context) {
     // A painted pack: the theme's real icon, as wallp Home draws it.
@@ -461,18 +459,22 @@ class PackIcon extends StatelessWidget {
       );
     }
     final picture = pack.glyphs[glyphKey];
-    final fallback = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: pack.tile == null ? Colors.transparent : Color(pack.tile!.argb),
-        borderRadius: _radius,
-        border: Border.all(color: Color(pack.ring.argb), width: 2),
-      ),
-      child: Icon(
-        _symbols[glyphKey] ?? Icons.apps_rounded,
-        color: Color(pack.glyph.argb),
-        size: size * 0.5,
+    // Pictures are edge-to-edge art; the shape and its rim are drawn here.
+    final tile = pack.tile;
+    Widget framed(Widget child) => IconShapeTile(
+      shape: shape,
+      size: size,
+      ring: tile == null ? null : Color(pack.ring.argb),
+      child: child,
+    );
+    final fallback = framed(
+      ColoredBox(
+        color: tile == null ? Colors.transparent : Color(tile.argb),
+        child: Icon(
+          _symbols[glyphKey] ?? Icons.apps_rounded,
+          color: Color(pack.glyph.argb),
+          size: size * 0.5,
+        ),
       ),
     );
     if (picture == null) return fallback;
@@ -480,15 +482,8 @@ class PackIcon extends StatelessWidget {
       future: SceneAssets.of(context).image(picture),
       builder: (context, snap) => snap.data == null
           ? fallback
-          : ClipRRect(
-              borderRadius: _radius,
-              child: SizedBox.square(
-                dimension: size,
-                child: RawImage(
-                  image: snap.data,
-                  filterQuality: FilterQuality.medium,
-                ),
-              ),
+          : framed(
+              RawImage(image: snap.data, filterQuality: FilterQuality.medium),
             ),
     );
   }

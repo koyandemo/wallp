@@ -85,57 +85,32 @@ Future<void> _save(
   await file.writeAsBytes(png!.buffer.asUint8List());
 }
 
-ui.Path _tileShape(String shape, ui.Rect r) {
-  final w = r.width;
-  ui.Radius rad(double f) => ui.Radius.circular(w * f);
-  return switch (shape) {
-    'circle' => ui.Path()..addOval(r),
-    'square' => ui.Path()..addRRect(ui.RRect.fromRectAndRadius(r, rad(0.12))),
-    // CSS "50% 50% 50% 12%": round everywhere but the bottom-left corner.
-    'leaf' =>
-      ui.Path()..addRRect(
-        ui.RRect.fromRectAndCorners(
-          r,
-          topLeft: rad(0.5),
-          topRight: rad(0.5),
-          bottomRight: rad(0.5),
-          bottomLeft: rad(0.12),
-        ),
-      ),
-    _ => ui.Path()..addRRect(ui.RRect.fromRectAndRadius(r, rad(0.3))),
-  };
-}
-
-/// A null [glyphPath] draws the empty tile.
+/// Draws one pack picture edge to edge on the square canvas: no margin and
+/// no rim, since the app clips it to the user's tile shape and draws the
+/// rim in the pack's ring colour itself. A null [glyphPath] draws the empty
+/// tile.
 void _icon(ui.Canvas canvas, PackArt pack, String? glyphPath) {
   const s = iconPixels * 1.0;
-  final tile = ui.Rect.fromLTWH(s * 0.06, s * 0.06, s * 0.88, s * 0.88);
-  final shape = _tileShape(pack.shape, tile);
+  const tile = ui.Rect.fromLTWH(0, 0, s, s);
 
-  if (pack.look == PackLook.glow) {
-    canvas.drawPath(
-      shape,
-      ui.Paint()
-        ..color = _c(pack.ring, 0.55)
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = s * 0.06
-        ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 10),
-    );
-  }
   if (pack.tile case final tileColor?) {
-    canvas.drawPath(shape, ui.Paint()..color = _c(tileColor));
+    if (pack.look == PackLook.glow) {
+      // A soft glow of the ring colour in from the edges.
+      canvas.drawRect(
+        tile,
+        ui.Paint()
+          ..shader = ui.Gradient.radial(
+            tile.center,
+            s * 0.75,
+            [_c(tileColor), _c(tileColor), _c(pack.ring, 0.55)],
+            [0, 0.6, 1],
+          ),
+      );
+    } else {
+      canvas.drawRect(tile, ui.Paint()..color = _c(tileColor));
+    }
   }
-  if (pack.look == PackLook.comic) _comicWeb(canvas, pack, shape, tile);
-  if (pack.look == PackLook.outline || pack.look == PackLook.glow) {
-    canvas.drawPath(
-      shape,
-      ui.Paint()
-        ..color = _c(pack.ring)
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = s * 0.035,
-    );
-  }
-
+  if (pack.look == PackLook.comic) _comicWeb(canvas, pack, tile);
   if (glyphPath == null) return;
 
   // The glyph fills half the tile (70% for line icons, which have no tile).
@@ -159,8 +134,8 @@ void _icon(ui.Canvas canvas, PackArt pack, String? glyphPath) {
     ..restore();
 }
 
-/// A web from the tile's centre, clipped to the tile, plus an inked rim.
-void _comicWeb(ui.Canvas canvas, PackArt pack, ui.Path shape, ui.Rect tile) {
+/// A web from the centre out past every edge.
+void _comicWeb(ui.Canvas canvas, PackArt pack, ui.Rect tile) {
   final hub = tile.center;
   final reach = tile.width * 0.75;
   const spokes = 12;
@@ -172,11 +147,11 @@ void _comicWeb(ui.Canvas canvas, PackArt pack, ui.Path shape, ui.Rect tile) {
     ..strokeWidth = 2;
   canvas
     ..save()
-    ..clipPath(shape);
+    ..clipRect(tile);
   for (var i = 0; i < spokes; i++) {
     canvas.drawLine(hub, at(i * 2 * math.pi / spokes, reach), web);
   }
-  for (final r in [0.2, 0.36, 0.54, 0.74]) {
+  for (final r in [0.18, 0.32, 0.48, 0.66]) {
     final radius = tile.width * r;
     final ring = ui.Path()..moveTo(at(0, radius).dx, at(0, radius).dy);
     for (var i = 1; i <= spokes; i++) {
@@ -186,15 +161,7 @@ void _comicWeb(ui.Canvas canvas, PackArt pack, ui.Path shape, ui.Rect tile) {
     }
     canvas.drawPath(ring, web);
   }
-  canvas
-    ..restore()
-    ..drawPath(
-      shape,
-      ui.Paint()
-        ..color = _c(pack.ring)
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = tile.width * 0.035,
-    );
+  canvas.restore();
 }
 
 void _snowHills(ui.Canvas canvas, ui.Size size) {

@@ -117,7 +117,7 @@ Use this **icon base prompt**, replacing `<SUBJECT>` from the table:
 | `files.png` | folder |
 | `health.png` | heart with a pulse line through it |
 
-Also make **`background.png`**: the same prompt with the whole "and in the centre a bold white <SUBJECT> …" sentence left out, so it's just the red tile and its web. wallp Home puts every app the pack has no icon for (Shopee, Meet, a bank app…) on this picture, with the app's own icon in the middle. Without it they get a plain red tile.
+Also make **`background.png`**: the same prompt with the whole "and in the centre a bold white <SUBJECT> …" sentence left out, so it's just the red tile and its web. wallp Home puts **every** app on this picture, with the app's own logo in the middle (the 20 symbol icons are only shown in the store and previews). Without it they get a plain red tile.
 
 To keep the set consistent: make `phone.png` first, adjust the prompt until you like it, then generate the other 19 with exactly the same wording (and Midjourney `--sref`, or "same style as the attached image" in ChatGPT with the phone icon attached).
 

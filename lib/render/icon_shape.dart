@@ -36,3 +36,40 @@ class IconShapeClip extends StatelessWidget {
     child: SizedBox.square(dimension: size, child: child),
   );
 }
+
+/// An icon pack tile: [child] (edge-to-edge art) clipped to [shape], with a
+/// [ring] drawn along the edge of that shape. The pack's pictures have no
+/// rim of their own, so every shape the user picks gets a clean one. Null
+/// [ring] = none (packs without a tile).
+class IconShapeTile extends StatelessWidget {
+  const IconShapeTile({
+    super.key,
+    required this.shape,
+    required this.size,
+    required this.ring,
+    required this.child,
+  });
+
+  final IconShape shape;
+  final double size;
+  final Color? ring;
+  final Widget child;
+
+  /// The rim's width as a share of the tile.
+  static const ringWidth = 0.035;
+
+  @override
+  Widget build(BuildContext context) {
+    final clipped = IconShapeClip(shape: shape, size: size, child: child);
+    final ring = this.ring;
+    if (ring == null) return clipped;
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: iconShapeRadius(shape, size),
+        border: Border.all(color: ring, width: size * ringWidth),
+      ),
+      child: clipped,
+    );
+  }
+}

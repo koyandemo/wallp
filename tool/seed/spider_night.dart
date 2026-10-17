@@ -196,7 +196,8 @@ SeedKit buildSpiderNight(AssetFor asset) {
     theme: ThemeDetail(
       id: spiderThemeId,
       // 2: the icon pack's background tile (downloadBytes).
-      rev: 2,
+      // 3: edge-to-edge icon pictures (downloadBytes).
+      rev: 3,
       festivalId: 'heroes',
       name: _t('Spider Night'),
       subtitle: _t('A red moon, city rain and a spider on a swing'),

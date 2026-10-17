@@ -30,17 +30,19 @@ class LauncherIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final own = _OwnIcon(app: app, size: size);
-    // A downloaded pack: its picture for this app, else the app's own icon
-    // framed in the pack's tile.
+    // A downloaded pack: every app keeps its own logo, on the pack's tile.
+    // Only previews, whose sample apps have no icon, show the pack's
+    // pictures.
     if (theme.imageIcons case final pack?) {
       final framed = PackFallbackIcon(pack: pack, app: app, size: size);
-      final picture = pack.pictureFor(app.glyphKey);
+      final picture = app.icon == null ? pack.pictureFor(app.glyphKey) : null;
       if (picture == null) return framed;
       return PackPictureIcon(
         picture: picture,
         shape: pack.shape,
         size: size,
         placeholder: framed,
+        ring: pack.tile == null ? null : pack.ring,
       );
     }
     final style = theme.iconStyle;
@@ -76,9 +78,9 @@ class _OwnIcon extends StatelessWidget {
   }
 }
 
-/// An app a downloaded pack has no picture for: its own icon on the pack's
-/// background picture, or, without one (or until it loads), on the pack's
-/// tile colour ringed in its ring colour. Clipped to the user's tile shape.
+/// An app under a downloaded pack: its own logo on the pack's background
+/// picture, or, without one (or until it loads), on the pack's tile colour.
+/// Clipped to the user's tile shape and ringed in the pack's ring colour.
 class PackFallbackIcon extends StatefulWidget {
   const PackFallbackIcon({
     super.key,
@@ -117,9 +119,10 @@ class _PackFallbackIconState extends State<PackFallbackIcon> {
     final size = widget.size;
     final background = _background;
     final icon = widget.app.icon;
-    final tile = IconShapeClip(
+    return IconShapeTile(
       shape: pack.shape,
       size: size,
+      ring: pack.tile == null ? null : pack.ring,
       child: icon == null && background == null
           ? Icon(Icons.apps_rounded, size: size * 0.55, color: Colors.white)
           : CustomPaint(
@@ -127,32 +130,19 @@ class _PackFallbackIconState extends State<PackFallbackIcon> {
               painter: PackFallbackPainter(
                 pack: pack,
                 appIcon: icon,
+                logo: widget.app.logo,
                 background: background,
                 // The size of the pack's own glyphs, so its art shows around.
                 iconScale: background == null ? 0.6 : 0.5,
               ),
             ),
     );
-    // The background picture has its own rim.
-    if (background != null) {
-      return SizedBox.square(dimension: size, child: tile);
-    }
-    return SizedBox.square(
-      dimension: size,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          borderRadius: iconShapeRadius(pack.shape, size),
-          border: Border.all(color: pack.ring, width: size * 0.035),
-        ),
-        child: tile,
-      ),
-    );
   }
 }
 
-/// A downloaded icon-pack picture, clipped to the user's tile shape. Shows
-/// [placeholder] until the picture loads, or if it can't.
+/// A downloaded icon-pack picture, clipped to the user's tile shape and
+/// ringed in [ring]. Shows [placeholder] until the picture loads, or if it
+/// can't.
 class PackPictureIcon extends StatefulWidget {
   const PackPictureIcon({
     super.key,
@@ -160,12 +150,16 @@ class PackPictureIcon extends StatefulWidget {
     required this.shape,
     required this.size,
     required this.placeholder,
+    this.ring,
   });
 
   final AssetRef picture;
   final IconShape shape;
   final double size;
   final Widget placeholder;
+
+  /// Null = no rim (packs without a tile).
+  final Color? ring;
 
   @override
   State<PackPictureIcon> createState() => _PackPictureIconState();
@@ -195,7 +189,12 @@ class _PackPictureIconState extends State<PackPictureIcon> {
       dimension: s,
       child: RawImage(image: image, filterQuality: FilterQuality.medium),
     );
-    return IconShapeClip(shape: widget.shape, size: s, child: picture);
+    return IconShapeTile(
+      shape: widget.shape,
+      size: s,
+      ring: widget.ring,
+      child: picture,
+    );
   }
 }
 

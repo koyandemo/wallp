@@ -27,13 +27,15 @@ class ImageIconPack {
   final Color? tile;
   final Color ring;
 
-  /// The picture for [glyphKey], or null to frame the app's own icon.
+  /// The picture for [glyphKey]: previews only, whose sample apps have no
+  /// icon. Real apps keep their own logo, on the pack's tile.
   AssetRef? pictureFor(String? glyphKey) =>
       glyphKey == null ? null : glyphs[glyphKey];
 }
 
-/// An app the pack has no picture for: its own icon on the pack's tile, so
-/// every app on wallp Home still looks part of the theme.
+/// An app under a downloaded pack: its own logo on the pack's tile, so
+/// every app on wallp Home looks part of the theme while staying
+/// recognisable.
 ///
 /// Fills the whole canvas; callers clip it to the tile shape (or let the
 /// launcher mask it, for a pinned shortcut).
@@ -41,6 +43,7 @@ class PackFallbackPainter extends CustomPainter {
   const PackFallbackPainter({
     required this.pack,
     required this.appIcon,
+    this.logo,
     this.background,
     this.iconScale = 0.6,
   });
@@ -48,11 +51,16 @@ class PackFallbackPainter extends CustomPainter {
   final ImageIconPack pack;
   final ui.Image? appIcon;
 
+  /// [InstalledApp.logo]: drawn instead of [appIcon] when there is one, so
+  /// the app's own background makes way for the pack's.
+  final ui.Image? logo;
+
   /// The pack's loaded [ImageIconPack.background], drawn edge to edge like
   /// its pictures. Null = a gradient of the pack's tile colour.
   final ui.Image? background;
 
-  /// The app icon's width as a share of the tile.
+  /// The app icon's width as a share of the tile. A [logo] layer is drawn
+  /// twice as wide, since adaptive icons keep their logo in its middle half.
   final double iconScale;
 
   @override
@@ -79,9 +87,17 @@ class PackFallbackPainter extends CustomPainter {
           ).createShader(full),
       );
     }
+    final side = size.shortestSide * iconScale;
+    if (logo case final logo?) {
+      _paintLogo(
+        canvas,
+        logo,
+        Rect.fromCenter(center: full.center, width: side * 2, height: side * 2),
+      );
+      return;
+    }
     final icon = appIcon;
     if (icon == null) return;
-    final side = size.shortestSide * iconScale;
     final dst = Rect.fromCenter(center: full.center, width: side, height: side);
     // A soft shadow lifts the app's icon off the tile.
     canvas.drawRRect(
@@ -101,10 +117,36 @@ class PackFallbackPainter extends CustomPainter {
     );
   }
 
+  /// [logo] over a soft shadow in its own shape.
+  void _paintLogo(Canvas canvas, ui.Image logo, Rect dst) {
+    final src =
+        Offset.zero & Size(logo.width.toDouble(), logo.height.toDouble());
+    final blur = dst.width * 0.02;
+    canvas
+      ..drawImageRect(
+        logo,
+        src,
+        dst.shift(Offset(0, dst.width * 0.015)),
+        Paint()
+          ..colorFilter = const ColorFilter.mode(
+            Color(0x66000000),
+            BlendMode.srcIn,
+          )
+          ..imageFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+      )
+      ..drawImageRect(
+        logo,
+        src,
+        dst,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+  }
+
   @override
   bool shouldRepaint(PackFallbackPainter old) =>
       old.pack != pack ||
       old.appIcon != appIcon ||
+      old.logo != logo ||
       old.background != background ||
       old.iconScale != iconScale;
 }

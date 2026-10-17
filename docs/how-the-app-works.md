@@ -43,7 +43,7 @@ A "theme" is a festival look, for example **Halloween**, **Christmas** or **Thin
 | Wallpaper (home + lock) | Draws the festival scene and sets it as the wallpaper |
 | Live wallpaper | Plays the same scene **animated** (bats flying, snow falling, water splashing) |
 | Home screen | wallp has its **own home screen app** ("wallp Home") with themed icons, a clock and a countdown |
-| App icons | Every app icon is redrawn in the festival style (or replaced by the icon pack's picture) |
+| App icons | Every app icon is redrawn in the festival style (or, for a downloaded icon pack, the app's own logo sits on the pack's tile) |
 | Clock font | The lock and home clock use the theme's font |
 | Countdown | Shows "17 nights left" until the festival |
 
@@ -55,7 +55,7 @@ The user can also change each part on its own: a different wallpaper, clock font
 |---|---|---|
 | Examples | Halloween, Christmas, Thingyan | Thadingyut, Minimal, Cozy Cabin, … |
 | Scene drawn by | A Dart painter written for it | The generic `layers` engine, from JSON layers |
-| Icons | Painted by `ThemedIconPainter` | Downloaded pictures, one per app type |
+| Icons | Painted by `ThemedIconPainter` | Each app's own logo on the pack's downloaded background tile; the per-app-type pictures are for store previews |
 | Download | Nothing | Images and fonts, a few hundred KB to a few MB |
 
 ---
