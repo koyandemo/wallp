@@ -2,7 +2,7 @@
 
 How the new store design ("wallp Store Flow" canvas, 12 screens) gets built on mock data that already has the exact shape of the Theme API, so binding the real API later only swaps the data source.
 
-**Status (17 Oct 2026): all 9 phases done.** The new store runs end to end on the mock catalog; 361 tests pass. What's left before the real API is in section 11.
+**Status (18 Oct 2026): all 9 phases done.** The new store runs end to end on the mock catalog (five themes, the latest being Neon Night); 357 tests pass. What's left before the real API is in section 11.
 
 Related: [theme-api.md](theme-api.md) (the JSON format), [theme-dashboard.md](theme-dashboard.md) (where themes are made), [how-the-app-works.md](how-the-app-works.md) (a walk through the code as built).
 
@@ -53,9 +53,9 @@ The mock is only the **source**: caching, checks and fallbacks are the real code
 
 | | Built-in | Downloadable (dashboard-made) |
 |---|---|---|
-| Examples | Halloween, Christmas, Thingyan (today's painters) | Thadingyut, Minimal, Cozy Cabin, Gold Ornaments, … |
+| Examples | Halloween, Christmas, Thingyan (today's painters) | Spider Night, Neon Night (made by script today; the dashboard later) |
 | Scene | Dart painter (`halloween`, `christmas`, `thingyan`) | `layers` engine: gradient, image, shape and particle layers from JSON ([theme-api.md §5](theme-api.md), level 2) |
-| Icons | `ThemedIconPainter` | Icon pack images, one per glyph key, plus tile style for apps without a glyph |
+| Icons | `ThemedIconPainter` | One background tile per pack; every app's own logo sits on it (the per-app pictures were dropped) |
 | Font | Bundled / `google_fonts` today | Font file (`.ttf`), loaded with `FontLoader` |
 | Download | 0 MB, apply instantly | ~0.5–3 MB, progress sheet first |
 
@@ -76,20 +76,20 @@ Things the design needed that [theme-api.md](theme-api.md) didn't define. All ar
 
 | Planned | Built as |
 |---|---|
-| `IconPack` { id, festivalId, name, style, isNew, shape, tile, ring, glyphs, bytes } | `IconPack` (§4.7) with `kind` (`painted` / `images`), `painter`, `glyph` colour and `publishedAt`. NEW comes from `publishedAt`, size from the glyph files, so `isNew` and `bytes` aren't stored |
+| `IconPack` { id, festivalId, name, style, isNew, shape, tile, ring, glyphs, bytes } | `IconPack` (§4.7) with `kind` (`painted` / `images`), `painter`, `glyph` colour, `background` tile (image packs) and `publishedAt`; no per-app `glyphs`. NEW comes from `publishedAt`, size from the background file, so `isNew` and `bytes` aren't stored |
 | Theme `download` { bytes, assets[] } | Theme `downloadBytes` (§4.3). The file list isn't stored: the app works it out from the scene, icon pack and fonts (`Catalog.assetsFor`) |
 | Theme `iconPackId` | As planned |
 | Font `category` | As planned, plus `sampleText` and `listed` |
 | Wallpaper `isNew`, `popularity` | `popularity` and `publishedAt`. Wallpapers show IN USE or LIVE, no NEW badge |
 | Catalog `searchSuggestions` | As planned, plus `accentPresets` (the picker's Solid and Gradient tabs) |
-| Glyph keys (`phone`, `chat`, `camera`, …) | 20 keys (§4.7). `chat` became `messages` |
+| Glyph keys (`phone`, `chat`, `camera`, …) | Built as 20 keys, then dropped: packs are now one `background` tile under each app's own logo (§4.7). Material symbols remain only for painted packs and the store's sample apps |
 | | Also added: theme `fonts.labels` and `labels.color` (app names on wallp Home), festival `look` ("Match app to my theme"), `durationDays`, `comingSoon` |
 
 ---
 
 ## 5. Seed (mock) data
 
-From the canvas, so every screen has real-looking content. Built by [tool/seed/](../tool/seed/). This 30-theme catalog was later removed: the app and the tests now share the four-theme demo catalog (Halloween, Christmas, Thingyan, Spider Night; see [theme-api.md §4.11](theme-api.md)). What it held:
+From the canvas, so every screen has real-looking content. Built by [tool/seed/](../tool/seed/). This 30-theme catalog was later removed: the app and the tests now share the five-theme demo catalog (Halloween, Christmas, Thingyan, Spider Night, Neon Night; see [theme-api.md §4.11](theme-api.md)). What it held:
 
 | Kind | Count | Notes |
 |---|---|---|
@@ -138,7 +138,7 @@ The risks as written before the work, each followed by where it ended up (**Now:
 4. **The layers engine's look and battery use.** Dashboard themes only look as good as this engine draws them. Particles on a live wallpaper cost battery, so keep the existing 30 fps cap and the particle limits. Lottie / Rive is a later step.
    **Now:** engine built, 30 fps cap and limits (150 particles per layer) kept. Battery use on real phones not measured yet.
 5. **Icons become images.** `app_glyphs.dart` returns `IconData`. It needs stable string keys so a downloaded pack can map apps to images. Icon images at 432 px can be 1–3 MB per pack, so use WebP.
-   **Now:** done: 20 glyph keys, pictures clipped to the user's tile shape.
+   **Now:** done, more simply than planned: a pack is one background tile (a few dozen KB), clipped to the user's tile shape, with each app's own logo (its adaptive icon's foreground) on top. No per-app pictures, so no glyph keys.
 
 ### Medium
 
@@ -149,7 +149,7 @@ The risks as written before the work, each followed by where it ended up (**Now:
 8. **Fonts:** `google_fonts` downloads at runtime and doesn't work offline on first use. Downloaded `.ttf` files fix this for theme fonts. Bundle Sora and Padauk.
    **Now:** theme fonts fixed. `google_fonts` still the fallback; bundling Sora and Padauk is still to do.
 9. **Mock files in the release APK:** bundled mock images and fonts increase the app size. Keep them small and plan a `mock` flavor, or remove them once the API exists.
-   **Now:** the demo catalog was cut to 3 themes (2.3 MB). Removing it with the real API is still to do.
+   **Now:** the demo catalog is 5 themes (2.7 MB). Removing it with the real API is still to do.
 10. **Navigation rewrite:** the app goes from 3 tabs to 5 plus about 9 pushed screens, and most of the 12 existing test files need rewriting.
     **Now:** done; old screens and their tests replaced.
 
@@ -182,7 +182,7 @@ The switches show in Me and save their value. They don't do anything yet.
 
 ## 9. Mock data in the app
 
-The app shows a small **demo catalog**: four themes (Haunted Moon, Snowy Pines, Water Splash, Spider Night) and their wallpapers, with their icon packs, fonts and banners, for testing step by step. The tests read the same catalog. Every change to the demo needs a new `demoRevision` and theme `rev`, or installed apps keep the old data. See [theme-api.md §4.11](theme-api.md).
+The app shows a small **demo catalog**: five themes (Haunted Moon, Snowy Pines, Water Splash, Spider Night, Neon Night) and their wallpapers, with their icon packs, fonts and banners, for testing step by step. The tests read the same catalog. Spider Night and Neon Night are script-made kits (one file each in [tool/seed/](../tool/seed/), built with `tool/seed/spider_night.sh`); Neon Night covers colour variants, a gradient accent and a downloaded font on the `layers` engine. Every change to the demo needs a new `demoRevision` and theme `rev`, or installed apps keep the old data. See [theme-api.md §4.11](theme-api.md).
 
 ## 10. Packages
 
@@ -199,5 +199,5 @@ The app shows a small **demo catalog**: four themes (Haunted Moon, Snowy Pines, 
 | **"Update wallp" for users** | The app knows when the server asks for a newer app and how many themes it hid, but only Developer settings shows it. A soft banner, and `previewImage` cards for themes that need a newer app |
 | **Download edge cases** | Resume inside a file (HTTP Range); check free space before starting |
 | **Stubbed features** | Festival reminders, Follow the next festival, one-app icon swap (section 7) |
-| **Myanmar dates** | Check the Thingyan and Thadingyut `occurrences` against the calendar |
+| **Myanmar dates** | Check the Thingyan `occurrences` against the calendar (and Thadingyut's, when it comes back to the catalog) |
 | **Dashboard** | [theme-dashboard.md](theme-dashboard.md), not started |

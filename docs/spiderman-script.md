@@ -4,6 +4,8 @@ This guide is for making the **Spider Night** theme's pictures (icon tile, city 
 
 The theme itself (colours, animation, fonts, store banner) is defined in [tool/seed/spider_night.dart](../tool/seed/spider_night.dart). The script draws its own placeholder art. You don't have to replace all of it: any file you leave out keeps the drawn version.
 
+The import step is for Spider Night only. The other script-made theme, **Neon Night** ([tool/seed/neon_night.dart](../tool/seed/neon_night.dart)), has no picture layers: its scene is all shapes and particles, and its Neon Glow tile is drawn by the script. The same build command rebuilds both.
+
 ---
 
 ## 1. What is a picture, and what is animation
@@ -57,7 +59,7 @@ Paste this **style block** into every prompt, so the 3 pictures look like one se
 
 **Tips per tool:**
 - **ChatGPT / GPT-Image:** ask for "transparent background, PNG". Sizes: 1024 × 1536 for the skyline, 1024 × 1024 for the web and icons.
-- **Midjourney:** add `--ar 2:3 --style raw` (skyline), `--ar 1:1 --style raw` (web, icons). Use `--sref <url of your first good icon>` on the other 19 so they match. It can't export transparency: use the green background.
+- **Midjourney:** add `--ar 2:3 --style raw` (skyline), `--ar 1:1 --style raw` (web, icons). Use `--sref <url of your skyline>` on the web and the tile so the three match. It can't export transparency: use the green background.
 - **Stable Diffusion:** negative prompt: `text, letters, watermark, logo, photo, 3d render, gradient background, people, character, blurry`.
 
 ---
@@ -109,9 +111,9 @@ tool/seed/spider_night.sh --external
 That runs four steps:
 
 1. **Import:** reads `tool/seed/incoming/spider-night/`, crops and resizes each picture, makes the green background transparent, and saves the results over the drawn art in `tool/seed/source/`. Imported files are listed in `tool/seed/source/external-art.txt`.
-2. **Render:** redraws the art that **wasn't** imported (and leaves the imported files alone).
-3. **Generate:** hashes the pictures into the demo catalog, `assets/mock/catalog/v1/`, and checks it through the app's own parser.
-4. **Preview:** draws the result into `build/spider-night-preview/`:
+2. **Render:** redraws the art that **wasn't** imported (and leaves the imported files alone). It also draws Neon Night's Neon Glow tile.
+3. **Generate:** hashes the pictures into the demo catalog, `assets/mock/catalog/v1/` (both kits, plus the three built-in themes), and checks it through the app's own parser. Anything the app would skip (e.g. a polygon point outside 0–1) stops the build, with the layer named.
+4. **Preview:** draws Spider Night into `build/spider-night-preview/`:
    - `scene-0.0.png`, `scene-1.3.png`, `scene-2.6.png`: the live wallpaper at three moments (the spider swings, the moon pulses)
    - `still.png`: the "Web Corner" still wallpaper
    - `icons.png`: the tile under a symbol for each kind of app, on the wallpaper, as the store's previews show it
@@ -136,10 +138,10 @@ tool/seed/spider_night.sh --drawn
    | Logos are hard to see on the tile | Ask for a calmer, plain middle, and less bright web lines |
    | Two spiders or two moons | Remove the spider or moon from your picture: the app draws them |
 
-2. **Check the size.** Step 3 prints the demo catalog size (about 2.6 MB with the drawn art). Busy, detailed pictures make big PNGs, and every user downloads them when applying the theme. Keep the skyline and web under about 1 MB each; flat colours compress best.
+2. **Check the size.** Step 3 prints the demo catalog size (about 2.7 MB with the drawn art, all five themes). Busy, detailed pictures make big PNGs, and every user downloads them when applying the theme. Keep the skyline and web under about 1 MB each; flat colours compress best.
 
 3. **Bump the revisions in [tool/seed/spider_night.dart](../tool/seed/spider_night.dart) and [tool/seed/seed_data.dart](../tool/seed/seed_data.dart)** when you change art the app has already shown:
-   - `rev: 1` → `rev: 2` on the Spider Night theme. Phones cache theme files by `rev` and never re-read one they have, so without this they keep the old pictures.
+   - `rev` +1 on the Spider Night theme (now `rev: 4`). Phones cache theme files by `rev` and never re-read one they have, so without this they keep the old pictures.
    - `demoRevision` +1 in `seed_data.dart` (with a note on the comment above it). Phones only download a catalog whose version is new.
 
    Then run `tool/seed/spider_night.sh` again.
@@ -161,4 +163,4 @@ All in [tool/seed/spider_night.dart](../tool/seed/spider_night.dart), then run `
 - **The spider:** `_spider`: where it hangs (`x`, `y`), the box size `_spiderWidth` / `_spiderAspect`, and its leg shapes.
 - **Names, fonts, banner text:** `buildSpiderNight`.
 
-The full layer format is in [theme-api.md §4.9](theme-api.md#49-layers-scene-engine-layers).
+The full layer format is in [theme-api.md §4.9](theme-api.md#49-layers-scene-engine-layers). To make a new theme the same way, copy [neon_night.dart](../tool/seed/neon_night.dart) (everything in one file) and follow [how-the-app-works.md §19.1](how-the-app-works.md).
