@@ -147,7 +147,7 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('a tap puts the pack on wallp Home; there\'s no Apply step', (
+    testWidgets('choices preview; Apply puts the pack on wallp Home', (
       tester,
     ) async {
       await h.pump(
@@ -156,9 +156,8 @@ void main() {
       );
       await settle(tester);
       expect(h.looks.isApplied, isFalse);
-      expect(find.byType(FilledButton), findsNothing);
-      expect(find.textContaining('Apply'), findsNothing);
-      expect(find.textContaining('to use it on wallp Home'), findsOneWidget);
+      expect(find.text('Apply icons'), findsOneWidget);
+      expect(find.textContaining('then apply to wallp Home'), findsOneWidget);
 
       /// Lets the apply's real file work run until [done] holds.
       Future<void> until(bool Function() done) async {
@@ -171,17 +170,25 @@ void main() {
         await settle(tester);
       }
 
+      // A tap only previews.
       await tester.tap(find.bySemanticsLabel('Leaf'));
+      await settle(tester);
+      expect(h.looks.isApplied, isFalse);
+
+      await tester.tap(find.text('Apply icons'));
       await until(() => h.looks.isApplied);
-      expect(h.looks.isApplied, isTrue);
       expect(h.looks.look!.icons.pack.id, 'spooky-glow');
       expect(h.looks.look!.icons.shape, IconShape.leaf);
-      expect(find.textContaining('Changes show there right away'), findsOne);
+      await until(() => find.text('Applied').evaluate().isNotEmpty);
+      expect(find.text('Applied'), findsOneWidget);
 
-      // Later choices go straight on too.
+      // A later change waits for Apply changes.
       await tester.ensureVisible(find.text('System font'));
       await tester.pump();
       await tester.tap(find.text('System font'));
+      await settle(tester);
+      expect(h.looks.look!.icons.labelFont, isNot(LabelFont.system));
+      await tester.tap(find.text('Apply changes'));
       await until(() => h.looks.look!.icons.labelFont == LabelFont.system);
       expect(h.looks.look!.icons.labelFont, LabelFont.system);
       expect(h.looks.look!.icons.shape, IconShape.leaf);

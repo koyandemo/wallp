@@ -17,6 +17,7 @@ import '../../services/launcher_service.dart';
 import '../apply_flow.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
+import '../widgets/apply_button.dart';
 import '../widgets/colour_field.dart';
 import '../widgets/common.dart';
 import 'pin_shortcuts_screen.dart';
@@ -164,8 +165,8 @@ const _sampleSymbols = <String, IconData>{
 InstalledApp sampleApp(String key) => sampleApps[GlyphKeys.all.indexOf(key)];
 
 /// One pack, previewed on the phone's own apps: the tile shape, the app
-/// name colour and font. Every choice goes on wallp Home the moment it's
-/// tapped; there's no Apply step.
+/// name colour and font. Choices only preview; Apply puts them on wallp
+/// Home.
 class IconPackDetailScreen extends StatefulWidget {
   const IconPackDetailScreen({
     super.key,
@@ -189,6 +190,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
   LabelColor? _labels;
   LabelFont? _labelFont;
   String _query = '';
+  bool _applying = false;
 
   /// The phone's apps, or [sampleApps] if they can't be listed.
   List<InstalledApp> _apps = sampleApps;
@@ -245,7 +247,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
     _labelFont ??= pack?.labelFont ?? LabelFont.theme;
   }
 
-  /// Takes the user's change and puts the pack on wallp Home with it.
+  /// Previews the user's change; [_apply] puts it on wallp Home.
   void _choose(
     IconPack pack, {
     IconShape? shape,
@@ -257,13 +259,18 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
       _labels = labels ?? _labels;
       _labelFont = labelFont ?? _labelFont;
     });
-    widget.flow.applyIconPack(
+  }
+
+  Future<void> _apply(IconPack pack) async {
+    setState(() => _applying = true);
+    await widget.flow.applyIconPack(
       context,
       pack,
       shape: _shape ?? pack.shape,
       labels: _labels,
       labelFont: _labelFont,
     );
+    if (mounted) setState(() => _applying = false);
   }
 
   @override
@@ -287,6 +294,13 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
     final inUse =
         context.watch<LookController>().isApplied &&
         context.read<LookController>().look?.icons.pack.id == pack.id;
+    final applied = context.read<LookController>().look?.icons;
+    // In use, and nothing picked here differs from what's on wallp Home.
+    final upToDate =
+        inUse &&
+        applied!.shape == shape &&
+        applied.labels == _labels &&
+        applied.labelFont == _labelFont;
     final query = _query.trim().toLowerCase();
     final apps = [
       for (final a in _apps)
@@ -302,7 +316,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(pack.name.en)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
         children: [
           Text(
             '${catalog.festival(pack.festivalId)?.name.en ?? ''} · ${pack.style.en}',
@@ -311,8 +325,8 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
           const SizedBox(height: 4),
           Text(
             inUse
-                ? 'On wallp Home. Changes show there right away.'
-                : 'Pick a shape or name colour to use it on wallp Home.',
+                ? 'On wallp Home. Apply to update it with your changes.'
+                : 'Pick a shape and name colour, then apply to wallp Home.',
             style: TextStyle(
               fontSize: 13,
               color: inUse ? context.palette.brand : context.palette.muted,
@@ -342,7 +356,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
                   Expanded(
                     child: _ShapeOption(
                       label: label,
-                      selected: inUse && shape == option,
+                      selected: shape == option,
                       onTap: () => _choose(pack, shape: option),
                       child: PackIcon(
                         pack: pack,
@@ -449,6 +463,22 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
               ],
             ),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: ApplyButton(
+        onPressed: () => _apply(pack),
+        state: _applying
+            ? ApplyState.applying
+            : upToDate
+            ? ApplyState.applied
+            : ApplyState.ready,
+        label: _applying
+            ? 'Applying…'
+            : upToDate
+            ? 'Applied'
+            : inUse
+            ? 'Apply changes'
+            : 'Apply icons',
       ),
     );
   }

@@ -178,26 +178,6 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('the Apply sheet offers all three ways', (tester) async {
-      await h.pump(
-        tester,
-        home: const ThemeDetailScreen(themeId: 'spider-night'),
-        themes: ['spider-night'],
-      );
-      await settle(tester);
-      await tester.tap(find.byType(FilledButton));
-      await settle(tester);
-      expect(find.text('Apply Spider Night'), findsOneWidget);
-      expect(find.text('Whole theme'), findsOneWidget);
-      expect(find.text('Wallpaper only'), findsOneWidget);
-      expect(find.text('Clock font only'), findsOneWidget);
-      expect(
-        find.text('Bebas Neue on the lock and home clock'),
-        findsOneWidget,
-      );
-      await tester.pumpWidget(const SizedBox());
-    });
-
     testWidgets('a theme that can\'t load says so and offers Try again', (
       tester,
     ) async {

@@ -16,6 +16,7 @@ import '../logic/queries.dart';
 import '../routes.dart';
 import '../state/user_store.dart';
 import '../state/live_wallpaper_status.dart';
+import '../widgets/apply_button.dart';
 import '../widgets/common.dart';
 
 /// One theme: a live preview of its lock and home screens, its colours and
@@ -321,46 +322,32 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-          child: SizedBox(
-            height: 56,
-            child: FilledButton(
-              onPressed: _applying ? null : () => _openApplySheet(detail),
-              child: Text(
-                _applying
-                    ? 'Applying…'
-                    : isApplied
-                    ? 'Applied · apply again'
-                    : missing == null || missing == 0
-                    ? 'Apply theme'
-                    : 'Apply · ${formatBytes(missing)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: ApplyButton(
+        onPressed: () => _apply(detail),
+        state: _applying
+            ? ApplyState.applying
+            : isApplied
+            ? ApplyState.applied
+            : missing != null && missing > 0
+            ? ApplyState.download
+            : ApplyState.ready,
+        label: _applying
+            ? 'Applying…'
+            : isApplied
+            ? 'Applied · apply again'
+            : missing == null || missing == 0
+            ? 'Apply theme'
+            : 'Apply · ${formatBytes(missing)}',
       ),
     );
   }
 
-  Future<void> _openApplySheet(ThemeDetail detail) async {
-    final option = await showModalBottomSheet<ApplyOption>(
-      context: context,
-      backgroundColor: context.palette.surface,
-      showDragHandle: true,
-      builder: (_) => _ApplySheet(theme: detail),
-    );
-    if (option == null || !mounted) return;
+  Future<void> _apply(ThemeDetail detail) async {
     setState(() => _applying = true);
     await widget.flow.applyTheme(
       context,
       detail,
-      option: option,
       variantId: _variant,
       accent: _accentFor(detail),
     );
@@ -454,97 +441,6 @@ class _IncludesRow extends StatelessWidget {
         trailing: onTap == null
             ? null
             : Icon(Icons.chevron_right_rounded, color: context.palette.muted),
-      ),
-    );
-  }
-}
-
-/// Whole theme / Wallpaper only / Clock font only.
-class _ApplySheet extends StatefulWidget {
-  const _ApplySheet({required this.theme});
-
-  final ThemeDetail theme;
-
-  @override
-  State<_ApplySheet> createState() => _ApplySheetState();
-}
-
-class _ApplySheetState extends State<_ApplySheet> {
-  ApplyOption _option = ApplyOption.wholeTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final clockFont = catalogOf(context).font(widget.theme.fonts.display);
-    final font = clockFont?.family ?? 'the clock font';
-    final options = [
-      (
-        ApplyOption.wholeTheme,
-        'Whole theme',
-        'Wallpaper, icons and clock font',
-      ),
-      (ApplyOption.wallpaperOnly, 'Wallpaper only', 'Keep your icons and font'),
-      // A hidden font can't be picked on its own.
-      if (clockFont?.listed ?? true)
-        (
-          ApplyOption.clockFontOnly,
-          'Clock font only',
-          '$font on the lock and home clock',
-        ),
-    ];
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Apply ${widget.theme.name.en}',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: context.palette.text,
-              ),
-            ),
-            const SizedBox(height: 10),
-            RadioGroup<ApplyOption>(
-              groupValue: _option,
-              onChanged: (o) => setState(() => _option = o!),
-              child: Column(
-                children: [
-                  for (final (option, title, sub) in options)
-                    RadioListTile<ApplyOption>(
-                      value: option,
-                      title: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        sub,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.palette.muted,
-                        ),
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 6),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(context, _option),
-                child: const Text('Apply'),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

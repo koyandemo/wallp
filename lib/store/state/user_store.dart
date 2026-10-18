@@ -16,10 +16,6 @@ class HistoryEntry {
 
 /// The Me tab's switches.
 enum UserSetting {
-  /// The live wallpaper draws the theme's clock on the lock screen.
-  /// Shares its key with the live wallpaper engine.
-  themedLockClock('lock_clock', true),
-
   /// A note 7 days before a festival theme goes live. Saved; the
   /// notification itself needs Android permissions (not built yet).
   festivalReminders('festival_reminders', true),

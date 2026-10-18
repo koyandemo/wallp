@@ -322,11 +322,6 @@ class _MeScreenState extends State<MeScreen> {
         const SectionHeader(title: 'Settings'),
         for (final (s, title, sub) in const [
           (
-            UserSetting.themedLockClock,
-            'Themed lock screen clock',
-            "Your theme's font on the lock screen, with the live wallpaper on",
-          ),
-          (
             UserSetting.festivalReminders,
             'Festival reminders',
             'A note 7 days before a festival theme goes live',
