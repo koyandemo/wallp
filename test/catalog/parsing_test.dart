@@ -341,6 +341,101 @@ void main() {
     });
   });
 
+  group('banner pictures and per-app icons (app-client.md §2)', () {
+    Map<String, dynamic> picture(String hex, {String format = 'png'}) {
+      final sha = hex * 64;
+      return {
+        'url': 'assets/$sha.$format',
+        'sha256': sha,
+        'bytes': 2048,
+        'format': format,
+      };
+    }
+
+    test('a banner may carry a picture', () {
+      final json = _seedCatalog();
+      final banner = _list(json, 'banners').first;
+      (banner['look'] as Map)['image'] = picture('a');
+
+      final look = _parse(json).banners.first.look;
+      expect(look.image?.sha256, 'a' * 64);
+    });
+
+    test('a banner picture must be an image, not a font', () {
+      final json = _seedCatalog();
+      final banners = _list(json, 'banners');
+      (banners.first['look'] as Map)['image'] = picture('a', format: 'ttf');
+
+      final catalog = _parse(json);
+      expect(catalog.banners, hasLength(banners.length - 1));
+      expect(
+        catalog.issues.single.path,
+        r'catalog.banners[0].look.image.format',
+      );
+    });
+
+    test('an icon pack can map apps to pictures and download them', () {
+      final json = _seedCatalog();
+      final pack = _list(json, 'iconPacks').first;
+      pack['apps'] = {
+        'com.whatsapp': picture('b'),
+        'com.android.chrome': picture('c'),
+        // Same picture twice is fine; it downloads once.
+        'org.telegram.messenger': picture('b'),
+      };
+      pack['appsFallbackStyle'] = 'tile';
+
+      final parsed = _parse(json).iconPack(pack['id'] as String)!;
+      expect(parsed.apps.keys, [
+        'com.whatsapp',
+        'com.android.chrome',
+        'org.telegram.messenger',
+      ]);
+      expect(parsed.appsFallbackStyle, 'tile');
+      final shas = parsed.assets.map((a) => a.sha256);
+      expect(shas, containsAll(['b' * 64, 'c' * 64]));
+      expect(shas.where((s) => s == 'b' * 64), hasLength(1));
+    });
+
+    test('packs without apps parse as before', () {
+      for (final pack in _parse(_seedCatalog()).iconPacks) {
+        expect(pack.apps, isEmpty);
+        expect(pack.appsFallbackStyle, isNull);
+      }
+    });
+
+    test('an app key must be an Android package name', () {
+      final json = _seedCatalog();
+      final packs = _list(json, 'iconPacks');
+      packs.first['apps'] = {'WhatsApp': picture('b')};
+
+      final catalog = _parse(json);
+      expect(catalog.issues.first.path, r'catalog.iconPacks[0].apps.WhatsApp');
+    });
+
+    test('a pack may list at most 200 apps', () {
+      final json = _seedCatalog();
+      _list(json, 'iconPacks').first['apps'] = {
+        for (var i = 0; i <= IconPack.maxApps; i++) 'com.app$i': picture('b'),
+      };
+
+      expect(_parse(json).issues.first.path, r'catalog.iconPacks[0].apps');
+    });
+
+    test('both fields survive toJson', () {
+      final json = _seedCatalog();
+      (_list(json, 'banners').first['look'] as Map)['image'] = picture('a');
+      _list(json, 'iconPacks').first['apps'] = {'com.whatsapp': picture('b')};
+
+      final catalog = _parse(json);
+      final again = _parse(
+        jsonDecode(jsonEncode(catalog.toJson())) as Map<String, dynamic>,
+      );
+      expect(again.banners.first.look.image, catalog.banners.first.look.image);
+      expect(again.iconPacks.first.apps, catalog.iconPacks.first.apps);
+    });
+  });
+
   test('a catalog written by toJson reads back identically', () {
     final catalog = _parse(_seedCatalog());
     final again = _parse(

@@ -143,6 +143,36 @@ class DownloadManager extends ChangeNotifier {
     return task;
   }
 
+  final _prefetching = <AssetRef>{};
+
+  /// Downloads [refs] in the background with no progress shown, for
+  /// nice-to-have files such as banner pictures. Never throws: a file that
+  /// fails is just missing, and the next call tries it again.
+  Future<void> prefetch(Iterable<AssetRef> refs) async {
+    final missing = [
+      for (final ref in await cache.missing(refs.toSet()))
+        if (_prefetching.add(ref)) ref,
+    ];
+    if (missing.isEmpty) return;
+    // Never becomes [current], so the Apply sheet doesn't show it.
+    final task = DownloadTask._('prefetch', missing, 0);
+    final fetched = <String>{};
+    for (final ref in missing) {
+      try {
+        await _fetchWithRetry(task, ref);
+        fetched.add(ref.sha256);
+      } on Object catch (e) {
+        debugPrint('Prefetch ${ref.url}: $e');
+      } finally {
+        _prefetching.remove(ref);
+      }
+    }
+    if (fetched.isEmpty) return;
+    await cache.evict(keep: fetched).catchError((Object e) {
+      debugPrint('Asset cache clean-up failed: $e');
+    });
+  }
+
   Future<void> _run(DownloadTask task, Set<AssetRef> wanted) async {
     final queue = [...task.files];
     final fetched = <String>{};

@@ -105,6 +105,7 @@ class PhoneTheme {
     this._iconStyle,
     this.layered,
     this.imageIcons,
+    this.appPictures,
     this.iconShape = IconShape.squircle,
     this.labelColor = Colors.white,
     this.systemLabels = false,
@@ -152,6 +153,10 @@ class PhoneTheme {
 
   /// A downloaded icon pack; drawn instead of [iconStyle] icons.
   final ImageIconPack? imageIcons;
+
+  /// The applied pack's pictures for particular apps; drawn instead of
+  /// [imageIcons] or [iconStyle] icons for the apps it lists.
+  final PackAppPictures? appPictures;
 
   /// The tile shape for painted icons (downloaded packs carry their own).
   final IconShape iconShape;
@@ -205,6 +210,7 @@ class PhoneTheme {
     bool? hasIconPack,
     SceneKind? iconStyle,
     ImageIconPack? imageIcons,
+    PackAppPictures? appPictures,
     IconShape? iconShape,
     Color? labelColor,
     bool? systemLabels,
@@ -225,6 +231,7 @@ class PhoneTheme {
     iconStyle: iconStyle ?? _iconStyle,
     layered: layered,
     imageIcons: imageIcons ?? this.imageIcons,
+    appPictures: appPictures ?? this.appPictures,
     iconShape: iconShape ?? this.iconShape,
     labelColor: labelColor ?? this.labelColor,
     systemLabels: systemLabels ?? this.systemLabels,

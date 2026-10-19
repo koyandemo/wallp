@@ -255,6 +255,109 @@ void main() {
       expect(sent, isA<Uint8List>());
     });
   });
+
+  group('a pack\'s own picture for an app (app-client.md §2)', () {
+    final look = AppliedLook.wholeTheme(
+      catalog,
+      mockTheme('spider-night'),
+      at: designDay,
+    ).withIconPack(catalog.iconPack('web-slinger')!, at: designDay);
+    // Any picture in the mock CDN will do as WhatsApp's.
+    final picture = look.icons.pack.background!;
+    final home = ResolvedLook.of(look, designDay).homeTheme.copyWith(
+      appPictures: PackAppPictures(
+        apps: {'com.whatsapp': picture},
+        ring: const Color(0xFFFF0000),
+      ),
+    );
+
+    Future<void> pumpIcon(WidgetTester tester, String package) =>
+        tester.pumpWidget(
+          SceneAssetsScope(
+            assets: assets,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: LauncherIcon(
+                app: InstalledApp(packageName: package, label: package),
+                theme: home,
+                accent: Colors.orange,
+              ),
+            ),
+          ),
+        );
+
+    Future<void> settle(WidgetTester tester) async {
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+    }
+
+    test('only packs that have pictures carry them', () {
+      expect(
+        ResolvedLook.of(look, designDay).homeTheme.appPictures,
+        isNull,
+        reason: 'the mock packs have no per-app pictures',
+      );
+    });
+
+    testWidgets('a listed app shows its picture once it loads', (tester) async {
+      await tester.runAsync(() async {
+        await download([picture]);
+        await assets.image(picture);
+      });
+      await pumpIcon(tester, 'com.whatsapp');
+      // The pack tile until the picture is read from the phone.
+      expect(find.byType(PackTileIcon), findsOneWidget);
+      await settle(tester);
+      expect(find.byType(PackTileIcon), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(PackAppIcon),
+          matching: find.byType(RawImage),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a picture that isn\'t on the phone falls back to the tile', (
+      tester,
+    ) async {
+      await pumpIcon(tester, 'com.whatsapp');
+      await settle(tester);
+      expect(find.byType(PackTileIcon), findsOneWidget);
+    });
+
+    testWidgets('an app the pack doesn\'t list gets the tile', (tester) async {
+      await tester.runAsync(() => download([picture]));
+      await pumpIcon(tester, 'com.example.game');
+      await settle(tester);
+      expect(find.byType(PackAppIcon), findsNothing);
+      expect(find.byType(PackTileIcon), findsOneWidget);
+    });
+
+    test('a pinned shortcut uses the picture', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      await download([picture]);
+      const channel = MethodChannel('wallp/icons');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      Object? sent;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        sent = (call.arguments as Map)['icon'];
+        return true;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+      final added = await const IconPackService().pin(
+        theme: home,
+        app: const InstalledApp(packageName: 'com.whatsapp', label: 'WhatsApp'),
+        accent: Colors.orange,
+        assets: assets,
+      );
+      expect(added, isTrue);
+      expect(sent, isA<Uint8List>());
+    });
+  });
 }
 
 /// A plain coloured square standing in for an app icon or logo.

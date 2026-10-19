@@ -7,6 +7,7 @@ import '../core/date_format.dart';
 import '../data/assets/asset_cache.dart';
 import '../data/assets/download_manager.dart';
 import '../data/catalog/catalog_repository.dart';
+import '../data/network_log.dart';
 import 'dev_settings.dart';
 
 /// Debug builds only: the mock network, a pretend date, and what the
@@ -55,6 +56,16 @@ class DevSettingsScreen extends StatelessWidget {
           Text('Downloads', style: text.titleMedium),
           const SizedBox(height: 12),
           const _DownloadStatus(),
+          const SizedBox(height: 28),
+          Text('Network', style: text.titleMedium),
+          const SizedBox(height: 4),
+          Text(
+            'Every call this run, newest first. Method, address, status, '
+            'time and size only: no tokens or passwords.',
+            style: text.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          const _NetworkCalls(),
           const SizedBox(height: 28),
           Text('Pretend network', style: text.titleMedium),
           const SizedBox(height: 4),
@@ -273,6 +284,82 @@ class _DownloadStatusState extends State<_DownloadStatus> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NetworkCalls extends StatelessWidget {
+  const _NetworkCalls();
+
+  static const _shown = 30;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return ListenableBuilder(
+      listenable: NetworkLog.shared,
+      builder: (context, _) {
+        final calls = NetworkLog.shared.calls;
+        if (calls.isEmpty) {
+          return Text(
+            'No calls yet. Try Refresh now.',
+            style: text.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          );
+        }
+        final error = Theme.of(context).colorScheme.error;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final c in calls.take(_shown))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 44,
+                      child: Text(
+                        '${c.status ?? 'ERR'}',
+                        style: text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: c.failed ? error : null,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${c.method} ${c.url.path}',
+                            style: text.bodyMedium,
+                          ),
+                          Text(
+                            [
+                              '${c.url.host} · ${c.duration.inMilliseconds} ms',
+                              if (c.bytes != null)
+                                NetworkCall.sizeText(c.bytes!),
+                              ?c.error,
+                              TimeOfDay.fromDateTime(c.at).format(context),
+                            ].join(' · '),
+                            style: text.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            TextButton.icon(
+              onPressed: NetworkLog.shared.clear,
+              icon: const Icon(Icons.clear_all_rounded),
+              label: const Text('Clear'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -381,6 +381,7 @@ class BannerLook {
     required this.titleColor,
     required this.font,
     this.artThemeId,
+    this.image,
   });
 
   factory BannerLook.fromJson(JsonReader r) => BannerLook(
@@ -389,6 +390,10 @@ class BannerLook {
     titleColor: r.color('titleColor'),
     font: r.id('font'),
     artThemeId: r.optId('artThemeId'),
+    image: switch (r.optObject('image')) {
+      final o? => _picture(o),
+      null => null,
+    },
   );
 
   final HexColor background;
@@ -401,13 +406,26 @@ class BannerLook {
   /// Draw this theme's scene as the banner art; null = plain background.
   final String? artThemeId;
 
+  /// A picture filling the whole banner, with the title on top in
+  /// [titleColor]. Optional: until it's downloaded (or if it never is) the
+  /// banner is drawn from [background] and [artThemeId] as before.
+  final AssetRef? image;
+
   Map<String, Object?> toJson() => compact({
     'background': background.hex,
     'accent': accent.hex,
     'titleColor': titleColor.hex,
     'font': font,
     'artThemeId': artThemeId,
+    'image': image?.toJson(),
   });
+}
+
+/// An [AssetRef] that must be a picture (not a font or an animation).
+AssetRef _picture(JsonReader r) {
+  final ref = AssetRef.fromJson(r);
+  if (!ref.isImage) r.fail('format', 'expected png, jpg or webp');
+  return ref;
 }
 
 /// The kinds of app the store's previews show an icon pack with (Phone,
@@ -463,8 +481,32 @@ class IconPack {
     required this.publishedAt,
     this.painter,
     this.background,
+    this.apps = const {},
+    this.appsFallbackStyle,
     this.popularity = 0,
   });
+
+  /// Most per-app pictures a pack may have (the server's limit too).
+  static const maxApps = 200;
+
+  /// An Android package name: `com.whatsapp`.
+  static final _package = RegExp(r'^[a-zA-Z]\w*(\.[a-zA-Z]\w*)+$');
+
+  static Map<String, AssetRef> _apps(JsonReader r) {
+    final raw = r.optObject('apps');
+    if (raw == null) return const {};
+    if (raw.json.length > maxApps) {
+      r.fail('apps', 'at most $maxApps apps');
+    }
+    final apps = <String, AssetRef>{};
+    for (final package in raw.json.keys) {
+      if (!_package.hasMatch(package)) {
+        raw.fail(package, 'expected an Android package name');
+      }
+      apps[package] = _picture(raw.object(package));
+    }
+    return apps;
+  }
 
   factory IconPack.fromJson(JsonReader r) {
     final kind = r.enumValue('kind', IconPackKind.values);
@@ -490,6 +532,8 @@ class IconPack {
       background: rawBackground == null
           ? null
           : AssetRef.fromJson(rawBackground),
+      apps: _apps(r),
+      appsFallbackStyle: r.optString('appsFallbackStyle'),
       publishedAt: r.time('publishedAt'),
       popularity: r.integer('popularity', orElse: 0),
     );
@@ -517,11 +561,20 @@ class IconPack {
   /// [IconPackKind.images] only (required there): the pack's tile picture.
   /// wallp Home puts every app's own logo on it.
   final AssetRef? background;
+
+  /// Drawn icons for particular apps, by Android package name. A pack can
+  /// be partial: apps not listed are drawn the pack's usual way.
+  final Map<String, AssetRef> apps;
+
+  /// How the backend says to draw apps not in [apps]. Kept for the round
+  /// trip; wallp Home always falls back to the pack's own tile or painter.
+  final String? appsFallbackStyle;
   final DateTime publishedAt;
   final int popularity;
 
-  /// Every picture the pack downloads.
-  Iterable<AssetRef> get assets => [?background];
+  /// Every picture the pack downloads. Duplicates removed: several apps
+  /// may share one picture.
+  Iterable<AssetRef> get assets => {?background, ...apps.values};
 
   int get bytes => assets.fold(0, (sum, a) => sum + a.bytes);
 
@@ -542,6 +595,10 @@ class IconPack {
     'glyph': glyph.hex,
     'ring': ring.hex,
     'background': background?.toJson(),
+    'apps': apps.isEmpty
+        ? null
+        : {for (final e in apps.entries) e.key: e.value.toJson()},
+    'appsFallbackStyle': appsFallbackStyle,
     'publishedAt': publishedAt.toIso8601String(),
     'popularity': popularity,
   });

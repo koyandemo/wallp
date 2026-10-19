@@ -88,6 +88,7 @@ class ResolvedLook {
         imageIcons: pack.kind == IconPackKind.images
             ? ImageIconPack.of(pack, look.icons.shape)
             : null,
+        appPictures: PackAppPictures.of(pack),
         iconShape: look.icons.shape,
         labelColor: switch (look.icons.labels) {
           final l when l.isAccent => accent,

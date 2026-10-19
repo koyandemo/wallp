@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,10 @@ import 'package:provider/provider.dart';
 import '../../catalog/catalog.dart' hide Banner;
 import '../../catalog/catalog.dart' as cat show Banner;
 import '../../core/store_palette.dart';
+import '../../data/assets/download_manager.dart';
 import '../../look/look_controller.dart';
+import '../../models/phone_theme.dart';
+import '../../render/scene_assets.dart';
 import '../logic/previews.dart';
 import '../logic/queries.dart';
 import '../routes.dart';
@@ -310,6 +314,55 @@ class _BannerCarouselState extends State<BannerCarousel> {
   }
 }
 
+/// A banner's picture once it's on the phone, else null. Asks for it in
+/// the background the first time, so it shows up when it arrives.
+class _BannerPicture extends StatefulWidget {
+  const _BannerPicture({required this.picture, required this.builder});
+
+  final AssetRef? picture;
+  final Widget Function(BuildContext context, ui.Image? image) builder;
+
+  @override
+  State<_BannerPicture> createState() => _BannerPictureState();
+}
+
+class _BannerPictureState extends State<_BannerPicture> {
+  ui.Image? _image;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(_BannerPicture old) {
+    super.didUpdateWidget(old);
+    if (old.picture != widget.picture) {
+      _image = null;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final ref = widget.picture;
+    if (ref == null || _image != null) return;
+    final assets = SceneAssets.of(context);
+    final downloads = Provider.of<DownloadManager?>(context, listen: false);
+    var image = await assets.image(ref);
+    if (image == null && downloads != null) {
+      await downloads.prefetch([ref]);
+      image = await assets.image(ref);
+    }
+    if (mounted && widget.picture == ref && image != null) {
+      setState(() => _image = image);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _image);
+}
+
 class _BannerCard extends StatelessWidget {
   const _BannerCard({required this.banner, required this.position});
 
@@ -357,9 +410,48 @@ class _BannerCard extends StatelessWidget {
       label: '${banner.title.en}, banner $position',
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
-        child: ColoredBox(
-          color: Color(look.background.argb),
-          child: Row(
+        child: _BannerPicture(
+          picture: look.image,
+          builder: (context, picture) => _body(
+            context,
+            picture: picture,
+            art: picture == null ? art : null,
+            font: font,
+            style: style,
+            accent: accent,
+            onAccent: onAccent,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The card's text and button over its [picture] (the whole card), or
+  /// over its colour with the [art] theme's scene beside them.
+  Widget _body(
+    BuildContext context, {
+    required ui.Image? picture,
+    required ThemeSummary? art,
+    required String font,
+    required PhoneTheme style,
+    required Color accent,
+    required Color onAccent,
+  }) {
+    final catalog = catalogOf(context);
+    final look = banner.look;
+    return ColoredBox(
+      color: Color(look.background.argb),
+      child: Stack(
+        children: [
+          if (picture != null)
+            Positioned.fill(
+              child: RawImage(
+                image: picture,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+              ),
+            ),
+          Row(
             children: [
               Expanded(
                 child: Padding(
@@ -426,7 +518,7 @@ class _BannerCard extends StatelessWidget {
                 ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

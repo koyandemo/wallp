@@ -27,8 +27,28 @@ class LauncherIcon extends StatelessWidget {
   final Color accent;
   final double size;
 
+  /// Which way to draw the icon, first that works (docs/app-client.md
+  /// §2): the pack's picture for this app; the pack tile with the app's
+  /// logo; the painted style; the app's own icon. A picture that hasn't
+  /// downloaded, or won't load, shows the next way instead.
   @override
   Widget build(BuildContext context) {
+    final fallback = _packStyle();
+    if (theme.appPictures case final pictures?) {
+      if (pictures[app.packageName] case final picture?) {
+        return PackAppIcon(
+          picture: picture,
+          ring: pictures.ring,
+          shape: theme.iconShape,
+          size: size,
+          fallback: fallback,
+        );
+      }
+    }
+    return fallback;
+  }
+
+  Widget _packStyle() {
     final own = _OwnIcon(app: app, size: size);
     // A downloaded pack: every app keeps its own logo, on the pack's tile.
     if (theme.imageIcons case final pack?) {
@@ -63,6 +83,70 @@ class _OwnIcon extends StatelessWidget {
       child: icon == null
           ? Icon(Icons.apps_rounded, size: size * 0.7, color: Colors.white)
           : RawImage(image: icon, filterQuality: FilterQuality.medium),
+    );
+  }
+}
+
+/// An app the pack has its own picture for: the picture clipped to the
+/// user's tile shape, ringed in the pack's ring colour. Shows [fallback]
+/// until the picture loads, and for good if it can't.
+class PackAppIcon extends StatefulWidget {
+  const PackAppIcon({
+    super.key,
+    required this.picture,
+    required this.ring,
+    required this.shape,
+    required this.size,
+    required this.fallback,
+  });
+
+  final AssetRef picture;
+  final Color ring;
+  final IconShape shape;
+  final double size;
+  final Widget fallback;
+
+  @override
+  State<PackAppIcon> createState() => _PackAppIconState();
+}
+
+class _PackAppIconState extends State<PackAppIcon> {
+  ui.Image? _image;
+  AssetRef? _loading;
+  bool _inFlight = false;
+
+  /// Like [PackTileIcon]: looks again on every rebuild until the picture is
+  /// there, so it shows up once it has downloaded.
+  void _load() {
+    final wanted = widget.picture;
+    if (_loading != wanted) {
+      _loading = wanted;
+      _image = null;
+    }
+    if (_image != null || _inFlight) return;
+    _inFlight = true;
+    SceneAssets.of(context).image(wanted).then((img) {
+      _inFlight = false;
+      if (mounted && _loading == wanted && img != null) {
+        setState(() => _image = img);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _load();
+    final image = _image;
+    if (image == null) return widget.fallback;
+    return IconShapeTile(
+      shape: widget.shape,
+      size: widget.size,
+      ring: widget.ring,
+      child: RawImage(
+        image: image,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.medium,
+      ),
     );
   }
 }

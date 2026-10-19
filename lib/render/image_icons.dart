@@ -38,6 +38,25 @@ class ImageIconPack {
   final Color glyph;
 }
 
+/// A pack's drawn icons for particular apps (`iconPacks[].apps`), by
+/// Android package name. Works with both kinds of pack: an app listed here
+/// gets its picture, the rest are drawn the pack's usual way.
+class PackAppPictures {
+  const PackAppPictures({required this.apps, required this.ring});
+
+  /// [pack]'s pictures, or null if it has none.
+  static PackAppPictures? of(IconPack pack) => pack.apps.isEmpty
+      ? null
+      : PackAppPictures(apps: pack.apps, ring: Color(pack.ring.argb));
+
+  final Map<String, AssetRef> apps;
+
+  /// Drawn along the edge of the user's tile shape.
+  final Color ring;
+
+  AssetRef? operator [](String packageName) => apps[packageName];
+}
+
 /// An app under a downloaded pack: its own logo on the pack's tile, so
 /// every app on wallp Home looks part of the theme while staying
 /// recognisable.

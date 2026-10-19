@@ -94,12 +94,22 @@ class IconPackService {
     required ui.Color accent,
     SceneAssets? assets,
   }) async {
-    // A downloaded pack: the app's own logo on the pack's background.
-    final background = switch (theme.imageIcons?.background) {
-      final ref? => await (assets ?? SceneAssets.shared).image(ref),
+    final files = assets ?? SceneAssets.shared;
+    // The pack's own picture for this app, if it has one and it loads.
+    final picture = switch (theme.appPictures?[app.packageName]) {
+      final ref? => await files.image(ref),
       null => null,
     };
-    final png = await _renderIcon(_painterFor(theme, app, accent, background));
+    // A downloaded pack: the app's own logo on the pack's background.
+    final background = switch (theme.imageIcons?.background) {
+      final ref? when picture == null => await files.image(ref),
+      _ => null,
+    };
+    final png = await _renderIcon(
+      picture != null
+          ? _PicturePainter(picture)
+          : _painterFor(theme, app, accent, background),
+    );
     try {
       return await _channel.invokeMethod<bool>('pinShortcut', {
             'id': '${theme.id}-${app.packageName}',
@@ -143,6 +153,8 @@ class IconPackService {
     );
   }
 
+  /// The launcher masks the shortcut to its own shape, so the picture is
+  /// drawn edge to edge with no ring.
   Future<Uint8List> _renderIcon(CustomPainter painter) async {
     final recorder = ui.PictureRecorder();
     const size = ui.Size.square(iconPixels + 0.0);
@@ -167,4 +179,22 @@ class IconPackService {
       return null;
     }
   }
+}
+
+/// A pack's picture for one app, filling the icon.
+class _PicturePainter extends CustomPainter {
+  const _PicturePainter(this.image);
+
+  final ui.Image image;
+
+  @override
+  void paint(ui.Canvas canvas, ui.Size size) => canvas.drawImageRect(
+    image,
+    ui.Offset.zero & ui.Size(image.width.toDouble(), image.height.toDouble()),
+    ui.Offset.zero & size,
+    ui.Paint()..filterQuality = ui.FilterQuality.medium,
+  );
+
+  @override
+  bool shouldRepaint(_PicturePainter old) => old.image != image;
 }

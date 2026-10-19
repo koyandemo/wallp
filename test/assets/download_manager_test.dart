@@ -93,6 +93,35 @@ void main() {
     expect(partFiles(), isEmpty);
   });
 
+  group('prefetch (banner pictures)', () {
+    test('downloads quietly: no task for the Apply sheet', () async {
+      final m = manager();
+      var notified = 0;
+      m.addListener(() => notified++);
+      await m.prefetch(spider.take(2));
+      expect(await cache.missing(spider.take(2)), isEmpty);
+      expect(m.current, isNull);
+      expect(notified, 0);
+    });
+
+    test('a failed file never throws and is tried again next time', () async {
+      final ref = spider.first;
+      source.failFirst[ref.url] = 3; // More than the retries.
+      final m = manager();
+      await m.prefetch([ref]);
+      expect(await cache.has(ref), isFalse);
+      await m.prefetch([ref]);
+      expect(await cache.has(ref), isTrue);
+    });
+
+    test('files already on the phone aren\'t fetched', () async {
+      await manager().prefetch(spider.take(1));
+      source.requests.clear();
+      await manager().prefetch(spider.take(1));
+      expect(source.requests, isEmpty);
+    });
+  });
+
   test('files already on the phone aren\'t downloaded again', () async {
     await manager().ensure(spider, label: 'Spider Night');
     source.requests.clear();

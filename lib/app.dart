@@ -12,6 +12,7 @@ import 'data/api/token_store.dart';
 import 'data/assets/asset_cache.dart';
 import 'data/assets/download_manager.dart';
 import 'data/catalog/catalog_poller.dart';
+import 'data/network_log.dart';
 import 'data/catalog/catalog_repository.dart';
 import 'data/catalog/catalog_source.dart';
 import 'data/catalog/catalog_store.dart';
@@ -52,14 +53,18 @@ class WallpApp extends StatelessWidget {
           create: (context) {
             final dev = context.read<DevSettings>();
             return PretendNetworkSource(
-              HttpCatalogSource(base: ApiConfig.current.catalogBase),
+              HttpCatalogSource(
+                base: ApiConfig.current.catalogBase,
+                client: appHttpClient(),
+              ),
               conditions: () => dev.conditions,
             );
           },
         ),
         // Accounts and events (/v1).
         Provider(
-          create: (_) => ApiClient.forConfig(ApiConfig.current),
+          create: (_) =>
+              ApiClient.forConfig(ApiConfig.current, client: appHttpClient()),
           dispose: (_, ApiClient api) => api.close(),
         ),
         // Anonymous popularity events, sent in batches. Not lazy: it sends

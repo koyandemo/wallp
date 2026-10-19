@@ -102,6 +102,11 @@ class AssetRef {
   final int bytes;
   final AssetFormat format;
 
+  bool get isImage => switch (format) {
+    AssetFormat.png || AssetFormat.jpg || AssetFormat.webp => true,
+    _ => false,
+  };
+
   Map<String, Object?> toJson() => {
     'url': url,
     'sha256': sha256,
