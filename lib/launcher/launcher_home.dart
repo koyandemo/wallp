@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/date_format.dart';
+import '../data/api/event_queue.dart';
 import '../look/accent_paint.dart';
 import '../look/applied_look.dart';
 import '../look/look_store.dart';
@@ -98,6 +99,9 @@ class _LauncherHomeState extends State<LauncherHome>
       final user = UserStore();
       await user.load();
       await user.recordApplied(look.theme.id, look.appliedAt);
+      // Queued only: the store sends it. A repeat from the store's own
+      // finish is dropped as a duplicate.
+      await EventQueue().add(AppEventType.themeApplied, look.theme.id);
       return look;
     } on Object {
       return null;

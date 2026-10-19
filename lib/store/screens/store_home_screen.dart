@@ -12,6 +12,7 @@ import '../logic/queries.dart';
 import '../routes.dart';
 import '../store_shell.dart';
 import '../widgets/common.dart';
+import '../widgets/update_banner.dart';
 import 'icon_pack_screens.dart';
 
 /// Store home: the banner carousel, then one row per festival (soonest
@@ -42,6 +43,7 @@ class StoreHomeScreen extends StatelessWidget {
             ),
           ],
         ),
+        const UpdateBanner(),
         if (banners.isNotEmpty) BannerCarousel(banners: banners),
         const SizedBox(height: 24),
         for (final f in festivalsBySoonest(catalog, now))

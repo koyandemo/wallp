@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../catalog/catalog.dart';
 import '../core/clock.dart';
+import '../data/api/event_queue.dart';
 import '../data/assets/download_manager.dart';
 import '../data/catalog/catalog_repository.dart';
 import '../look/applied_look.dart';
@@ -76,6 +79,7 @@ class ApplyFlow {
     }
     if (option == ApplyOption.wholeTheme) {
       await user.recordApplied(theme.id, clock.now());
+      if (context.mounted) _track(context, AppEventType.themeApplied, theme.id);
     }
     if (!context.mounted) return;
 
@@ -105,6 +109,7 @@ class ApplyFlow {
       return;
     }
     if (!context.mounted) return;
+    _track(context, AppEventType.wallpaperApplied, wallpaper.id);
     final message = await _setWallpaper(context, look);
     if (context.mounted) {
       showToast(context, message ?? '${wallpaper.name.en} chosen');
@@ -125,7 +130,9 @@ class ApplyFlow {
         color: color,
         places: places,
       );
-      if (context.mounted) showToast(context, '${font.family} applied');
+      if (!context.mounted) return;
+      _track(context, AppEventType.fontApplied, font.id);
+      showToast(context, '${font.family} applied');
     } on Object catch (e) {
       if (context.mounted) showToast(context, failureMessage(e, font.family));
     }
@@ -150,13 +157,19 @@ class ApplyFlow {
         labels: labels,
         labelFont: labelFont,
       );
-      if (switching && context.mounted) {
+      if (!context.mounted) return;
+      if (switching) {
+        _track(context, AppEventType.iconPackApplied, pack.id);
         showToast(context, '${pack.name.en} icons on wallp Home');
       }
     } on Object catch (e) {
       if (context.mounted) showToast(context, failureMessage(e, pack.name.en));
     }
   }
+
+  /// Counts an apply for popularity; never waits or fails.
+  static void _track(BuildContext context, AppEventType type, String id) =>
+      unawaited(context.read<EventQueue>().add(type, id));
 
   /// What went wrong, for a toast.
   static String failureMessage(Object error, String name) => switch (error) {

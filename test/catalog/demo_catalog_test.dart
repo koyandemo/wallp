@@ -6,11 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
-import 'package:wallp/data/catalog/catalog_repository.dart';
-import 'package:wallp/data/catalog/catalog_store.dart';
-import 'package:wallp/data/catalog/mock_catalog_source.dart';
 
 const _dir = 'assets/mock/catalog/v1';
 
@@ -73,15 +71,11 @@ void main() {
     expect(still.scene!.isLive, isFalse);
   });
 
-  test('the app loads it through its own asset bundle', () async {
+  test('it stays out of the app: only the built-in catalog ships', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    final repo = CatalogRepository(
-      source: MockCatalogSource(),
-      store: MemoryCatalogStore(),
-    );
-    await repo.start(refresh: false);
-    expect(await repo.refresh(), RefreshOutcome.updated);
-    expect(repo.catalog.themes, hasLength(5));
-    expect((await repo.theme('thingyan-water')).subtitle?.en, 'သင်္ကြန်');
+    final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final shipped = manifest.listAssets();
+    expect(shipped, contains('assets/builtin/catalog/catalog.json'));
+    expect(shipped.where((a) => a.startsWith('assets/mock/')), isEmpty);
   });
 }

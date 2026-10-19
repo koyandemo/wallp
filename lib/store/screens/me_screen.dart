@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/store_palette.dart';
 import '../../core/app_version.dart';
 import '../../core/date_format.dart';
+import '../../data/api/auth_session.dart';
 import '../../data/assets/asset_cache.dart';
 import '../../data/assets/downloads.dart';
 import '../../data/catalog/catalog_repository.dart';
@@ -18,6 +19,7 @@ import '../routes.dart';
 import '../state/user_store.dart';
 import '../state/live_wallpaper_status.dart';
 import '../widgets/common.dart';
+import 'account_screens.dart';
 
 /// Me: what's applied, favourites, history, downloads and settings.
 class MeScreen extends StatefulWidget {
@@ -319,6 +321,9 @@ class _MeScreenState extends State<MeScreen> {
             ),
           ),
         ],
+        const SectionHeader(title: 'Account'),
+        const _AccountTile(),
+        const SizedBox(height: 16),
         const SectionHeader(title: 'Settings'),
         for (final (s, title, sub) in const [
           (
@@ -379,6 +384,51 @@ class _MeScreenState extends State<MeScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Signed in: who, and the way to the account page. Signed out: an
+/// optional sign-in; nothing in the app needs it.
+class _AccountTile extends StatelessWidget {
+  const _AccountTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final session = context.watch<AuthSession>();
+    final user = session.user;
+    if (session.isSignedIn) {
+      return ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+        leading: AccountAvatar(user: user),
+        title: Text(user?.displayName ?? 'Signed in'),
+        subtitle: user == null ? null : Text(user.email),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () => StoreRoutes.account(context),
+      );
+    }
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      leading: const AccountAvatar(user: null),
+      title: const Text('Sign in'),
+      subtitle: Text(switch (session.lastSignOut) {
+        SignOutReason.expired ||
+        SignOutReason.reused => 'You were signed out. Sign in again.',
+        _ => 'Optional: keep your favourites on every phone',
+      }),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        if (await StoreRoutes.signIn(context) == true) {
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text('Signed in as ${session.user?.displayName}'),
+              ),
+            );
+        }
+      },
     );
   }
 }

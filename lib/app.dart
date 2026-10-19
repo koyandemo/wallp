@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/api_config.dart';
 import 'core/app_theme.dart';
+import 'data/api/account_service.dart';
+import 'data/api/api_client.dart';
+import 'data/api/auth_session.dart';
+import 'data/api/event_queue.dart';
+import 'data/api/install_link.dart';
+import 'data/api/token_store.dart';
 import 'data/assets/asset_cache.dart';
 import 'data/assets/download_manager.dart';
+import 'data/catalog/catalog_poller.dart';
 import 'data/catalog/catalog_repository.dart';
 import 'data/catalog/catalog_source.dart';
 import 'data/catalog/catalog_store.dart';
-import 'data/catalog/mock_catalog_source.dart';
+import 'data/catalog/http_catalog_source.dart';
+import 'data/catalog/pretend_network.dart';
 import 'dev/dev_settings.dart';
 import 'look/look_controller.dart';
 import 'look/my_accents.dart';
 import 'render/font_registry.dart';
 import 'core/clock.dart';
+import 'store/state/favourites_sync.dart';
 import 'store/state/live_wallpaper_status.dart';
 import 'store/state/user_store.dart';
 import 'store/store_shell.dart';
@@ -36,13 +46,74 @@ class WallpApp extends StatelessWidget {
         // Custom accents the user saved, for every theme's picker.
         ChangeNotifierProvider(create: (_) => MyAccents()..load()),
         // Where catalog files come from, for the catalog and downloads
-        // alike. The mock Theme API; when the real one exists, only this
-        // changes: an HTTP source pointed at the CDN.
+        // alike: the server picked by the env file (env/*.json), behind
+        // Developer settings' pretend network (always "fast" in release).
         Provider<CatalogSource>(
           create: (context) {
             final dev = context.read<DevSettings>();
-            return MockCatalogSource(conditions: () => dev.conditions);
+            return PretendNetworkSource(
+              HttpCatalogSource(base: ApiConfig.current.catalogBase),
+              conditions: () => dev.conditions,
+            );
           },
+        ),
+        // Accounts and events (/v1).
+        Provider(
+          create: (_) => ApiClient.forConfig(ApiConfig.current),
+          dispose: (_, ApiClient api) => api.close(),
+        ),
+        // Anonymous popularity events, sent in batches. Not lazy: it sends
+        // what's waiting on launch. Hearts are counted too.
+        Provider(
+          lazy: false,
+          create: (context) {
+            final events = EventQueue(api: context.read<ApiClient>())..start();
+            context
+                .read<UserStore>()
+                .onThemeFavourite = (id, {required added}) => events.add(
+              added
+                  ? AppEventType.themeFavourited
+                  : AppEventType.themeUnfavourited,
+              id,
+            );
+            return events;
+          },
+          dispose: (_, EventQueue events) => events.dispose(),
+        ),
+        // The optional sign-in. Not lazy: a saved one refreshes at launch.
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (context) => AuthSession(
+            api: context.read<ApiClient>(),
+            store: SecureTokenStore(scope: ApiConfig.current.base.authority),
+          )..start(),
+        ),
+        Provider(
+          create: (context) => AccountService(
+            context.read<ApiClient>(),
+            context.read<AuthSession>(),
+          ),
+        ),
+        // Favourites follow the account to other phones. Not lazy: it
+        // syncs on launch when signed in.
+        Provider(
+          lazy: false,
+          create: (context) => FavouritesSync(
+            api: context.read<ApiClient>(),
+            session: context.read<AuthSession>(),
+            user: context.read<UserStore>(),
+          ),
+          dispose: (_, FavouritesSync sync) => sync.dispose(),
+        ),
+        // Ties this install to the account, for stats.
+        Provider(
+          lazy: false,
+          create: (context) => InstallLink(
+            api: context.read<ApiClient>(),
+            session: context.read<AuthSession>(),
+            installId: context.read<EventQueue>().installId,
+          ),
+          dispose: (_, InstallLink link) => link.dispose(),
         ),
         // The same instance SceneAssets and FontRegistry read through.
         Provider(create: (_) => AssetCache.shared),
@@ -55,6 +126,13 @@ class WallpApp extends StatelessWidget {
         // Not lazy: the catalog loads and refreshes from launch, before
         // any screen asks for it.
         ChangeNotifierProvider(create: _catalog, lazy: false),
+        // Checks for a new catalog every 5 minutes while the store is open.
+        Provider(
+          lazy: false,
+          create: (context) =>
+              CatalogPoller(context.read<CatalogRepository>())..start(),
+          dispose: (_, CatalogPoller poller) => poller.dispose(),
+        ),
         // What the phone looks like, and every way to change it. Not lazy:
         // on launch it re-pins (and if needed re-downloads) the applied
         // look's files.

@@ -9,6 +9,7 @@ import 'screens/me_screen.dart';
 import 'screens/store_home_screen.dart';
 import 'screens/themes_screen.dart';
 import 'screens/wallpapers_screen.dart';
+import 'state/favourites_sync.dart';
 import 'state/user_store.dart';
 
 /// The store's five tabs: Store, Themes, Wallpapers, Fonts, Me. Pages
@@ -54,6 +55,8 @@ class _StoreShellState extends State<StoreShell> {
       onResume: () {
         context.read<LookController>().load();
         context.read<UserStore>().load();
+        // A sync that failed offline tries again.
+        context.read<FavouritesSync>().syncIfNeeded();
       },
     );
   }

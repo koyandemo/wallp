@@ -64,6 +64,10 @@ class UserStore extends ChangeNotifier {
   List<HistoryEntry> get history => List.unmodifiable(_history);
   List<String> get recentSearches => List.unmodifiable(_searches);
 
+  /// False until the first [load] finishes.
+  bool get isLoaded => _loaded;
+  bool _loaded = false;
+
   bool isFavouriteTheme(String id) => _favThemes.contains(id);
   bool isFavouriteWallpaper(String id) => _favWalls.contains(id);
   bool setting(UserSetting s) => _settings[s] ?? s.defaultValue;
@@ -107,21 +111,33 @@ class UserStore extends ChangeNotifier {
       final v = await _prefs.getBool(s.key);
       if (v != null) _settings[s] = v;
     }
+    _loaded = true;
     notifyListeners();
   }
 
   // --- favourites ---
 
+  /// Told about each heart and un-heart the user makes (not sync merges):
+  /// popularity events.
+  void Function(String themeId, {required bool added})? onThemeFavourite;
+
   /// Hearts or un-hearts a theme. Returns its old position when removed,
   /// for [restoreTheme] (the Me tab's Undo).
-  Future<int?> toggleTheme(String id) => _toggle(_favThemes, _favThemesKey, id);
+  Future<int?> toggleTheme(String id) async {
+    final at = await _toggle(_favThemes, _favThemesKey, id);
+    onThemeFavourite?.call(id, added: at == null);
+    return at;
+  }
 
   Future<int?> toggleWallpaper(String id) =>
       _toggle(_favWalls, _favWallsKey, id);
 
   /// Undo: puts a removed favourite back where it was.
-  Future<void> restoreTheme(String id, int at) =>
-      _restore(_favThemes, _favThemesKey, id, at);
+  Future<void> restoreTheme(String id, int at) async {
+    if (_favThemes.contains(id)) return;
+    await _restore(_favThemes, _favThemesKey, id, at);
+    onThemeFavourite?.call(id, added: true);
+  }
 
   Future<int?> _toggle(List<String> list, String key, String id) async {
     final at = list.indexOf(id);
@@ -145,6 +161,25 @@ class UserStore extends ChangeNotifier {
     list.insert(at.clamp(0, list.length), id);
     notifyListeners();
     await _prefs.setStringList(key, list);
+  }
+
+  /// Both favourite lists at once, newest first: the account sync's merge.
+  Future<void> replaceFavourites({
+    required List<String> themes,
+    required List<String> wallpapers,
+  }) async {
+    if (listEquals(themes, _favThemes) && listEquals(wallpapers, _favWalls)) {
+      return;
+    }
+    _favThemes
+      ..clear()
+      ..addAll(themes);
+    _favWalls
+      ..clear()
+      ..addAll(wallpapers);
+    notifyListeners();
+    await _prefs.setStringList(_favThemesKey, _favThemes);
+    await _prefs.setStringList(_favWallsKey, _favWalls);
   }
 
   // --- history ---

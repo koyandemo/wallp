@@ -8,6 +8,10 @@ import 'package:shared_preferences_platform_interface/in_memory_shared_preferenc
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:wallp/core/app_theme.dart';
 import 'package:wallp/core/clock.dart';
+import 'package:wallp/data/api/account_service.dart';
+import 'package:wallp/data/api/auth_session.dart';
+import 'package:wallp/data/api/event_queue.dart';
+import 'package:wallp/data/api/token_store.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
 import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/catalog/catalog_repository.dart';
@@ -16,11 +20,13 @@ import 'package:wallp/dev/dev_settings.dart';
 import 'package:wallp/look/look_controller.dart';
 import 'package:wallp/look/my_accents.dart';
 import 'package:wallp/render/scene_assets.dart';
+import 'package:wallp/store/state/favourites_sync.dart';
 import 'package:wallp/store/state/user_store.dart';
 import 'package:wallp/store/store_shell.dart';
 import 'package:wallp/store/widgets/download_overlay.dart';
 import 'package:wallp/store/widgets/store_look_scope.dart';
 
+import '../api/fake_backend.dart';
 import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
 
@@ -35,6 +41,11 @@ class StoreHarness {
   late AssetCache cache;
   late Directory dir;
 
+  /// The accounts server; Me's sign-in talks to it.
+  final server = FakeBackend();
+  late EventQueue events;
+  late final session = AuthSession(api: server.api, store: MemoryTokenStore());
+
   /// Builds and pumps the store, with full theme files preloaded for
   /// [themes] (detail pages open them).
   Future<void> pump(
@@ -45,6 +56,7 @@ class StoreHarness {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
+    events = EventQueue();
     final view = tester.view
       ..physicalSize = const Size(1170, 2532)
       ..devicePixelRatio = 3;
@@ -90,6 +102,15 @@ class StoreHarness {
           ),
           ChangeNotifierProvider.value(value: catalog),
           ChangeNotifierProvider.value(value: looks),
+          ChangeNotifierProvider.value(value: session),
+          // Records only: tests read [events].pending().
+          Provider.value(value: events),
+          Provider(create: (_) => AccountService(server.api, session)),
+          Provider(
+            create: (_) =>
+                FavouritesSync(api: server.api, session: session, user: user),
+            dispose: (_, FavouritesSync sync) => sync.dispose(),
+          ),
         ],
         child: SceneAssetsScope(
           assets: SceneAssets(cache),

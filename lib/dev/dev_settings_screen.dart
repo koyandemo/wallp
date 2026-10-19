@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/api_config.dart';
 import '../core/app_colors.dart';
 import '../core/date_format.dart';
 import '../data/assets/asset_cache.dart';
@@ -58,7 +59,9 @@ class DevSettingsScreen extends StatelessWidget {
           Text('Pretend network', style: text.titleMedium),
           const SizedBox(height: 4),
           Text(
-            'For the mock catalog only. Applies to the next request.',
+            'Slows or breaks catalog downloads from the server, to try '
+            'the error handling. Debug builds only; applies to the next '
+            'request.',
             style: text.bodySmall?.copyWith(color: AppColors.textSecondary),
           ),
           RadioGroup<String>(
@@ -137,6 +140,7 @@ class _CatalogStatus extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final catalog = repo.isReady ? repo.catalog : null;
     final rows = <(String, String)>[
+      ('Server', ApiConfig.current.label),
       (
         'Showing',
         switch (repo.origin) {

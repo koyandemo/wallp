@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <!-- The catalog, accounts and events API (lib/core/api_config.dart). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="wallp"
         android:name="${applicationName}"

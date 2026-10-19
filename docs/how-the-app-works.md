@@ -2,7 +2,7 @@
 
 This guide explains how the **wallp** app works, from the moment it starts to the moment a themed wallpaper and themed icons show on the phone. Read it from top to bottom the first time; after that you can jump to any section.
 
-**Up to date as of 17 Oct 2026:** the new 5-tab store, running on a mock Theme API ([store-redesign-plan.md](store-redesign-plan.md), phases 1–9 done).
+**Up to date as of 18 Oct 2026:** the new 5-tab store on the real backend at `https://wallp-api.justym.me`: the catalog, optional accounts with synced favourites, and anonymous events ([api-binding-plan.md](api-binding-plan.md), [app-client.md](app-client.md)).
 
 ---
 
@@ -49,7 +49,7 @@ A "theme" is a festival look, for example **Halloween**, **Christmas** or **Thin
 
 The user can also change each part on its own: a different wallpaper, clock font, icon pack, tile shape, accent colour or app name colour.
 
-**Where themes come from.** Themes are **data**, not code. The app reads a *catalog* of themes in the format described in [theme-api.md](theme-api.md). Today that catalog is a mock bundled in the app; later it comes from a CDN, filled by the [dashboard](theme-dashboard.md). There are two kinds of theme:
+**Where themes come from.** Themes are **data**, not code. The app reads a *catalog* of themes in the format described in [theme-api.md](theme-api.md). It comes from the backend (`/catalog/v1/`), filled by the [dashboard](theme-dashboard.md); a small built-in catalog covers the first launch with no internet. There are two kinds of theme:
 
 | | Built-in | Dashboard-made |
 |---|---|---|
@@ -105,7 +105,8 @@ lib/
 ├── app.dart                  Theme store root: providers + MaterialApp
 ├── catalog/                  The Theme API format: models + JSON parser (pure Dart)
 ├── data/
-│   ├── catalog/              CatalogRepository, sources (mock), saved copy, built-in catalog
+│   ├── catalog/              CatalogRepository, HTTP source + pretend network, saved copy, built-in catalog
+│   ├── api/                  /v1 client and errors, sign-in, account calls, install id, event queue
 │   └── assets/               AssetCache (downloaded files), DownloadManager, Downloads list
 ├── look/                     AppliedLook (what's on the phone), LookStore, LookController,
 │                             ResolvedLook, accents, event icons
@@ -129,11 +130,12 @@ android/app/src/main/kotlin/com/example/wallp/
 
 assets/
 ├── builtin/catalog/          The catalog shipped for good: the 3 built-in themes
-└── mock/catalog/v1/          The mock Theme API (5 themes), laid out like the CDN
+└── mock/catalog/v1/          The mock Theme API (5 themes) for tests and tools; not in the APK
 
 tool/seed/                    Generates both catalogs from Dart; one file per script-made kit
-docs/                         Theme API, dashboard, store plan + this guide
-test/                         Unit and widget tests, reading the mock catalog in assets/mock/
+env/                          prod.json, local.json: which server a build talks to
+docs/                         Theme API, backend guide, plans + this guide
+test/                         Unit and widget tests, reading the mock catalog in assets/mock/ from disk
 ```
 
 Packages used ([pubspec.yaml](../pubspec.yaml)):
@@ -175,9 +177,14 @@ It creates the store's shared objects in a `MultiProvider`, so any screen can `c
 | `UserStore` | Favourites, history, per-theme accent picks, recent searches, Me settings |
 | `DevSettings` + `Clock` | Developer switches; "now" for countdowns and badges (can be faked) |
 | `MyAccents` | The user's saved custom accents, shared by every theme |
-| `CatalogSource` | **Where catalog files come from.** Today `MockCatalogSource`; later an HTTP source. This is the only line that changes to use the real API |
+| `CatalogSource` | **Where catalog files come from:** `HttpCatalogSource` for the server in `env/*.json`, behind the pretend network (Developer settings; always "fast" in release) |
+| `ApiClient` | JSON calls to `/v1`; every failure is an `ApiException` |
+| `AuthSession` (not lazy) + `AccountService` | The optional sign-in (refresh token in secure storage) and the `/v1/me` calls |
+| `EventQueue` (not lazy) + `InstallLink` | Anonymous popularity events, queued and sent in batches; the install's link to the account |
+| `FavouritesSync` (not lazy) | Keeps favourites in step with the account |
 | `AssetCache` + `DownloadManager` | Downloaded files and the downloads in progress |
 | `CatalogRepository` (not lazy) | The catalog: loads at launch and refreshes in the background |
+| `CatalogPoller` (not lazy) | Checks for a new catalog every 5 minutes while the store is on screen |
 | `LookController` (not lazy) | What the phone looks like and every way to change it; at launch it re-pins the applied look's files and re-downloads any that are missing |
 | `LiveWallpaperStatus` | Is wallp's live wallpaper on? Previews animate only then |
 
@@ -219,7 +226,7 @@ background refresh:
 
 | Class | Job |
 |---|---|
-| `CatalogSource` / [MockCatalogSource](../lib/data/catalog/mock_catalog_source.dart) | Reads files. The mock reads [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) through a pretend network that can be slow, offline or flaky (section 17) |
+| `CatalogSource` / [HttpCatalogSource](../lib/data/catalog/http_catalog_source.dart) | Reads files from the server. [PretendNetworkSource](../lib/data/catalog/pretend_network.dart) can make it slow, offline, flaky or corrupt (section 17); tests use [MockCatalogSource](../lib/data/catalog/mock_catalog_source.dart), the mock catalog from disk |
 | [CatalogStore](../lib/data/catalog/catalog_store.dart) | The saved copy (manifest, catalog, theme files) in the app's support folder, replaced in one step |
 | [BuiltInCatalog](../lib/data/catalog/built_in_catalog.dart) | The catalog in the APK ([assets/builtin/catalog/](../assets/builtin/catalog/)): the 3 built-in themes. Used on first launch, and by wallp Home and the live wallpaper for the default look |
 
@@ -482,6 +489,9 @@ When the store comes back to the front it reloads the look and user data (`Store
 | `HomeStore` ([home_arrangement.dart](../lib/launcher/home_arrangement.dart)) | `home_arrangement` (JSON pages + dock) | wallp Home |
 | `DevSettings` ([dev_settings.dart](../lib/dev/dev_settings.dart)) | Network preset, pretend date | Store (debug) |
 | `CatalogStore` | Files: `manifest.json`, the catalog, `themes/<id>.<rev>.json` | Store |
+| `SecureTokenStore` ([token_store.dart](../lib/data/api/token_store.dart)) | Keychain / Keystore: `wallp_login_<server>` (refresh token + user) | Store |
+| `EventQueue` ([event_queue.dart](../lib/data/api/event_queue.dart)) | `event_queue_v1`, `event_retry_after`, `install_id` | Store sends; wallp Home also adds |
+| `FavouritesSync`, `InstallLink` | `fav_sync_base_<account>`, `install_linked_account` | Store |
 | `AssetCache` | Files: `<sha256>.<ext>` + pin lists | All three engines |
 
 Key points:
@@ -489,7 +499,7 @@ Key points:
 - They use **`SharedPreferencesAsync`** (not the older `SharedPreferences`). The async version has **no in-memory cache**, so when one engine writes, another engine reads the fresh value. With a cache, wallp Home would see old data.
 - User data is saved **by catalog ID**. An ID that's no longer in the catalog is skipped on screen, never a crash.
 - Broken JSON → start fresh instead of crashing.
-- Nothing here leaves the phone.
+- Only favourites (when signed in) and anonymous events leave the phone; see [app-client.md](app-client.md).
 
 The Me settings (`UserSetting`): **Themed lock screen clock**, **Match app to my theme**, and two that are saved but not built yet: **Festival reminders** and **Follow the next festival**.
 
@@ -697,7 +707,8 @@ The checks are `WallpaperService.canSetDirectly` and `LauncherService.isSupporte
 
 Debug builds only: **Me › Developer settings** ([dev_settings_screen.dart](../lib/dev/dev_settings_screen.dart)).
 
-- **Network:** fast, slow, offline or flaky, for the mock source. Lets you see the progress card, retries and offline behaviour without a real server.
+- **Network:** fast, slow, offline or flaky, in front of the real server. Lets you see the progress card, retries and offline behaviour on demand.
+- **Server:** which env file the build uses (`prod` or `local`).
 - **Pretend date:** moves "now" for countdowns, NEW badges and banners (through the `Clock` provider).
 - **Catalog status:** where the catalog came from (built-in, saved, refreshed), its version, skipped items, themes hidden because they need a newer app.
 - **Downloads:** what's cached and pinned.
@@ -712,11 +723,12 @@ Folder [test/](../test/). Run with:
 flutter test
 ```
 
-361 tests, all passing. By folder:
+437 tests, all passing. By folder:
 
 | Folder / file | Checks |
 |---|---|
-| [test/catalog/](../test/catalog/) | Parsing every object, the mock and built-in catalogs (every hash, size and reference), countdowns, the repository (offline first launch, unknown schema and engines, refresh) |
+| [test/api/](../test/api/) | The `/v1` client and errors, sign-in and refresh rules, account calls, events and the install link, against a fake backend |
+| [test/catalog/](../test/catalog/) | The HTTP source, parsing every object, the mock and built-in catalogs (every hash, size and reference), countdowns, the repository (offline first launch, unknown schema and engines, refresh) |
 | [test/assets/](../test/assets/) | The file cache (hashes, atomic writes, LRU, pins) and the download manager (progress, retries, cancel) |
 | [test/look/](../test/look/) | `AppliedLook`, `LookStore` (migration, pending), `LookController`, `ResolvedLook`, accents, apply with downloads (failures keep the old look) |
 | [test/render/](../test/render/) | The layers painter, image icons and fonts |
@@ -725,7 +737,7 @@ flutter test
 | `live_wallpaper_test.dart` | Live wallpaper widget from the snapshot alone |
 | `scene_test.dart`, `wallpaper_renderer_test.dart`, `themed_icon_test.dart`, `icon_pack_test.dart`, `dev_settings_test.dart` | Painters, PNG rendering, icons, Developer settings |
 
-The tests read the same mock catalog the app shows, in [assets/mock/catalog/v1/](../assets/mock/catalog/v1/). Neon Night covers variants and a gradient accent on a `layers` theme; where no theme has an example of a feature (a still `layers` theme, an `@accent` shape at a known spot), the test edits a copy of Spider Night's JSON to make one.
+The tests read the mock catalog from disk, in [assets/mock/catalog/v1/](../assets/mock/catalog/v1/) (the seed data the backend publishes too). Neon Night covers variants and a gradient accent on a `layers` theme; where no theme has an example of a feature (a still `layers` theme, an `@accent` shape at a known spot), the test edits a copy of Spider Night's JSON to make one.
 
 Many classes accept fake dependencies in their constructors (e.g. `CatalogRepository(source: …, store: …, clock: …)`, `LookController(prepare: …, pin: …)`, `LiveWallpaperApp(clock: …)`). This is **dependency injection**, so tests can pass fakes instead of the network, the disk or Android.
 
@@ -770,7 +782,7 @@ Dart's `switch` on an enum must cover every value, so the compiler will point yo
 | **MethodChannel** | Named message pipe between Dart and Kotlin. |
 | **Catalog** | The list of festivals, themes, wallpapers, fonts, icon packs and banners, in the Theme API format. |
 | **Built-in catalog** | The catalog shipped inside the APK, for first launch with no internet. |
-| **Mock source** | Reads the bundled mock catalog through a pretend network, until the real CDN exists. |
+| **Mock source** | Tests only: reads the mock catalog from disk through a pretend network. |
 | **Asset** | A downloaded file (image, font), named by its sha256. |
 | **Pin** | A mark that stops the cache deleting a file the phone still needs. |
 | **Applied look** | The saved snapshot of everything on the phone (`AppliedLook`). |

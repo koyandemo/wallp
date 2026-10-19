@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../catalog/catalog.dart';
 import '../data/catalog/catalog_repository.dart';
 import 'screens/accent_picker_screen.dart';
+import 'screens/account_screens.dart';
 import 'screens/festival_screen.dart';
 import 'screens/font_detail_screen.dart';
 import 'screens/icon_pack_screens.dart';
@@ -58,6 +59,13 @@ abstract final class StoreRoutes {
 
   static Future<void> search(BuildContext context) =>
       _push(context, const SearchScreen());
+
+  /// True once signed in.
+  static Future<bool?> signIn(BuildContext context) =>
+      _push<bool>(context, const SignInScreen());
+
+  static Future<void> account(BuildContext context) =>
+      _push(context, const AccountScreen());
 
   /// The accent picker for [theme]; returns the accent picked, or null.
   static Future<Accent?> accentPicker(

@@ -194,7 +194,7 @@ The app shows a small **demo catalog**: five themes (Haunted Moon, Snowy Pines, 
 
 | Work | Notes |
 |---|---|
-| **HTTP catalog source** | The one new class for the real CDN ([theme-api.md](theme-api.md) §7.1), with the request headers in §7.8. Then remove the mock catalog from the APK |
+| ~~**HTTP catalog source**~~ | Done, with accounts and events: [api-binding-plan.md](api-binding-plan.md). The mock catalog is out of the APK |
 | **Drop `google_fonts`** | Bundle Sora and Padauk; every other font comes from the catalog |
 | **"Update wallp" for users** | The app knows when the server asks for a newer app and how many themes it hid, but only Developer settings shows it. A soft banner, and `previewImage` cards for themes that need a newer app |
 | **Download edge cases** | Resume inside a file (HTTP Range); check free space before starting |

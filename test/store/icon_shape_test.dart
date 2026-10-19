@@ -192,6 +192,13 @@ void main() {
       await until(() => h.looks.look!.icons.labelFont == LabelFont.system);
       expect(h.looks.look!.icons.labelFont, LabelFont.system);
       expect(h.looks.look!.icons.shape, IconShape.leaf);
+
+      // Counted once for popularity: a new label font isn't a new pack.
+      final waiting = await tester.runAsync(h.events.pending);
+      expect(
+        [for (final e in waiting!) '${e.type.wire} ${e.itemId}'],
+        ['icon_pack_applied spooky-glow'],
+      );
       await tester.pumpWidget(const SizedBox());
     });
   });

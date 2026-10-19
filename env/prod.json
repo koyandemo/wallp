@@ -1,0 +1,4 @@
+{
+  "WALLP_ENV": "prod",
+  "WALLP_API_BASE": "https://wallp-api.justym.me"
+}

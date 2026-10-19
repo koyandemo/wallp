@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/clock.dart';
-import '../data/catalog/mock_catalog_source.dart';
+import '../data/catalog/pretend_network.dart';
 
 /// Switches for trying the app against a pretend network and another date.
 ///
