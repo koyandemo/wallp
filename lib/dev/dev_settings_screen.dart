@@ -5,11 +5,15 @@ import '../core/app_colors.dart';
 import '../core/date_format.dart';
 import '../data/assets/asset_cache.dart';
 import '../data/assets/download_manager.dart';
+import '../data/account/account_repository.dart';
+import '../data/api/api_config.dart';
+import '../data/api/event_queue.dart';
+import '../data/api/install_id.dart';
 import '../data/catalog/catalog_repository.dart';
 import 'dev_settings.dart';
 
-/// Debug builds only: the mock network, a pretend date, and what the
-/// catalog repository is doing.
+/// Debug builds only: server or mock catalog, the mock network, a pretend
+/// date, and what the catalog repository and event queue are doing.
 class DevSettingsScreen extends StatelessWidget {
   const DevSettingsScreen({super.key});
 
@@ -30,6 +34,28 @@ class DevSettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
+          Text('Server', style: text.titleMedium),
+          const SizedBox(height: 4),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Use the mock catalog'),
+            subtitle: Text(
+              dev.mockCatalog
+                  ? 'Bundled files behind the pretend network below'
+                  : 'From ${ApiConfig.current}/catalog/v1/',
+            ),
+            value: dev.mockCatalog,
+            onChanged: repo.isRefreshing
+                ? null
+                : (on) async {
+                    await dev.setMockCatalog(on);
+                    // Start clean, so the two catalogs never mix.
+                    await repo.forgetSaved();
+                    await repo.refresh();
+                  },
+          ),
+          const _ApiStatus(),
+          const SizedBox(height: 28),
           Text('Catalog', style: text.titleMedium),
           const SizedBox(height: 12),
           _CatalogStatus(repo: repo, now: dev.clock.now()),
@@ -282,4 +308,58 @@ class _Never implements Listenable {
 
   @override
   void removeListener(VoidCallback listener) {}
+}
+
+/// The install ID, queued events and who's signed in.
+class _ApiStatus extends StatefulWidget {
+  const _ApiStatus();
+
+  @override
+  State<_ApiStatus> createState() => _ApiStatusState();
+}
+
+class _ApiStatusState extends State<_ApiStatus> {
+  final _installId = InstallId().get();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<EventQueue>().load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final events = context.watch<EventQueue>();
+    final account = context.watch<AccountRepository>();
+    final small = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(color: AppColors.textSecondary);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FutureBuilder(
+          future: _installId,
+          builder: (context, snap) =>
+              SelectableText('Install ID: ${snap.data ?? '…'}', style: small),
+        ),
+        Text('Account: ${account.user?.email ?? 'signed out'}', style: small),
+        Text(
+          'Events queued: ${events.pending}'
+          '${events.retryAfter == null ? '' : ' · rate limited until ${DateFormatX.clock(events.retryAfter!.toLocal(), use24h: true)}'}',
+          style: small,
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final result = await events.flush();
+            messenger.showSnackBar(
+              SnackBar(content: Text('Events: ${result.name}')),
+            );
+          },
+          icon: const Icon(Icons.send_rounded),
+          label: const Text('Send events now'),
+        ),
+      ],
+    );
+  }
 }

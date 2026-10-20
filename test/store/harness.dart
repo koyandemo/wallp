@@ -3,11 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:wallp/core/app_theme.dart';
 import 'package:wallp/core/clock.dart';
+import 'package:wallp/data/account/account_repository.dart';
+import 'package:wallp/data/account/token_store.dart';
+import 'package:wallp/data/api/api_client.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
 import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/catalog/catalog_repository.dart';
@@ -16,6 +21,7 @@ import 'package:wallp/dev/dev_settings.dart';
 import 'package:wallp/look/look_controller.dart';
 import 'package:wallp/look/my_accents.dart';
 import 'package:wallp/render/scene_assets.dart';
+import 'package:wallp/store/state/favourites_sync.dart';
 import 'package:wallp/store/state/user_store.dart';
 import 'package:wallp/store/store_shell.dart';
 import 'package:wallp/store/widgets/download_overlay.dart';
@@ -90,6 +96,23 @@ class StoreHarness {
           ),
           ChangeNotifierProvider.value(value: catalog),
           ChangeNotifierProvider.value(value: looks),
+          // Signed out, with no server: the store must work regardless.
+          ChangeNotifierProvider(
+            create: (_) => AccountRepository(
+              client: ApiClient(
+                client: MockClient(
+                  (_) async => throw http.ClientException('offline'),
+                ),
+              ),
+              tokens: MemoryTokenStore(),
+            ),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => FavouritesSync(
+              account: context.read<AccountRepository>(),
+              user: user,
+            ),
+          ),
         ],
         child: SceneAssetsScope(
           assets: SceneAssets(cache),

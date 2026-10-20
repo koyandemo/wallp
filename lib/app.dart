@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/app_theme.dart';
+import 'data/account/account_repository.dart';
+import 'data/api/api_client.dart';
+import 'data/api/event_queue.dart';
 import 'data/assets/asset_cache.dart';
 import 'data/assets/download_manager.dart';
 import 'data/catalog/catalog_repository.dart';
 import 'data/catalog/catalog_source.dart';
 import 'data/catalog/catalog_store.dart';
+import 'data/catalog/http_catalog_source.dart';
 import 'data/catalog/mock_catalog_source.dart';
 import 'dev/dev_settings.dart';
 import 'look/look_controller.dart';
 import 'look/my_accents.dart';
 import 'render/font_registry.dart';
 import 'core/clock.dart';
+import 'store/state/backend_sync.dart';
+import 'store/state/favourites_sync.dart';
 import 'store/state/live_wallpaper_status.dart';
 import 'store/state/user_store.dart';
 import 'store/store_shell.dart';
@@ -35,13 +41,19 @@ class WallpApp extends StatelessWidget {
         ),
         // Custom accents the user saved, for every theme's picker.
         ChangeNotifierProvider(create: (_) => MyAccents()..load()),
+        // The app API at API_BASE_URL (env/*.json): events and accounts.
+        Provider(create: (_) => ApiClient(), dispose: (_, c) => c.close()),
         // Where catalog files come from, for the catalog and downloads
-        // alike. The mock Theme API; when the real one exists, only this
-        // changes: an HTTP source pointed at the CDN.
+        // alike: the server's /catalog/v1/, or (Developer settings) the
+        // bundled mock behind a pretend network.
         Provider<CatalogSource>(
           create: (context) {
             final dev = context.read<DevSettings>();
-            return MockCatalogSource(conditions: () => dev.conditions);
+            final server = HttpCatalogSource();
+            final mock = MockCatalogSource(conditions: () => dev.conditions);
+            return SwitchingCatalogSource(
+              () => dev.mockCatalog ? mock : server,
+            );
           },
         ),
         // The same instance SceneAssets and FontRegistry read through.
@@ -61,6 +73,26 @@ class WallpApp extends StatelessWidget {
         ChangeNotifierProvider(create: _looks, lazy: false),
         // Previews animate only while wallp's live wallpaper is on.
         ChangeNotifierProvider(create: (_) => LiveWallpaperStatus()),
+        // Anonymous usage events, sent in batches.
+        ChangeNotifierProvider(
+          create: (context) => EventQueue(
+            client: context.read<ApiClient>(),
+            clock: context.read<DevSettings>().liveClock,
+          ),
+        ),
+        // The optional account: cross-device favourites.
+        ChangeNotifierProvider(
+          create: (context) =>
+              AccountRepository(client: context.read<ApiClient>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FavouritesSync(
+            account: context.read<AccountRepository>(),
+            user: context.read<UserStore>(),
+          ),
+        ),
+        // Not lazy: the start-up sequence and the periodic refreshes.
+        Provider(create: _backend, dispose: (_, b) => b.dispose(), lazy: false),
       ],
       child: MaterialApp(
         title: 'Wallp Themes',
@@ -87,6 +119,18 @@ class WallpApp extends StatelessWidget {
     // very first request.
     dev.load().then((_) => repo.start());
     return repo;
+  }
+
+  static BackendSync _backend(BuildContext context) {
+    final sync = BackendSync(
+      catalog: context.read<CatalogRepository>(),
+      events: context.read<EventQueue>(),
+      account: context.read<AccountRepository>(),
+      favourites: context.read<FavouritesSync>(),
+      user: context.read<UserStore>(),
+    );
+    context.read<DevSettings>().load().then((_) => sync.start());
+    return sync;
   }
 
   static LookController _looks(BuildContext context) {

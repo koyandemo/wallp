@@ -18,6 +18,7 @@ import '../routes.dart';
 import '../state/user_store.dart';
 import '../state/live_wallpaper_status.dart';
 import '../widgets/common.dart';
+import 'account_screens.dart';
 
 /// Me: what's applied, favourites, history, downloads and settings.
 class MeScreen extends StatefulWidget {
@@ -123,6 +124,10 @@ class _MeScreenState extends State<MeScreen> {
         const TabHeader(
           title: 'Me',
           subtitle: 'Your look, favourites and settings',
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+          child: AccountCard(),
         ),
         if (looks.look case final look?)
           Padding(

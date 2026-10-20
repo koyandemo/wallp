@@ -7,7 +7,8 @@ import '../data/catalog/mock_catalog_source.dart';
 /// Switches for trying the app against a pretend network and another date.
 ///
 /// Saved on the phone so they survive restarts. Release builds ignore them:
-/// [conditions] is always fast and [clock] always the real time.
+/// the catalog always comes from the server, [conditions] is always fast
+/// and [clock] always the real time.
 class DevSettings extends ChangeNotifier {
   DevSettings({SharedPreferencesAsync? prefs, this.enabled = kDebugMode})
     : _prefs = prefs ?? SharedPreferencesAsync();
@@ -19,13 +20,18 @@ class DevSettings extends ChangeNotifier {
 
   static const _networkKey = 'dev_network';
   static const _todayKey = 'dev_pretend_today';
+  static const _mockKey = 'dev_mock_catalog';
 
   String _network = 'fast';
+  bool _mockCatalog = false;
   DateTime? _pretendToday;
   Clock? _clock;
 
   /// A key of [NetworkConditions.presets].
   String get network => _network;
+
+  /// Serve the catalog from the bundled mock instead of the API server.
+  bool get mockCatalog => enabled && _mockCatalog;
 
   NetworkConditions get conditions => enabled
       ? NetworkConditions.presets[_network] ?? NetworkConditions.fast
@@ -49,8 +55,15 @@ class DevSettings extends ChangeNotifier {
         ? network!
         : 'fast';
     _pretendToday = today == null ? null : DateTime.tryParse(today);
+    _mockCatalog = await _prefs.getBool(_mockKey) ?? false;
     _clock = null;
     notifyListeners();
+  }
+
+  Future<void> setMockCatalog(bool on) async {
+    _mockCatalog = on;
+    notifyListeners();
+    await _prefs.setBool(_mockKey, on);
   }
 
   Future<void> setNetwork(String preset) async {

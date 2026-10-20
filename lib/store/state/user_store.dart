@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -33,8 +34,20 @@ enum UserSetting {
   final bool defaultValue;
 }
 
+enum FavouriteKind { theme, wallpaper }
+
+/// The user hearted ([added]) or un-hearted an item.
+class FavouriteChange {
+  const FavouriteChange(this.kind, this.id, {required this.added});
+
+  final FavouriteKind kind;
+  final String id;
+  final bool added;
+}
+
 /// The user's own data, by catalog ID: favourites, history, recent searches
-/// and settings. Saved on the phone; nothing leaves it.
+/// and settings. Saved on the phone. Favourites are the source of truth;
+/// when signed in, FavouritesSync mirrors them to the account.
 class UserStore extends ChangeNotifier {
   UserStore({SharedPreferencesAsync? prefs})
     : _prefs = prefs ?? SharedPreferencesAsync();
@@ -58,6 +71,17 @@ class UserStore extends ChangeNotifier {
   /// custom), by theme ID.
   final _accents = <String, Accent>{};
 
+  final _favouriteChanges = StreamController<FavouriteChange>.broadcast();
+
+  /// Hearts and un-hearts the user makes (not [replaceFavourites]).
+  Stream<FavouriteChange> get favouriteChanges => _favouriteChanges.stream;
+
+  @override
+  void dispose() {
+    _favouriteChanges.close();
+    super.dispose();
+  }
+
   /// Newest first.
   List<String> get favouriteThemes => List.unmodifiable(_favThemes);
   List<String> get favouriteWallpapers => List.unmodifiable(_favWalls);
@@ -71,7 +95,14 @@ class UserStore extends ChangeNotifier {
   /// The accent the user last picked for [themeId], or null.
   Accent? accentFor(String themeId) => _accents[themeId];
 
-  Future<void> load() async {
+  /// Reads everything saved. Call again to re-read.
+  Future<void> load() => _loading = _load();
+  Future<void>? _loading;
+
+  /// Completes once [load] has run (starting it if nobody has).
+  Future<void> get ready => _loading ?? load();
+
+  Future<void> _load() async {
     _favThemes
       ..clear()
       ..addAll(await _prefs.getStringList(_favThemesKey) ?? const []);
@@ -114,16 +145,22 @@ class UserStore extends ChangeNotifier {
 
   /// Hearts or un-hearts a theme. Returns its old position when removed,
   /// for [restoreTheme] (the Me tab's Undo).
-  Future<int?> toggleTheme(String id) => _toggle(_favThemes, _favThemesKey, id);
+  Future<int?> toggleTheme(String id) =>
+      _toggle(FavouriteKind.theme, _favThemes, _favThemesKey, id);
 
   Future<int?> toggleWallpaper(String id) =>
-      _toggle(_favWalls, _favWallsKey, id);
+      _toggle(FavouriteKind.wallpaper, _favWalls, _favWallsKey, id);
 
   /// Undo: puts a removed favourite back where it was.
   Future<void> restoreTheme(String id, int at) =>
-      _restore(_favThemes, _favThemesKey, id, at);
+      _restore(FavouriteKind.theme, _favThemes, _favThemesKey, id, at);
 
-  Future<int?> _toggle(List<String> list, String key, String id) async {
+  Future<int?> _toggle(
+    FavouriteKind kind,
+    List<String> list,
+    String key,
+    String id,
+  ) async {
     final at = list.indexOf(id);
     if (at >= 0) {
       list.removeAt(at);
@@ -131,11 +168,13 @@ class UserStore extends ChangeNotifier {
       list.insert(0, id);
     }
     notifyListeners();
+    _favouriteChanges.add(FavouriteChange(kind, id, added: at < 0));
     await _prefs.setStringList(key, list);
     return at >= 0 ? at : null;
   }
 
   Future<void> _restore(
+    FavouriteKind kind,
     List<String> list,
     String key,
     String id,
@@ -144,7 +183,28 @@ class UserStore extends ChangeNotifier {
     if (list.contains(id)) return;
     list.insert(at.clamp(0, list.length), id);
     notifyListeners();
+    _favouriteChanges.add(FavouriteChange(kind, id, added: true));
     await _prefs.setStringList(key, list);
+  }
+
+  /// Sets both lists at once (newest first), e.g. from the account. Not
+  /// reported on [favouriteChanges].
+  Future<void> replaceFavourites({
+    required List<String> themes,
+    required List<String> wallpapers,
+  }) async {
+    if (listEquals(themes, _favThemes) && listEquals(wallpapers, _favWalls)) {
+      return;
+    }
+    _favThemes
+      ..clear()
+      ..addAll(themes);
+    _favWalls
+      ..clear()
+      ..addAll(wallpapers);
+    notifyListeners();
+    await _prefs.setStringList(_favThemesKey, _favThemes);
+    await _prefs.setStringList(_favWallsKey, _favWalls);
   }
 
   // --- history ---

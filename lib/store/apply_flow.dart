@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../catalog/catalog.dart';
 import '../core/clock.dart';
+import '../data/api/event_queue.dart';
 import '../data/assets/download_manager.dart';
 import '../data/catalog/catalog_repository.dart';
 import '../look/applied_look.dart';
@@ -47,6 +50,7 @@ class ApplyFlow {
     final looks = context.read<LookController>();
     final user = context.read<UserStore>();
     final clock = context.read<Clock>();
+    final events = _events(context);
     final name = theme.name.en;
 
     if (option == ApplyOption.wholeTheme) {
@@ -75,6 +79,7 @@ class ApplyFlow {
       return;
     }
     if (option == ApplyOption.wholeTheme) {
+      unawaited(events?.record(AppEventType.themeApplied, theme.id));
       await user.recordApplied(theme.id, clock.now());
     }
     if (!context.mounted) return;
@@ -95,6 +100,7 @@ class ApplyFlow {
 
   Future<void> applyWallpaper(BuildContext context, Wallpaper wallpaper) async {
     final looks = context.read<LookController>();
+    final events = _events(context);
     final AppliedLook look;
     try {
       look = await looks.applyWallpaper(wallpaper.id);
@@ -104,6 +110,7 @@ class ApplyFlow {
       }
       return;
     }
+    unawaited(events?.record(AppEventType.wallpaperApplied, wallpaper.id));
     if (!context.mounted) return;
     final message = await _setWallpaper(context, look);
     if (context.mounted) {
@@ -118,6 +125,7 @@ class ApplyFlow {
     ClockColor? color,
     ClockPlaces? places,
   }) async {
+    final events = _events(context);
     try {
       await context.read<LookController>().applyClockFont(
         font.id,
@@ -125,6 +133,7 @@ class ApplyFlow {
         color: color,
         places: places,
       );
+      unawaited(events?.record(AppEventType.fontApplied, font.id));
       if (context.mounted) showToast(context, '${font.family} applied');
     } on Object catch (e) {
       if (context.mounted) showToast(context, failureMessage(e, font.family));
@@ -142,6 +151,7 @@ class ApplyFlow {
     LabelFont? labelFont,
   }) async {
     final looks = context.read<LookController>();
+    final events = _events(context);
     final switching = !looks.isApplied || looks.look?.icons.pack.id != pack.id;
     try {
       await looks.applyIconPack(
@@ -150,11 +160,24 @@ class ApplyFlow {
         labels: labels,
         labelFont: labelFont,
       );
+      if (switching) {
+        unawaited(events?.record(AppEventType.iconPackApplied, pack.id));
+      }
       if (switching && context.mounted) {
         showToast(context, '${pack.name.en} icons on wallp Home');
       }
     } on Object catch (e) {
       if (context.mounted) showToast(context, failureMessage(e, pack.name.en));
+    }
+  }
+
+  /// Where applies are counted (docs/app-api.md §4); null where the app
+  /// runs without a backend (widget tests).
+  static EventQueue? _events(BuildContext context) {
+    try {
+      return context.read<EventQueue>();
+    } on ProviderNotFoundException {
+      return null;
     }
   }
 

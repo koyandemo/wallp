@@ -473,9 +473,6 @@ class IconPack {
     if (kind == IconPackKind.painted && painter == null) {
       r.fail('painter', 'a painted pack names its painter style');
     }
-    if (kind == IconPackKind.images && rawBackground == null) {
-      r.fail('background', 'an image pack needs its background tile');
-    }
     return IconPack(
       id: r.id('id'),
       festivalId: r.id('festivalId'),
@@ -484,7 +481,8 @@ class IconPack {
       kind: kind,
       painter: painter,
       shape: r.enumValue('shape', IconShape.values),
-      tile: r.optColor('tile'),
+      // "" means no tile, like a missing one (docs/app-api.md §2).
+      tile: r.optString('tile') == '' ? null : r.optColor('tile'),
       glyph: r.color('glyph'),
       ring: r.color('ring'),
       background: rawBackground == null
@@ -514,8 +512,9 @@ class IconPack {
   final HexColor glyph;
   final HexColor ring;
 
-  /// [IconPackKind.images] only (required there): the pack's tile picture.
-  /// wallp Home puts every app's own logo on it.
+  /// [IconPackKind.images] only: the pack's tile picture. wallp Home puts
+  /// every app's own logo on it. Null = no picture: the [tile] colour, or
+  /// nothing behind the logo at all.
   final AssetRef? background;
   final DateTime publishedAt;
   final int popularity;
