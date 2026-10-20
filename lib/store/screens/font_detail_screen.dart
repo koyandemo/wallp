@@ -15,10 +15,16 @@ class FontDetailScreen extends StatefulWidget {
   const FontDetailScreen({
     super.key,
     required this.fontId,
+    this.previewOn,
     this.flow = const ApplyFlow(),
   });
 
   final String fontId;
+
+  /// The look to preview the font on, e.g. the theme whose page opened
+  /// this one. Null: the user's own look (the default theme until one is
+  /// applied).
+  final AppliedLook? previewOn;
   final ApplyFlow flow;
 
   @override
@@ -69,7 +75,7 @@ class _FontDetailScreenState extends State<FontDetailScreen> {
         ),
       );
     }
-    final look = context.watch<LookController>().look;
+    final look = widget.previewOn ?? context.watch<LookController>().look;
     final now = nowOf(context);
     // The user's look with this font where the switches put it: what Apply
     // would give. With every switch off, the look as it is.

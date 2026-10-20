@@ -79,6 +79,26 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
   Accent _accentFor(ThemeDetail d) =>
       _accent ?? AppliedLook.defaultAccentFor(d, _variant);
 
+  /// This theme as it would be applied, with the colours picked here.
+  AppliedLook? _lookOf(
+    Catalog catalog,
+    ThemeDetail d,
+    Accent accent,
+    DateTime now,
+  ) {
+    try {
+      return AppliedLook.wholeTheme(
+        catalog,
+        d,
+        at: now,
+        variantId: _variant,
+        accent: accent,
+      );
+    } on StateError {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ThemeDetail>(
@@ -292,16 +312,16 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
             ),
             child: Column(
               children: [
-                _IncludesRow(
-                  icon: Icons.wallpaper_rounded,
-                  title: detail.isLive ? 'Live wallpaper' : 'Wallpaper',
-                  subtitle: detail.isLive
-                      ? 'Animated, on the lock and home screen'
-                      : 'For the lock and home screen',
-                  onTap: wallpaper == null
-                      ? null
-                      : () => StoreRoutes.wallpaper(context, wallpaper.id),
-                ),
+                // Only a live wallpaper is worth a row of its own.
+                if (detail.isLive)
+                  _IncludesRow(
+                    icon: Icons.wallpaper_rounded,
+                    title: 'Live wallpaper',
+                    subtitle: 'Animated, on the lock and home screen',
+                    onTap: wallpaper == null
+                        ? null
+                        : () => StoreRoutes.wallpaper(context, wallpaper.id),
+                  ),
                 if (pack != null)
                   _IncludesRow(
                     icon: Icons.apps_rounded,
@@ -314,7 +334,15 @@ class _ThemeDetailScreenState extends State<ThemeDetailScreen> {
                     icon: Icons.text_fields_rounded,
                     title: '${font.family} clock font',
                     subtitle: 'Lock screen and home clock',
-                    onTap: () => StoreRoutes.font(context, font.id),
+                    // Previewed on this theme, not the default look a
+                    // user who hasn't applied one yet would get.
+                    onTap: () => StoreRoutes.font(
+                      context,
+                      font.id,
+                      previewOn: isApplied
+                          ? null
+                          : _lookOf(catalog, detail, accent, now),
+                    ),
                     last: true,
                   ),
               ],

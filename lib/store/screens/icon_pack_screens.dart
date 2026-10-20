@@ -38,6 +38,7 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
   @override
   Widget build(BuildContext context) {
     final catalog = catalogOf(context);
+    final shipped = shippedOf(context);
     final now = nowOf(context);
     final packs = iconPacksTab(catalog, filter: _filter, now: now);
     // Only a pack the user applied is "in use", not the suggested default.
@@ -85,9 +86,11 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
                 final meta = p.id == inUse
                     ? 'In use'
                     : '${p.isNew(now) ? 'New · ' : ''}$festival · ${p.style.en}';
+                final inApp = shipped.hasIconPack(p.id);
                 return Semantics(
                   button: true,
-                  label: '${p.name.en} icon pack, $meta',
+                  label:
+                      '${p.name.en} icon pack, $meta${inApp ? ', in the app' : ''}',
                   excludeSemantics: true,
                   child: ListTile(
                     minTileHeight: 72,
@@ -101,9 +104,21 @@ class _IconPacksScreenState extends State<IconPacksScreen> {
                     ),
                     tileColor: context.palette.surface,
                     leading: PackSample(pack: p, size: 44),
-                    title: Text(
-                      p.name.en,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    title: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            p.name.en,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        if (inApp) ...[
+                          const SizedBox(width: 8),
+                          const BadgeChip(CardBadge.app),
+                        ],
+                      ],
                     ),
                     subtitle: Text(
                       meta,
@@ -173,6 +188,7 @@ class IconPackDetailScreen extends StatefulWidget {
     required this.packId,
     this.flow = const ApplyFlow(),
     this.apps = const IconPackService(),
+    this.launcher = const LauncherService(),
   });
 
   final String packId;
@@ -180,6 +196,9 @@ class IconPackDetailScreen extends StatefulWidget {
 
   /// Where the preview's apps come from.
   final IconPackService apps;
+
+  /// Whether wallp is the home app: icons only show on wallp Home.
+  final LauncherService launcher;
 
   @override
   State<IconPackDetailScreen> createState() => _IconPackDetailScreenState();
@@ -196,13 +215,29 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
   List<InstalledApp> _apps = sampleApps;
   bool _started = false;
 
+  /// Null until known, or off Android.
+  bool? _isDefaultHome;
+
+  /// The user may change the home app in Android's settings and come back.
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
     // Icon names redraw once the theme's downloaded font has loaded.
     FontRegistry.shared.addListener(_redraw);
+    _lifecycle = AppLifecycleListener(onResume: _checkHome);
+    _checkHome();
     _loadApps();
   }
+
+  Future<void> _checkHome() async {
+    if (!LauncherService.isSupported) return;
+    final on = await widget.launcher.isDefaultHome();
+    if (mounted) setState(() => _isDefaultHome = on);
+  }
+
+  static const _applyThemeFirst = 'Apply a theme first to use icon packs';
 
   void _redraw() {
     if (mounted) setState(() {});
@@ -234,6 +269,7 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     FontRegistry.shared.removeListener(_redraw);
     super.dispose();
   }
@@ -291,6 +327,10 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
       _fetchBackground(pack);
     }
     final shape = _shape ?? pack.shape;
+    // Icons only show on wallp Home, which a theme sets up: until one is
+    // applied (and wallp is the home app), there's nothing to apply onto.
+    final locked =
+        !context.watch<LookController>().isApplied || _isDefaultHome == false;
     final inUse =
         context.watch<LookController>().isApplied &&
         context.read<LookController>().look?.icons.pack.id == pack.id;
@@ -324,7 +364,10 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            inUse
+            locked
+                ? '$_applyThemeFirst: they show on wallp Home, which a theme '
+                      'sets up.'
+                : inUse
                 ? 'On wallp Home. Apply to update it with your changes.'
                 : 'Pick a shape and name colour, then apply to wallp Home.',
             style: TextStyle(
@@ -354,15 +397,20 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
                   (IconShape.leaf, 'Leaf'),
                 ])
                   Expanded(
-                    child: _ShapeOption(
-                      label: label,
-                      selected: shape == option,
-                      onTap: () => _choose(pack, shape: option),
-                      child: PackIcon(
-                        pack: pack,
-                        app: _apps.first,
-                        shape: option,
-                        size: 56,
+                    child: Opacity(
+                      opacity: locked ? 0.45 : 1,
+                      child: _ShapeOption(
+                        label: label,
+                        selected: shape == option,
+                        onTap: locked
+                            ? () => showToast(context, _applyThemeFirst)
+                            : () => _choose(pack, shape: option),
+                        child: PackIcon(
+                          pack: pack,
+                          app: _apps.first,
+                          shape: option,
+                          size: 56,
+                        ),
                       ),
                     ),
                   ),
@@ -465,21 +513,23 @@ class _IconPackDetailScreenState extends State<IconPackDetailScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: ApplyButton(
-        onPressed: () => _apply(pack),
-        state: _applying
-            ? ApplyState.applying
-            : upToDate
-            ? ApplyState.applied
-            : ApplyState.ready,
-        label: _applying
-            ? 'Applying…'
-            : upToDate
-            ? 'Applied'
-            : inUse
-            ? 'Apply changes'
-            : 'Apply icons',
-      ),
+      floatingActionButton: locked
+          ? null
+          : ApplyButton(
+              onPressed: () => _apply(pack),
+              state: _applying
+                  ? ApplyState.applying
+                  : upToDate
+                  ? ApplyState.applied
+                  : ApplyState.ready,
+              label: _applying
+                  ? 'Applying…'
+                  : upToDate
+                  ? 'Applied'
+                  : inUse
+                  ? 'Apply changes'
+                  : 'Apply icons',
+            ),
     );
   }
 }

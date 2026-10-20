@@ -7,10 +7,21 @@ import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/resolved_look.dart';
 import 'package:wallp/render/icon_shape.dart';
 import 'package:wallp/services/icon_pack_service.dart';
+import 'package:wallp/services/launcher_service.dart';
 import 'package:wallp/store/screens/icon_pack_screens.dart';
 
 import '../look/fixtures.dart';
 import 'harness.dart';
+
+/// Android's answer to "is wallp the home app?", pretended.
+class _Launcher extends LauncherService {
+  const _Launcher({required this.isHome});
+
+  final bool isHome;
+
+  @override
+  Future<bool> isDefaultHome() async => isHome;
+}
 
 void main() {
   final catalog = mockCatalog();
@@ -130,11 +141,70 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('tapping a shape reshapes every icon', (tester) async {
+    /// Icon packs go on wallp Home, which applying a theme sets up.
+    Future<void> applyTheme(WidgetTester tester) =>
+        tester.runAsync(() => h.looks.applyTheme('christmas-eve'));
+
+    testWidgets('before a theme is applied: no Apply, shapes ask for one', (
+      tester,
+    ) async {
       await h.pump(
         tester,
         home: const IconPackDetailScreen(packId: 'spooky-glow'),
       );
+      await settle(tester);
+      expect(h.looks.isApplied, isFalse);
+      expect(find.text('Apply icons'), findsNothing);
+      expect(find.textContaining('Apply a theme first'), findsOneWidget);
+      final before = tester
+          .widgetList<ThemedIcon>(find.byType(ThemedIcon))
+          .map((i) => i.shape)
+          .toList();
+      await tester.tap(find.bySemanticsLabel('Leaf'));
+      await tester.pump();
+      expect(
+        find.text('Apply a theme first to use icon packs'),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widgetList<ThemedIcon>(find.byType(ThemedIcon))
+            .map((i) => i.shape)
+            .toList(),
+        before,
+        reason: 'the tap changed nothing',
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a theme applied but wallp not the home app: still locked', (
+      tester,
+    ) async {
+      await h.pump(
+        tester,
+        home: const IconPackDetailScreen(
+          packId: 'spooky-glow',
+          launcher: _Launcher(isHome: false),
+        ),
+        themes: ['christmas-eve'],
+      );
+      await applyTheme(tester);
+      await settle(tester);
+      expect(find.text('Apply icons'), findsNothing);
+      expect(find.textContaining('Apply a theme first'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('tapping a shape reshapes every icon', (tester) async {
+      await h.pump(
+        tester,
+        home: const IconPackDetailScreen(
+          packId: 'spooky-glow',
+          launcher: _Launcher(isHome: true),
+        ),
+        themes: ['christmas-eve'],
+      );
+      await applyTheme(tester);
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('Leaf'));
       await settle(tester);
@@ -152,10 +222,15 @@ void main() {
     ) async {
       await h.pump(
         tester,
-        home: const IconPackDetailScreen(packId: 'spooky-glow'),
+        home: const IconPackDetailScreen(
+          packId: 'spooky-glow',
+          launcher: _Launcher(isHome: true),
+        ),
+        themes: ['christmas-eve'],
       );
+      await applyTheme(tester);
       await settle(tester);
-      expect(h.looks.isApplied, isFalse);
+      expect(h.looks.look!.icons.pack.id, 'gold-ornament');
       expect(find.text('Apply icons'), findsOneWidget);
       expect(find.textContaining('then apply to wallp Home'), findsOneWidget);
 
@@ -173,10 +248,10 @@ void main() {
       // A tap only previews.
       await tester.tap(find.bySemanticsLabel('Leaf'));
       await settle(tester);
-      expect(h.looks.isApplied, isFalse);
+      expect(h.looks.look!.icons.pack.id, 'gold-ornament');
 
       await tester.tap(find.text('Apply icons'));
-      await until(() => h.looks.isApplied);
+      await until(() => h.looks.look!.icons.pack.id == 'spooky-glow');
       expect(h.looks.look!.icons.pack.id, 'spooky-glow');
       expect(h.looks.look!.icons.shape, IconShape.leaf);
       await until(() => find.text('Applied').evaluate().isNotEmpty);

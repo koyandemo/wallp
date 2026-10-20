@@ -7,7 +7,7 @@ import '../../catalog/catalog.dart';
 // ---------------------------------------------------------------------------
 // Badges
 
-enum CardBadge { applied, inUse, isNew, live }
+enum CardBadge { applied, inUse, isNew, live, app }
 
 extension BadgeText on CardBadge {
   String get label => switch (this) {
@@ -15,7 +15,18 @@ extension BadgeText on CardBadge {
     CardBadge.inUse => 'IN USE',
     CardBadge.isNew => 'NEW',
     CardBadge.live => 'LIVE',
+    CardBadge.app => 'APP',
   };
+}
+
+/// Shipped inside the app (assets/builtin), not only on the server: the
+/// APP badge, shown beside the card's other badge. [shipped] is null until
+/// the built-in catalog is read.
+extension ShippedInApp on Catalog? {
+  bool hasTheme(String id) => this?.theme(id) != null;
+  bool hasWallpaper(String id) => this?.wallpaper(id) != null;
+  bool hasFont(String id) => this?.font(id) != null;
+  bool hasIconPack(String id) => this?.iconPack(id) != null;
 }
 
 /// One badge per card: APPLIED beats NEW beats LIVE.

@@ -19,6 +19,10 @@ DateTime nowOf(BuildContext context) => context.read<Clock>().now();
 Catalog catalogOf(BuildContext context) =>
     context.watch<CatalogRepository>().catalog;
 
+/// The catalog shipped inside the app, for APP badges.
+Catalog? shippedOf(BuildContext context) =>
+    context.watch<CatalogRepository>().shipped;
+
 /// The applied theme's ID, for APPLIED badges.
 String? appliedIdOf(BuildContext context) {
   final looks = context.watch<LookController>();
@@ -113,7 +117,8 @@ class BadgeChip extends StatelessWidget {
       CardBadge.applied ||
       CardBadge.inUse => (context.palette.brand, context.palette.background),
       CardBadge.isNew => (context.palette.text, context.palette.background),
-      CardBadge.live => (context.palette.background, context.palette.text),
+      CardBadge.live ||
+      CardBadge.app => (context.palette.background, context.palette.text),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -154,6 +159,7 @@ class SceneThumb extends StatelessWidget {
     super.key,
     required this.theme,
     this.badge,
+    this.inApp = false,
     this.highlight = false,
     this.radius = 22,
     this.showClock = true,
@@ -162,6 +168,9 @@ class SceneThumb extends StatelessWidget {
 
   final PhoneTheme theme;
   final CardBadge? badge;
+
+  /// Shipped in the app: an APP badge in the top-left corner.
+  final bool inApp;
   final bool highlight;
   final double radius;
   final bool showClock;
@@ -189,7 +198,7 @@ class SceneThumb extends StatelessWidget {
                 left: 0,
                 right: 0,
                 // Below the badge, so it never covers the date.
-                top: badge == null ? 18 : 36,
+                top: badge == null && !inApp ? 18 : 36,
                 child: Column(
                   children: [
                     Text(
@@ -221,6 +230,12 @@ class SceneThumb extends StatelessWidget {
                   ],
                 ),
               ),
+            if (inApp)
+              const Positioned(
+                left: 8,
+                top: 8,
+                child: BadgeChip(CardBadge.app),
+              ),
             if (badge case final b?)
               Positioned(right: 8, top: 8, child: BadgeChip(b)),
           ],
@@ -251,6 +266,7 @@ class ThemeCard extends StatelessWidget {
     final now = nowOf(context);
     final applied = appliedIdOf(context);
     final badge = themeBadge(theme, appliedId: applied, now: now);
+    final inApp = shippedOf(context).hasTheme(theme.id);
     final festival = catalog.festival(theme.festivalId);
     final line =
         subtitle ??
@@ -260,7 +276,8 @@ class ThemeCard extends StatelessWidget {
     return Semantics(
       button: true,
       label:
-          '${theme.name.en}, $line${badge == null ? '' : ', ${badge.label.toLowerCase()}'}',
+          '${theme.name.en}, $line${badge == null ? '' : ', ${badge.label.toLowerCase()}'}'
+          '${inApp ? ', in the app' : ''}',
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -273,6 +290,7 @@ class ThemeCard extends StatelessWidget {
               child: SceneThumb(
                 theme: previewOf(theme, catalog, now),
                 badge: badge,
+                inApp: inApp,
                 highlight: badge == CardBadge.applied,
               ),
             ),
@@ -318,11 +336,13 @@ class WallpaperCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final catalog = catalogOf(context);
     final badge = wallpaperBadge(wallpaper, inUseId: inUseId);
+    final inApp = shippedOf(context).hasWallpaper(wallpaper.id);
     final festival = catalog.festival(wallpaper.festivalId)?.name.en ?? '';
     return Semantics(
       button: true,
       label:
-          '${wallpaper.name.en}, $festival${wallpaper.isLive ? ', live wallpaper' : ''}',
+          '${wallpaper.name.en}, $festival${wallpaper.isLive ? ', live wallpaper' : ''}'
+          '${inApp ? ', in the app' : ''}',
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -335,6 +355,7 @@ class WallpaperCard extends StatelessWidget {
               child: SceneThumb(
                 theme: wallpaperPreviewOf(wallpaper, catalog, nowOf(context)),
                 badge: badge,
+                inApp: inApp,
                 highlight: badge == CardBadge.inUse,
                 radius: 20,
                 showClock: false,

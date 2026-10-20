@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
@@ -51,6 +52,27 @@ void main() {
       expect(wallpaperBadge(swing, inUseId: 'red-moon-swing'), CardBadge.inUse);
       expect(wallpaperBadge(swing), CardBadge.live);
       expect(wallpaperBadge(catalog.wallpaper('web-corner')!), isNull);
+    });
+
+    test('APP: only what the built-in catalog ships', () {
+      final shipped = Catalog.fromJson(
+        JsonReader.of(
+          jsonDecode(
+            File('assets/builtin/catalog/catalog.json').readAsStringSync(),
+          ),
+          'built-in',
+        ),
+      );
+      expect(shipped.hasTheme('halloween-night'), isTrue);
+      expect(shipped.hasTheme('spider-night'), isFalse);
+      expect(shipped.hasWallpaper('harvest-moon'), isTrue);
+      expect(shipped.hasWallpaper('red-moon-swing'), isFalse);
+      expect(shipped.hasFont('creepster'), isTrue);
+      expect(shipped.hasIconPack('spooky-glow'), isTrue);
+      // Not read yet: no badges.
+      const Catalog? none = null;
+      expect(none.hasTheme('halloween-night'), isFalse);
+      expect(CardBadge.app.label, 'APP');
     });
   });
 

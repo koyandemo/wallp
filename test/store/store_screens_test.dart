@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/store/screens/accent_picker_screen.dart';
 import 'package:wallp/store/screens/festival_screen.dart';
+import 'package:wallp/store/screens/font_detail_screen.dart';
 import 'package:wallp/store/screens/search_screen.dart';
 import 'package:wallp/store/screens/theme_detail_screen.dart';
 import 'package:wallp/store/state/user_store.dart';
@@ -161,6 +162,26 @@ void main() {
       expect(find.text('Web Slinger icons'), findsOneWidget);
       expect(find.text('Bebas Neue clock font'), findsOneWidget);
       expect(find.textContaining('Apply'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('its clock font previews on this theme, not the default', (
+      tester,
+    ) async {
+      await h.pump(
+        tester,
+        home: const ThemeDetailScreen(themeId: 'spider-night'),
+        themes: ['spider-night'],
+      );
+      await settle(tester);
+      await scrollTo(tester, find.text('Bebas Neue clock font'));
+      await tester.tap(find.text('Bebas Neue clock font'));
+      await settle(tester);
+      final page = tester.widget<FontDetailScreen>(
+        find.byType(FontDetailScreen),
+      );
+      expect(page.fontId, 'bebas-neue');
+      expect(page.previewOn?.theme.id, 'spider-night');
       await tester.pumpWidget(const SizedBox());
     });
 

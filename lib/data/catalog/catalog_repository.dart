@@ -87,6 +87,7 @@ class CatalogRepository extends ChangeNotifier {
 
   Catalog? _raw;
   Catalog? _visible;
+  Catalog? _shipped;
   Manifest? _manifest;
   CatalogOrigin? _origin;
 
@@ -109,6 +110,10 @@ class CatalogRepository extends ChangeNotifier {
 
   CatalogOrigin? get origin => _origin;
 
+  /// The catalog shipped inside the app, once read: what gets the APP
+  /// badge. Null until then, or if the bundle has none.
+  Catalog? get shipped => _shipped;
+
   /// Version on screen; `built-in` before the first successful refresh.
   String? get catalogVersion => _raw?.catalogVersion;
 
@@ -128,6 +133,7 @@ class CatalogRepository extends ChangeNotifier {
   /// Shows the saved or built-in catalog, then (unless [refresh] is false)
   /// starts a background refresh. Returns once something is on screen.
   Future<void> start({bool refresh = true}) async {
+    unawaited(_loadShipped());
     if (!isReady) await _loadLocal();
     if (refresh) unawaited(this.refresh());
   }
@@ -185,7 +191,18 @@ class CatalogRepository extends ChangeNotifier {
     }
   }
 
-  Future<Catalog> _loadBuiltIn() => _builtIn.catalog();
+  Future<Catalog> _loadBuiltIn() async => _shipped = await _builtIn.catalog();
+
+  /// Not awaited by [start]: the badges can wait, the store can't.
+  Future<void> _loadShipped() async {
+    if (_shipped != null) return;
+    try {
+      _shipped = await _builtIn.catalog();
+      notifyListeners();
+    } on Object catch (e) {
+      debugPrint('No built-in catalog for APP badges: $e');
+    }
+  }
 
   Catalog _parseCatalog(Uint8List bytes, Manifest manifest) {
     final catalog = Catalog.fromJson(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../catalog/catalog.dart';
 import '../data/catalog/catalog_repository.dart';
+import '../look/applied_look.dart';
 import 'screens/accent_picker_screen.dart';
 import 'screens/festival_screen.dart';
 import 'screens/font_detail_screen.dart';
@@ -44,8 +45,16 @@ abstract final class StoreRoutes {
     festivalId: _catalog(context).wallpaper(id)?.festivalId,
   );
 
-  static Future<void> font(BuildContext context, String id) =>
-      _push(context, FontDetailScreen(fontId: id));
+  /// [previewOn]: the look to preview the font on, if not the user's own.
+  static Future<void> font(
+    BuildContext context,
+    String id, {
+    AppliedLook? previewOn,
+  }) => _push(
+    context,
+    FontDetailScreen(fontId: id, previewOn: previewOn),
+    festivalId: previewOn?.festival.id,
+  );
 
   static Future<void> iconPacks(BuildContext context, {String? filter}) =>
       _push(context, IconPacksScreen(initialFilter: filter));

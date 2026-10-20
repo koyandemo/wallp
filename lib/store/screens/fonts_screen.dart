@@ -114,9 +114,10 @@ class _FontCard extends StatelessWidget {
         ? (font.sampleText?.en ?? defaultSample)
         : sample;
     final tag = usedBy.isEmpty ? 'Free' : 'In ${usedBy.first}';
+    final inApp = shippedOf(context).hasFont(font.id);
     return Semantics(
       button: true,
-      label: '${font.family}, $tag',
+      label: '${font.family}, $tag${inApp ? ', in the app' : ''}',
       excludeSemantics: true,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -157,6 +158,10 @@ class _FontCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (inApp) ...[
+                    const BadgeChip(CardBadge.app),
+                    const SizedBox(width: 8),
+                  ],
                   Text(
                     tag,
                     style: TextStyle(
