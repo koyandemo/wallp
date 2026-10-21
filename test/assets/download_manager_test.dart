@@ -7,7 +7,7 @@ import 'package:wallp/catalog/catalog.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
 import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
-import 'package:wallp/data/catalog/mock_catalog_source.dart';
+import '../catalog/mock_catalog_source.dart';
 
 import '../catalog/fakes.dart';
 import '../look/fixtures.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../catalog/catalog.dart';
 import 'scene_assets.dart';
@@ -34,8 +33,8 @@ class FontRegistry extends ChangeNotifier {
   String? loadedFamily(String family) => _loaded[family];
 
   /// Loads every font in [fonts] whose files are on the phone. Fonts with
-  /// a missing file are skipped (drawn with google_fonts until Phase 7
-  /// bundles the built-in ones). Never throws.
+  /// a missing file are skipped (drawn in the system font until they
+  /// download). Never throws.
   Future<void> ensureAll(Iterable<CatalogFont> fonts) async {
     final list = fonts.toList();
     await Future.wait([for (final f in list) ensure(f)]);
@@ -63,35 +62,37 @@ class FontRegistry extends ChangeNotifier {
     try {
       final files = [for (final f in font.files) await _files.bytes(f.asset)];
       if (files.any((b) => b == null)) return false;
-      final loader = FontLoader(familyFor(font));
-      for (final bytes in files) {
-        loader.addFont(Future.value(ByteData.sublistView(bytes!)));
-      }
-      await loader.load();
-      _loaded[font.family] = familyFor(font);
-      // Text drawn before this loaded can redraw in it now.
-      notifyListeners();
-      return true;
+      return await load(font, [for (final b in files) b!]);
     } on Object catch (e) {
       debugPrint('Font ${font.id} could not be loaded: $e');
       return false;
     }
   }
 
-  /// [base] in [family]: the downloaded font if loaded, else google_fonts,
-  /// else the system font. For PhoneTheme's displayStyle / bodyStyle.
+  /// Loads [font] from its files' bytes, already in hand. For tests, which
+  /// have no asset cache on disk.
+  @visibleForTesting
+  Future<bool> load(CatalogFont font, List<Uint8List> files) async {
+    final loader = FontLoader(familyFor(font));
+    for (final bytes in files) {
+      loader.addFont(Future.value(ByteData.sublistView(bytes)));
+    }
+    await loader.load();
+    _loaded[font.family] = familyFor(font);
+    // Text drawn before this loaded can redraw in it now.
+    notifyListeners();
+    return true;
+  }
+
+  /// [base] in [family]: the font downloaded from the catalog if loaded,
+  /// else the system font. Fonts only ever come from the catalog API.
+  /// For PhoneTheme's displayStyle / bodyStyle.
   TextStyle style(String family, [TextStyle? base]) {
     final loaded = _loaded[family];
-    if (loaded != null) {
-      return (base ?? const TextStyle()).copyWith(
-        fontFamily: loaded,
-        fontFamilyFallback: _fallbacks[family],
-      );
-    }
-    try {
-      return GoogleFonts.getFont(family, textStyle: base);
-    } on Object {
-      return base ?? const TextStyle();
-    }
+    if (loaded == null) return base ?? const TextStyle();
+    return (base ?? const TextStyle()).copyWith(
+      fontFamily: loaded,
+      fontFamilyFallback: _fallbacks[family],
+    );
   }
 }

@@ -12,17 +12,10 @@ import '../data/api/install_id.dart';
 import '../data/catalog/catalog_repository.dart';
 import 'dev_settings.dart';
 
-/// Debug builds only: server or mock catalog, the mock network, a pretend
-/// date, and what the catalog repository and event queue are doing.
+/// Debug builds only: a pretend date, and what the catalog repository and
+/// event queue are doing. The catalog always comes from the API server.
 class DevSettingsScreen extends StatelessWidget {
   const DevSettingsScreen({super.key});
-
-  static const _networkLabels = {
-    'fast': ('Fast', 'No delay'),
-    'slow': ('Slow', '600 ms, 64 KB/s'),
-    'offline': ('Offline', 'Every request fails'),
-    'flaky': ('Flaky', '1 in 3 requests fails'),
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -36,23 +29,15 @@ class DevSettingsScreen extends StatelessWidget {
         children: [
           Text('Server', style: text.titleMedium),
           const SizedBox(height: 4),
-          SwitchListTile(
+          ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Use the mock catalog'),
+            title: const Text('Catalog'),
             subtitle: Text(
-              dev.mockCatalog
-                  ? 'Bundled files behind the pretend network below'
+              repo.origin == CatalogOrigin.builtIn
+                  ? 'Nothing downloaded yet from ${ApiConfig.current}: '
+                        'the store is empty'
                   : 'From ${ApiConfig.current}/catalog/v1/',
             ),
-            value: dev.mockCatalog,
-            onChanged: repo.isRefreshing
-                ? null
-                : (on) async {
-                    await dev.setMockCatalog(on);
-                    // Start clean, so the two catalogs never mix.
-                    await repo.forgetSaved();
-                    await repo.refresh();
-                  },
           ),
           const _ApiStatus(),
           const SizedBox(height: 28),
@@ -81,29 +66,6 @@ class DevSettingsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           const _DownloadStatus(),
           const SizedBox(height: 28),
-          Text('Pretend network', style: text.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            'For the mock catalog only. Applies to the next request.',
-            style: text.bodySmall?.copyWith(color: AppColors.textSecondary),
-          ),
-          RadioGroup<String>(
-            groupValue: dev.network,
-            onChanged: (v) => dev.setNetwork(v!),
-            child: Column(
-              children: [
-                for (final MapEntry(key: key, value: (title, sub))
-                    in _networkLabels.entries)
-                  RadioListTile<String>(
-                    value: key,
-                    title: Text(title),
-                    subtitle: Text(sub),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
           Text('Pretend today is', style: text.titleMedium),
           const SizedBox(height: 4),
           Text(

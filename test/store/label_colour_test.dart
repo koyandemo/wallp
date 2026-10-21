@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +9,7 @@ import 'package:wallp/launcher/app_drawer.dart';
 import 'package:wallp/launcher/launcher_icon.dart';
 import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/resolved_look.dart';
+import 'package:wallp/render/font_registry.dart';
 import 'package:wallp/services/icon_pack_service.dart';
 import 'package:wallp/store/logic/previews.dart';
 import 'package:wallp/store/logic/queries.dart';
@@ -16,6 +18,7 @@ import 'package:wallp/store/screens/fonts_screen.dart';
 import 'package:wallp/store/screens/icon_pack_screens.dart';
 import 'package:wallp/widgets/theme_preview.dart';
 
+import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
 import 'harness.dart';
 
@@ -98,7 +101,13 @@ void main() {
   group('app name font', () {
     final pack = catalog.iconPack('spooky-glow')!;
 
-    test('theme font by default; System font drops the family', () {
+    test('theme font by default; System font drops the family', () async {
+      // Downloaded from the API, as CatalogFonts does in the app.
+      final font = catalog.font(mockTheme('halloween-night').fonts.labels)!;
+      await FontRegistry.shared.load(font, [
+        for (final f in font.files)
+          File('$mockDir/${f.asset.url}').readAsBytesSync(),
+      ]);
       final base = lookOf('halloween-night');
       expect(base.icons.labelFont, LabelFont.theme);
       final home = ResolvedLook.of(base, designDay).homeTheme;

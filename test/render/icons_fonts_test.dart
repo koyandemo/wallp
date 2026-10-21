@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/catalog/catalog.dart';
 import 'package:wallp/data/assets/asset_cache.dart';
+import 'package:wallp/data/assets/download_manager.dart';
+import 'package:wallp/data/catalog/catalog_repository.dart';
+import 'package:wallp/data/catalog/catalog_store.dart';
 import 'package:wallp/launcher/launcher_icon.dart';
 import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/resolved_look.dart';
@@ -14,6 +17,7 @@ import 'package:wallp/render/image_icons.dart';
 import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/services/icon_pack_service.dart';
 import 'package:wallp/store/screens/icon_pack_screens.dart' show sampleApps;
+import 'package:wallp/store/state/catalog_fonts.dart';
 
 import '../catalog/fakes.dart';
 import '../look/fixtures.dart';
@@ -58,6 +62,47 @@ void main() {
       final registry = FontRegistry(assets: assets);
       expect(await registry.ensure(catalog.font('bebas-neue')!), isFalse);
       expect(registry.loadedFamily('Bebas Neue'), isNull);
+    });
+
+    test('a font not downloaded draws in the system font, never '
+        'google_fonts', () {
+      final registry = FontRegistry(assets: assets);
+      const base = TextStyle(fontSize: 20);
+      expect(registry.style('Creepster', base), same(base));
+    });
+
+    test('CatalogFonts downloads every catalog font from the API and loads '
+        'it', () async {
+      final source = TamperingSource();
+      final repo = CatalogRepository(
+        source: source,
+        store: MemoryCatalogStore(),
+      );
+      await repo.start(refresh: false);
+      expect(await repo.refresh(), RefreshOutcome.updated);
+      final registry = FontRegistry(assets: assets);
+      final fonts = CatalogFonts(
+        catalog: repo,
+        downloads: DownloadManager(source: source, cache: cache),
+        cache: cache,
+        registry: registry,
+      );
+      await fonts.idle;
+      for (final f in repo.catalog.fonts) {
+        expect(registry.loadedFamily(f.family), FontRegistry.familyFor(f));
+        for (final file in f.files) {
+          expect(source.requests[file.asset.url], 1, reason: f.id);
+        }
+      }
+      // Kept through clean-ups.
+      await cache.clearUnpinned();
+      expect(
+        await cache.missing(
+          repo.catalog.fonts.expand((f) => f.files.map((x) => x.asset)),
+        ),
+        isEmpty,
+      );
+      fonts.dispose();
     });
 
     test('Burmese text falls back to Padauk once it\'s loaded', () async {

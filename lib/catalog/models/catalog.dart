@@ -186,6 +186,7 @@ class Catalog {
   Catalog filtered({
     bool Function(ThemeSummary)? theme,
     bool Function(Wallpaper)? wallpaper,
+    bool Function(CatalogFont)? font,
     bool Function(IconPack)? iconPack,
   }) => Catalog(
     catalogVersion: catalogVersion,
@@ -194,7 +195,7 @@ class Catalog {
     wallpapers: wallpaper == null
         ? wallpapers
         : wallpapers.where(wallpaper).toList(),
-    fonts: fonts,
+    fonts: font == null ? fonts : fonts.where(font).toList(),
     banners: banners,
     iconPacks: iconPack == null
         ? iconPacks

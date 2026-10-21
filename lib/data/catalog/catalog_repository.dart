@@ -97,7 +97,9 @@ class CatalogRepository extends ChangeNotifier {
   DateTime? _lastCheckedAt;
   bool _updateRecommended = false;
   bool _schemaTooNew = false;
+  bool _hideShipped = false;
   int _hiddenForUpdate = 0;
+  int _hiddenShipped = 0;
 
   final _details = <String, ThemeDetail>{};
   final _detailLoads = <String, Future<ThemeDetail>>{};
@@ -111,8 +113,9 @@ class CatalogRepository extends ChangeNotifier {
   CatalogOrigin? get origin => _origin;
 
   /// The catalog shipped inside the app, once read: what gets the APP
-  /// badge. Null until then, or if the bundle has none.
-  Catalog? get shipped => _shipped;
+  /// badge. Null until then, if the bundle has none, or with [hideShipped]
+  /// (everything on screen is then the server's).
+  Catalog? get shipped => _hideShipped ? null : _shipped;
 
   /// Version on screen; `built-in` before the first successful refresh.
   String? get catalogVersion => _raw?.catalogVersion;
@@ -129,6 +132,19 @@ class CatalogRepository extends ChangeNotifier {
 
   /// Themes hidden because they need a newer app.
   int get hiddenForUpdate => _hiddenForUpdate;
+
+  /// Show only what the server sends: hide everything shipped in the app,
+  /// never show the built-in catalog (an empty store until the first
+  /// download), and never open a theme from the app's own files.
+  bool get hideShipped => _hideShipped;
+  set hideShipped(bool on) {
+    if (on == _hideShipped) return;
+    _hideShipped = on;
+    _reshow();
+  }
+
+  /// Items hidden by [hideShipped].
+  int get hiddenShipped => _hiddenShipped;
 
   /// Shows the saved or built-in catalog, then (unless [refresh] is false)
   /// starts a background refresh. Returns once something is on screen.
@@ -198,6 +214,7 @@ class CatalogRepository extends ChangeNotifier {
     if (_shipped != null) return;
     try {
       _shipped = await _builtIn.catalog();
+      if (_hideShipped) return _reshow();
       notifyListeners();
     } on Object catch (e) {
       debugPrint('No built-in catalog for APP badges: $e');
@@ -230,10 +247,58 @@ class CatalogRepository extends ChangeNotifier {
       wallpaper: (w) => build.meetsVersion(w.minAppVersion, appVersion),
     );
     _hiddenForUpdate = supported.themes.length - visible.themes.length;
-    _visible = visible;
+    _visible = !_hideShipped
+        ? visible
+        : origin == CatalogOrigin.builtIn
+        ? _empty(raw)
+        : _withoutShipped(visible);
+    _hiddenShipped = _count(visible) - _count(_visible!);
     for (final issue in raw.issues) {
       debugPrint('Catalog ${raw.catalogVersion}: skipped $issue');
     }
+  }
+
+  void _reshow() {
+    if (_raw == null) return;
+    _show(_raw!, _manifest, _origin!);
+    notifyListeners();
+  }
+
+  static Catalog _empty(Catalog raw) => Catalog(
+    catalogVersion: raw.catalogVersion,
+    festivals: const [],
+    themes: const [],
+    wallpapers: const [],
+    fonts: const [],
+    banners: const [],
+    iconPacks: const [],
+  );
+
+  static int _count(Catalog c) =>
+      c.themes.length +
+      c.wallpapers.length +
+      c.fonts.length +
+      c.iconPacks.length;
+
+  /// [catalog] minus the shipped themes and wallpapers. Shipped fonts and
+  /// icon packs go too, unless something still listed needs them.
+  Catalog _withoutShipped(Catalog catalog) {
+    final shipped = _shipped;
+    if (shipped == null) return catalog;
+    final rest = catalog.filtered(
+      theme: (t) => shipped.theme(t.id) == null,
+      wallpaper: (w) => shipped.wallpaper(w.id) == null,
+    );
+    final packs = {for (final t in rest.themes) t.iconPackId};
+    final fonts = {
+      for (final t in rest.themes) t.displayFont,
+      for (final f in rest.festivals) f.look.displayFont,
+      for (final b in rest.banners) b.look.font,
+    };
+    return rest.filtered(
+      iconPack: (p) => shipped.iconPack(p.id) == null || packs.contains(p.id),
+      font: (f) => shipped.font(f.id) == null || fonts.contains(f.id),
+    );
   }
 
   Future<RefreshOutcome> _refresh() async {
@@ -325,7 +390,7 @@ class CatalogRepository extends ChangeNotifier {
     final done = _details[key];
     if (done != null) return done;
     final saved = await _store.read(key);
-    if (saved == null) return _builtIn.theme(id);
+    if (saved == null) return _hideShipped ? null : _builtIn.theme(id);
     try {
       return _details[key] = _parseTheme(saved, summary);
     } on Object {
@@ -375,7 +440,7 @@ class CatalogRepository extends ChangeNotifier {
       cause = e;
     }
     // Offline: a built-in theme still opens, even if a newer rev exists.
-    final builtIn = await _builtIn.theme(summary.id);
+    final builtIn = _hideShipped ? null : await _builtIn.theme(summary.id);
     if (builtIn != null) return builtIn;
     throw ThemeUnavailableException(summary.id, cause: cause);
   }

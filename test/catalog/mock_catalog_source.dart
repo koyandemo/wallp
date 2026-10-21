@@ -3,10 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 
-import 'catalog_source.dart';
+import 'package:wallp/data/catalog/catalog_source.dart';
 
-/// How the pretend network behaves. Developer settings switch between the
-/// presets; tests build their own.
+/// How the pretend network behaves in tests.
 class NetworkConditions {
   const NetworkConditions({
     this.latency = Duration.zero,
@@ -36,34 +35,15 @@ class NetworkConditions {
 
   static const fast = NetworkConditions();
 
-  /// Phone on a weak mobile signal: 600 ms to start, 64 KB/s.
-  static const slow = NetworkConditions(
-    latency: Duration(milliseconds: 600),
-    bytesPerSecond: 64 * 1024,
-  );
-
   static const offlineNow = NetworkConditions(
     latency: Duration(milliseconds: 150),
     offline: true,
   );
-
-  /// One request in three fails.
-  static const flaky = NetworkConditions(
-    latency: Duration(milliseconds: 300),
-    bytesPerSecond: 256 * 1024,
-    failureRate: 1 / 3,
-  );
-
-  static const presets = {
-    'fast': fast,
-    'slow': slow,
-    'offline': offlineNow,
-    'flaky': flaky,
-  };
 }
 
-/// Serves the mock catalog bundled under `assets/mock/catalog/v1/` as if it
-/// were the CDN, through a pretend network ([conditions]).
+/// Serves the test catalog under `assets/mock/catalog/v1/` as if it were
+/// the CDN, through a pretend network ([conditions]). Tests only: the app
+/// always reads the API.
 class MockCatalogSource extends CatalogSource {
   MockCatalogSource({
     AssetBundle? bundle,

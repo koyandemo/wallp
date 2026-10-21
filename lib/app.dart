@@ -11,13 +11,13 @@ import 'data/catalog/catalog_repository.dart';
 import 'data/catalog/catalog_source.dart';
 import 'data/catalog/catalog_store.dart';
 import 'data/catalog/http_catalog_source.dart';
-import 'data/catalog/mock_catalog_source.dart';
 import 'dev/dev_settings.dart';
 import 'look/look_controller.dart';
 import 'look/my_accents.dart';
 import 'render/font_registry.dart';
 import 'core/clock.dart';
 import 'store/state/backend_sync.dart';
+import 'store/state/catalog_fonts.dart';
 import 'store/state/favourites_sync.dart';
 import 'store/state/live_wallpaper_status.dart';
 import 'store/state/user_store.dart';
@@ -44,18 +44,8 @@ class WallpApp extends StatelessWidget {
         // The app API at API_BASE_URL (env/*.json): events and accounts.
         Provider(create: (_) => ApiClient(), dispose: (_, c) => c.close()),
         // Where catalog files come from, for the catalog and downloads
-        // alike: the server's /catalog/v1/, or (Developer settings) the
-        // bundled mock behind a pretend network.
-        Provider<CatalogSource>(
-          create: (context) {
-            final dev = context.read<DevSettings>();
-            final server = HttpCatalogSource();
-            final mock = MockCatalogSource(conditions: () => dev.conditions);
-            return SwitchingCatalogSource(
-              () => dev.mockCatalog ? mock : server,
-            );
-          },
-        ),
+        // alike: the server's /catalog/v1/.
+        Provider<CatalogSource>(create: (_) => HttpCatalogSource()),
         // The same instance SceneAssets and FontRegistry read through.
         Provider(create: (_) => AssetCache.shared),
         ChangeNotifierProvider(
@@ -71,6 +61,16 @@ class WallpApp extends StatelessWidget {
         // on launch it re-pins (and if needed re-downloads) the applied
         // look's files.
         ChangeNotifierProvider(create: _looks, lazy: false),
+        // Every catalog font, from the API, for the store's previews.
+        Provider(
+          create: (context) => CatalogFonts(
+            catalog: context.read<CatalogRepository>(),
+            downloads: context.read<DownloadManager>(),
+            cache: context.read<AssetCache>(),
+          ),
+          dispose: (_, f) => f.dispose(),
+          lazy: false,
+        ),
         // Previews animate only while wallp's live wallpaper is on.
         ChangeNotifierProvider(create: (_) => LiveWallpaperStatus()),
         // Anonymous usage events, sent in batches.
@@ -110,13 +110,13 @@ class WallpApp extends StatelessWidget {
 
   static CatalogRepository _catalog(BuildContext context) {
     final dev = context.read<DevSettings>();
+    // Only the server's items: nothing shipped in the app is shown.
     final repo = CatalogRepository(
       source: context.read<CatalogSource>(),
       store: FileCatalogStore.appSupport(),
       clock: dev.liveClock,
-    );
-    // Wait for saved Developer switches, so "Offline" applies from the
-    // very first request.
+    )..hideShipped = true;
+    // Wait for the saved pretend date, so the first catalog shows with it.
     dev.load().then((_) => repo.start());
     return repo;
   }

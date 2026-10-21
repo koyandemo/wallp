@@ -11,7 +11,7 @@ import 'package:wallp/data/assets/download_manager.dart';
 import 'package:wallp/data/assets/downloads.dart';
 import 'package:wallp/data/catalog/catalog_repository.dart';
 import 'package:wallp/data/catalog/catalog_store.dart';
-import 'package:wallp/data/catalog/mock_catalog_source.dart';
+import '../catalog/mock_catalog_source.dart';
 import 'package:wallp/look/applied_look.dart';
 import 'package:wallp/look/look_controller.dart';
 import 'package:wallp/look/look_store.dart';

@@ -20,6 +20,7 @@ import 'package:wallp/data/catalog/catalog_store.dart';
 import 'package:wallp/dev/dev_settings.dart';
 import 'package:wallp/look/look_controller.dart';
 import 'package:wallp/look/my_accents.dart';
+import 'package:wallp/render/font_registry.dart';
 import 'package:wallp/render/scene_assets.dart';
 import 'package:wallp/store/state/favourites_sync.dart';
 import 'package:wallp/store/state/user_store.dart';
@@ -64,6 +65,13 @@ class StoreHarness {
       catalog = CatalogRepository(source: source, store: MemoryCatalogStore());
       await catalog.start(refresh: false);
       await catalog.refresh();
+      // As CatalogFonts does in the app: every catalog font, from the API.
+      for (final font in catalog.catalog.fonts) {
+        await FontRegistry.shared.load(font, [
+          for (final f in font.files)
+            await source.get(f.asset.url, maxBytes: f.asset.bytes),
+        ]);
+      }
       for (final id in themes) {
         await catalog.theme(id);
       }

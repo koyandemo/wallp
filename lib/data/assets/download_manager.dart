@@ -113,6 +113,27 @@ class DownloadManager extends ChangeNotifier {
     await task.done;
   }
 
+  /// Downloads what's missing of [refs] with no progress card, for files
+  /// nobody tapped for (catalog fonts for the store's previews). True when
+  /// every file is on the phone. Never throws.
+  Future<bool> prefetch(Iterable<AssetRef> refs) async {
+    try {
+      final wanted = refs.toSet();
+      final missing = await cache.missing(wanted);
+      if (missing.isEmpty) return true;
+      final task = DownloadTask._(
+        'Prefetch',
+        missing,
+        missing.fold<int>(0, (s, r) => s + r.bytes),
+      );
+      await _run(task, wanted);
+      return task.state == DownloadState.done;
+    } on Object catch (e) {
+      debugPrint('Prefetch failed: $e');
+      return false;
+    }
+  }
+
   /// Starts (or joins) the download and returns its task straight away.
   Future<DownloadTask> start(
     Iterable<AssetRef> refs, {

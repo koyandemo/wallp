@@ -80,14 +80,3 @@ class CatalogFetchException implements Exception {
       'CatalogFetchException(${failure.name}): $path'
       '${detail == null ? '' : ' ($detail)'}';
 }
-
-/// Asks [choose] which source to use on every request, so Developer
-/// settings can switch between the mock and the server without a restart.
-class SwitchingCatalogSource extends CatalogSource {
-  const SwitchingCatalogSource(this.choose);
-
-  final CatalogSource Function() choose;
-
-  @override
-  Stream<List<int>> open(String path) => choose().open(path);
-}

@@ -191,7 +191,7 @@ class PhoneTheme {
     ),
   ];
 
-  /// In the downloaded font if this engine loaded it, else google_fonts.
+  /// In the downloaded font if this engine loaded it, else the system font.
   TextStyle displayStyle([TextStyle? style]) =>
       FontRegistry.shared.style(displayFont, style);
 

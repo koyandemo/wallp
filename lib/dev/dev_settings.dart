@@ -2,13 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/clock.dart';
-import '../data/catalog/mock_catalog_source.dart';
 
-/// Switches for trying the app against a pretend network and another date.
+/// Switches for trying the app on another date. The catalog always comes
+/// from the API server, in every build.
 ///
 /// Saved on the phone so they survive restarts. Release builds ignore them:
-/// the catalog always comes from the server, [conditions] is always fast
-/// and [clock] always the real time.
+/// [clock] is always the real time.
 class DevSettings extends ChangeNotifier {
   DevSettings({SharedPreferencesAsync? prefs, this.enabled = kDebugMode})
     : _prefs = prefs ?? SharedPreferencesAsync();
@@ -18,24 +17,10 @@ class DevSettings extends ChangeNotifier {
   /// False in release builds.
   final bool enabled;
 
-  static const _networkKey = 'dev_network';
   static const _todayKey = 'dev_pretend_today';
-  static const _mockKey = 'dev_mock_catalog';
 
-  String _network = 'fast';
-  bool _mockCatalog = false;
   DateTime? _pretendToday;
   Clock? _clock;
-
-  /// A key of [NetworkConditions.presets].
-  String get network => _network;
-
-  /// Serve the catalog from the bundled mock instead of the API server.
-  bool get mockCatalog => enabled && _mockCatalog;
-
-  NetworkConditions get conditions => enabled
-      ? NetworkConditions.presets[_network] ?? NetworkConditions.fast
-      : NetworkConditions.fast;
 
   DateTime? get pretendToday => enabled ? _pretendToday : null;
 
@@ -49,30 +34,10 @@ class DevSettings extends ChangeNotifier {
   Future<void>? _loading;
 
   Future<void> _load() async {
-    final network = await _prefs.getString(_networkKey);
     final today = await _prefs.getString(_todayKey);
-    _network = NetworkConditions.presets.containsKey(network)
-        ? network!
-        : 'fast';
     _pretendToday = today == null ? null : DateTime.tryParse(today);
-    _mockCatalog = await _prefs.getBool(_mockKey) ?? false;
     _clock = null;
     notifyListeners();
-  }
-
-  Future<void> setMockCatalog(bool on) async {
-    _mockCatalog = on;
-    notifyListeners();
-    await _prefs.setBool(_mockKey, on);
-  }
-
-  Future<void> setNetwork(String preset) async {
-    if (!NetworkConditions.presets.containsKey(preset)) {
-      throw ArgumentError.value(preset, 'preset');
-    }
-    _network = preset;
-    notifyListeners();
-    await _prefs.setString(_networkKey, preset);
   }
 
   /// One clock object that always follows the current setting, for code

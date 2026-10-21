@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
-import 'package:wallp/data/catalog/mock_catalog_source.dart';
+import 'mock_catalog_source.dart';
 
 /// The mock catalog the app ships: the Halloween, Christmas, Thingyan and
 /// Spider Night themes.

@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallp/data/catalog/catalog_source.dart';
-import 'package:wallp/data/catalog/mock_catalog_source.dart';
+import 'mock_catalog_source.dart';
 
 import 'fakes.dart';
 

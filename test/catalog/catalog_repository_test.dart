@@ -272,6 +272,59 @@ void main() {
     );
   });
 
+  group('API only', () {
+    test('hides what the app ships, keeping what server themes need', () async {
+      final r = repo();
+      await r.start(refresh: false);
+      expect(await r.refresh(), RefreshOutcome.updated);
+      final all = r.catalog;
+      final shipped = r.shipped!;
+
+      r.hideShipped = true;
+      final themes = r.catalog.themes;
+      expect(themes, isNotEmpty);
+      expect(themes.where((t) => shipped.theme(t.id) != null), isEmpty);
+      expect(
+        r.catalog.wallpapers.where((w) => shipped.wallpaper(w.id) != null),
+        isEmpty,
+      );
+      expect(r.hiddenShipped, greaterThan(0));
+      // No APP badges: everything on screen is the server's.
+      expect(r.shipped, isNull);
+      // Server themes still find their fonts and icon packs.
+      for (final t in themes) {
+        expect(r.catalog.font(t.displayFont), isNotNull);
+        expect(r.catalog.iconPack(t.iconPackId), isNotNull);
+      }
+
+      r.hideShipped = false;
+      expect(r.catalog.themes, hasLength(all.themes.length));
+      expect(r.hiddenShipped, 0);
+    });
+
+    test('offline on a first launch shows nothing', () async {
+      source.offline = true;
+      final r = repo()..hideShipped = true;
+      await r.start(refresh: false);
+      expect(r.origin, CatalogOrigin.builtIn);
+      expect(r.catalog.themes, isEmpty);
+      expect(r.catalog.festivals, isEmpty);
+      expect(r.catalog.banners, isEmpty);
+      expect(r.catalog.fonts, isEmpty);
+    });
+
+    test('never opens a theme from the app\'s own files', () async {
+      final r = repo();
+      await r.start(refresh: false);
+      expect(await r.refresh(), RefreshOutcome.updated);
+      r.hideShipped = true;
+      source.offline = true;
+      final id = r.catalog.themes.first.id;
+      expect(await r.savedTheme(id), isNull);
+      await expectLater(r.theme(id), throwsA(isA<ThemeUnavailableException>()));
+    });
+  });
+
   group('refresh', () {
     test('calls while one is running share it', () async {
       final r = repo();

@@ -290,4 +290,16 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
   });
+
+  testWidgets('API only, nothing downloaded yet: an empty store', (
+    tester,
+  ) async {
+    final h = StoreHarness();
+    await h.pump(tester);
+    await tester.runAsync(() => h.catalog.forgetSaved());
+    h.catalog.hideShipped = true;
+    await settle(tester);
+    expect(h.catalog.catalog.themes, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
 }
